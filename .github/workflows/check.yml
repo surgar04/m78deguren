@@ -1,6 +1,7 @@
 name: Quality
 on:
   push:
+    branches: [main, 'codex/**']
   pull_request:
 permissions:
   contents: read
@@ -21,9 +22,23 @@ jobs:
         shell: pwsh
         working-directory: D:\新境
         run: |
-          $vc = Get-ChildItem 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC' -Directory | Sort-Object Name -Descending | Select-Object -First 1
-          $sdk = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\Lib' -Directory | Sort-Object Name -Descending | Select-Object -First 1
-          ./scripts/bootstrap.ps1 -MsvcSource $vc.FullName -SdkVersion $sdk.Name
+          # 只读复用 runner 已有工具，不安装组件。SDK 的 Lib 目录还可能包含 wdf 等非版本目录。
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $installation = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $installation) { throw 'Runner 未提供 C++ 工具链' }
+          $vc = Get-ChildItem (Join-Path $installation 'VC\Tools\MSVC') -Directory |
+            Where-Object { $_.Name -match '^\d+(\.\d+)+$' -and (Test-Path (Join-Path $_.FullName 'bin\Hostx64\x64\link.exe')) } |
+            Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          $sdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10'
+          $sdk = Get-ChildItem (Join-Path $sdkRoot 'Lib') -Directory |
+            Where-Object {
+              $_.Name -match '^\d+(\.\d+)+$' -and
+              (Test-Path (Join-Path $_.FullName 'um\x64\kernel32.lib')) -and
+              (Test-Path (Join-Path $_.FullName 'ucrt\x64\ucrt.lib')) -and
+              (Test-Path (Join-Path $sdkRoot ('Include\' + $_.Name + '\um\Windows.h')))
+            } | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          if (-not $vc -or -not $sdk) { throw 'Runner 未提供完整的 MSVC/Windows SDK' }
+          ./scripts/bootstrap.ps1 -MsvcSource $vc.FullName -SdkSource $sdkRoot -SdkVersion $sdk.Name
       - name: Quality checks
         shell: pwsh
         working-directory: D:\新境
