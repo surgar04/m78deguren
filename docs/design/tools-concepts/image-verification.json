@@ -1,0 +1,23 @@
+[
+  {
+    "file": "01-quick-workbench.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1890175,
+    "sha256": "ad8bc63d846cd595421c3f5ab91a404eed1799d42a2e1302e03e787e4fff4a2e"
+  },
+  {
+    "file": "02-focused-workbench.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1801222,
+    "sha256": "7a9e4ed341bd316b5aaff41a129507c45e7b25e5b643808c3a932178508bced7"
+  },
+  {
+    "file": "03-category-shelves.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1919849,
+    "sha256": "60b589257bab72ee314ce2838e4823c1b6b4980eea6ff05175551c92b3684077"
+  }
+]

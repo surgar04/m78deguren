@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="126" viewBox="0 0 96 126">
+  <defs><linearGradient id="mint" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#28c9aa"/><stop offset="1" stop-color="#a2f0dc"/></linearGradient></defs>
+  <path fill="url(#mint)" d="M9 66 40 11 49 27 26 66Zm27 0 23-40 28 40Zm15-13h13l-6-11Z" fill-rule="evenodd"/>
+  <text x="48" y="95" text-anchor="middle" fill="#14212d" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="700">臻境</text>
+  <text x="48" y="112" text-anchor="middle" fill="#14212d" font-family="Segoe UI, sans-serif" font-size="8" font-weight="600" letter-spacing="2">ZHENJING</text>
+</svg>

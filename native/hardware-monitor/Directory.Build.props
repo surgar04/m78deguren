@@ -1,0 +1,4 @@
+<Project><PropertyGroup>
+  <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../../.cache/dotnet/hardware/obj/</BaseIntermediateOutputPath>
+  <OutputPath>$(MSBuildThisFileDirectory)../../.cache/dotnet/hardware/bin/</OutputPath>
+</PropertyGroup></Project>

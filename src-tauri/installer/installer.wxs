@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 仅当前用户 MSI；不修改 PATH、不自动安装 WebView2、不启动系统优化。
+     文件、登记和快捷方式全部采用标准 MSI 组件，失败由 Windows Installer 事务回滚。 -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="臻境" Language="2052" Codepage="936" Version="{{version}}"
+           Manufacturer="Sur方糖" UpgradeCode="{{upgrade_code}}">
+    <Package Id="*" InstallerVersion="500" Compressed="yes" InstallScope="perUser"
+             InstallPrivileges="limited" Platform="x64" SummaryCodepage="936"
+             Description="臻境 · MSI 安装程序" Manufacturer="Sur方糖" />
+    <MajorUpgrade Schedule="afterInstallInitialize"
+                  DowngradeErrorMessage="已安装更新版本的臻境，不允许降级覆盖。" />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+    <Icon Id="ProductIcon" SourceFile="{{icon_path}}" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/surgar04/m78deguren" />
+    <!-- 防止更新时 Restart Manager 强制结束用户应用；应先正常退出臻境。 -->
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Property Id="INSTALLDIR" Secure="yes">
+      <RegistrySearch Id="PreviousMsiLocation" Root="HKCU" Key="Software\SurFangTang\Zhenjing"
+                      Name="InstallDir" Type="raw" Win64="yes" />
+    </Property>
+    <Property Id="PROFILEDIR" Secure="yes">
+      <RegistrySearch Id="PreviousProfileLocation" Root="HKCU" Key="Software\SurFangTang\Zhenjing"
+                      Name="DataDir" Type="raw" Win64="yes" />
+    </Property>
+    <Property Id="OLD_NSIS" Secure="yes">
+      <RegistrySearch Id="PreviousNsis" Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\ZhenjingDesktop"
+                      Name="InstallLocation" Type="raw" Win64="yes" />
+    </Property>
+    <Property Id="LEGACY_NSIS" Secure="yes">
+      <RegistrySearch Id="LegacyNsis" Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\XinjingDesktop"
+                      Name="InstallLocation" Type="raw" Win64="yes" />
+    </Property>
+    <!-- Windows 10/11 的 MSI VersionNT 仍可能为 603；不能用 1000 阻止正常安装。 -->
+    <Condition Message="此安装包需要 64 位 Windows。">Installed OR VersionNT64</Condition>
+    <Condition Message="本安装包仅支持当前用户安装，请勿设置 ALLUSERS。">NOT ALLUSERS</Condition>
+    <Condition Message="请先卸载旧 EXE 安装版（用户数据会保留），再安装 MSI。">Installed OR (NOT OLD_NSIS AND NOT LEGACY_NSIS)</Condition>
+    <Binary Id="InstallerActions" SourceFile="{{main_binary_path}}.msi-actions.dll" />
+    <CustomAction Id="ValidateInstallDirectory" BinaryKey="InstallerActions" DllEntry="ValidateInstallDirectory"
+                  Execute="immediate" Return="check" />
+    <CustomAction Id="DefaultProfileDirectory" Property="PROFILEDIR" Value="[LocalAppDataFolder]Zhenjing" />
+    <InstallUISequence>
+      <Custom Action="DefaultProfileDirectory" After="CostFinalize">NOT PROFILEDIR</Custom>
+      <Custom Action="ValidateInstallDirectory" After="DefaultProfileDirectory">NOT REMOVE~="ALL"</Custom>
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="DefaultProfileDirectory" After="CostFinalize">NOT PROFILEDIR</Custom>
+      <Custom Action="ValidateInstallDirectory" After="DefaultProfileDirectory">NOT REMOVE~="ALL"</Custom>
+    </InstallExecuteSequence>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <UI>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+    </UI>
+    <!-- 组件 GUID 固定保存；升级时禁止重新生成，以维持 Windows Installer 组件身份。 -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="UserPrograms" Name="Programs">
+          <Directory Id="INSTALLDIR" Name="Zhenjing">
+            <Component Id="MainExecutable" Guid="6EFFE4C3-ECE3-4CF8-8501-A10A254FCC69" Win64="yes">
+              <File Id="MainExe" Name="zhenjing.exe" Source="{{main_binary_path}}" Checksum="yes" />
+              <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="Main" Type="string" Value="[ProductVersion]" KeyPath="yes" />
+            </Component>
+            <Component Id="InstallRegistration" Guid="E112F59A-D284-4ABF-931F-940EB73AE55F" Win64="yes">
+              <!-- UTF-16 种子让 Windows INI API 保留任意语言的用户目录，不受系统 ANSI 代码页限制。 -->
+              <File Id="ProfileSeed" Name="zhenjing-profile.ini" Source="__PROJECT_ROOT__\src-tauri\resources\profile-seed.ini" />
+              <RegistryKey Root="HKCU" Key="Software\SurFangTang\Zhenjing">
+                <RegistryValue Name="InstallDir" Type="string" Value="[INSTALLDIR]" KeyPath="yes" />
+                <RegistryValue Name="ProductCode" Type="string" Value="[ProductCode]" />
+                <RegistryValue Name="DataDir" Type="string" Value="[PROFILEDIR]" />
+              </RegistryKey>
+              <IniFile Id="MarkerId" Directory="INSTALLDIR" Name="zhenjing-install.ini" Action="addLine" Section="Application" Key="Id" Value="dev.zhenjing.desktop" />
+              <IniFile Id="MarkerFormat" Directory="INSTALLDIR" Name="zhenjing-install.ini" Action="addLine" Section="Application" Key="Format" Value="msi" />
+              <IniFile Id="MarkerProduct" Directory="INSTALLDIR" Name="zhenjing-install.ini" Action="addLine" Section="Application" Key="ProductCode" Value="[ProductCode]" />
+              <IniFile Id="MarkerVersion" Directory="INSTALLDIR" Name="zhenjing-install.ini" Action="addLine" Section="Application" Key="Version" Value="[ProductVersion]" />
+              <!-- 引导文件由 MSI 管理，手动升级同样从 HKCU 保留数据位置；卸载只移除此指针。 -->
+              <IniFile Id="ProfileMarkerId" Directory="INSTALLDIR" Name="zhenjing-profile.ini" Action="addLine" Section="Application" Key="Id" Value="dev.zhenjing.desktop" />
+              <IniFile Id="ProfileMarkerData" Directory="INSTALLDIR" Name="zhenjing-profile.ini" Action="addLine" Section="Application" Key="DataRoot" Value="[PROFILEDIR]" />
+              <RemoveFile Id="RemoveMarker" Name="zhenjing-install.ini" On="uninstall" />
+              <RemoveFile Id="RemoveProfileMarker" Name="zhenjing-profile.ini" On="uninstall" />
+              <RemoveFolder Id="RemoveInstallDir" On="uninstall" />
+              <RemoveFolder Id="RemoveEmptyUserPrograms" Directory="UserPrograms" On="uninstall" />
+            </Component>
+            <Component Id="Notices" Guid="6AFE852B-5F8D-43EE-8608-5B3DE5972D88" Win64="yes">
+              <File Id="NoticeFile" Name="THIRD_PARTY_NOTICES.md" Source="__PROJECT_ROOT__\THIRD_PARTY_NOTICES.md" />
+              <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="Notices" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+            <Directory Id="LicensesDir" Name="licenses">
+              <Component Id="HudLicense" Guid="423D0C46-FBA5-42BF-8C30-E865075939D8" Win64="yes">
+                <File Id="HudLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\licenses\EndfieldChargePlus-MIT.txt" />
+                <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="HudLicense" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+              <Component Id="EcpLicense" Guid="3E61009B-F675-4694-A826-5F25028DFCB0" Win64="yes">
+                <File Id="EcpLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\licenses\ECPFrames-MIT.txt" />
+                <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="EcpLicense" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+              <Component Id="InterLicense" Guid="3BA50061-EBEA-4520-8979-3F7190B06D67" Win64="yes">
+                <File Id="InterLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\licenses\Inter-OFL.txt" />
+                <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="InterLicense" Type="integer" Value="1" KeyPath="yes" />
+              </Component>
+              <Component Id="PresentMonLicense" Guid="5CFF73B3-4898-4308-8C93-2DEC5EC04919" Win64="yes">
+                <File Id="PresentMonLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\helpers\PresentMon-LICENSE.txt" />
+                <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="PresentMonLicense" Type="integer" Value="1" KeyPath="yes" />
+                <RemoveFolder Id="RemoveLicensesDir" On="uninstall" />
+              </Component>
+              <Directory Id="HardwareLicensesDir" Name="hardware">
+                <Component Id="DotnetLicense" Guid="7A75610C-743D-43F5-8243-260E64B3CBAA" Win64="yes">
+                  <File Id="DotnetLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\dotnet-MIT.txt" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="DotnetLicense" Type="integer" Value="1" KeyPath="yes" />
+                  <RemoveFolder Id="RemoveHardwareLicensesDir" On="uninstall" />
+                </Component>
+                <Component Id="DotnetNotices" Guid="FB17E505-7B77-4055-931B-D40A0EED9377" Win64="yes">
+                  <File Id="DotnetNoticesFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\dotnet-THIRD-PARTY.txt" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="DotnetNotices" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="EtwLicense" Guid="312EC49A-64BF-41DF-8183-A6AE08FE2959" Win64="yes">
+                  <File Id="EtwLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\ferrisetw-LICENSE.md" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="EtwLicense" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="HidLicense" Guid="396B95E2-3B2C-4D48-8C3B-C9EC7D743CE9" Win64="yes">
+                  <File Id="HidLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\HidSharp-APACHE-2.0.txt" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="HidLicense" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="MonitorLicense" Guid="2F5E9DC5-2A5B-4A7D-BD14-9326BD93DE37" Win64="yes">
+                  <File Id="MonitorLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\LibreHardwareMonitor-MPL-2.0.txt" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="MonitorLicense" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="MonitorNotices" Guid="DC89DF61-B2BB-4403-BBAE-0BAF0E3DB316" Win64="yes">
+                  <File Id="MonitorNoticesFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\LibreHardwareMonitor-THIRD-PARTY.txt" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="MonitorNotices" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+                <Component Id="QrLicense" Guid="9470D262-1771-4842-8119-6C3FC228639B" Win64="yes">
+                  <File Id="QrLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\hardware-monitor\licenses\qrcode-MIT.txt" />
+                  <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="QrLicense" Type="integer" Value="1" KeyPath="yes" />
+                </Component>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="DesktopFolder">
+        <Component Id="DesktopShortcut" Guid="A74FAF0F-38F3-452B-9DEC-11B8CA18FA44" Win64="yes">
+          <Shortcut Id="DesktopLink" Name="臻境" Target="[INSTALLDIR]zhenjing.exe" WorkingDirectory="INSTALLDIR" />
+          <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Component Id="StartMenuShortcut" Guid="2A6BC83F-4824-427E-A5F5-FBC9D9924D69" Win64="yes">
+          <Shortcut Id="StartMenuLink" Name="臻境" Target="[INSTALLDIR]zhenjing.exe" WorkingDirectory="INSTALLDIR">
+            <ShortcutProperty Key="System.AppUserModel.ID" Value="dev.zhenjing.desktop" />
+          </Shortcut>
+          <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </Directory>
+    <Feature Id="Application" Title="臻境" Level="1" Absent="disallow" AllowAdvertise="no">
+      <ComponentRef Id="MainExecutable" /><ComponentRef Id="InstallRegistration" /><ComponentRef Id="Notices" />
+      <ComponentRef Id="PresentMonLicense" /><ComponentRef Id="DotnetLicense" /><ComponentRef Id="DotnetNotices" />
+      <ComponentRef Id="HudLicense" /><ComponentRef Id="EcpLicense" /><ComponentRef Id="InterLicense" />
+      <ComponentRef Id="EtwLicense" /><ComponentRef Id="HidLicense" /><ComponentRef Id="MonitorLicense" />
+      <ComponentRef Id="MonitorNotices" /><ComponentRef Id="QrLicense" />
+      <ComponentRef Id="DesktopShortcut" /><ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+  </Product>
+</Wix>

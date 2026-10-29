@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.cache/
+.tools/
+.local/
+Microsoft/Windows/PowerShell/ModuleAnalysisCache
+coverage/
+src-tauri/target/
+src-tauri/gen/schemas/
+*.local
+.env
+.env.*
+!.env.example
+!.env.empty
+*.log
+native/**/obj/
+native/**/bin/

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'sha256-__SCRIPT_HASH__'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'"
+  />
+  <title>臻境 · 硬件时序报告</title
+  ><style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font:
+        15px system-ui,
+        sans-serif;
+      margin: 0;
+      background: #eff6f6;
+      color: #18323e;
+    }
+    main {
+      max-width: 1200px;
+      padding: 28px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 27px;
+    }
+    section {
+      background: white;
+      border: 1px solid #d9e9e6;
+      border-radius: 14px;
+      margin: 16px 0;
+      padding: 20px;
+    }
+    label {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin: 5px;
+    }
+    input,
+    select,
+    button {
+      max-width: 100%;
+      min-width: 0;
+      font: inherit;
+      padding: 7px;
+      border: 1px solid #c8d8da;
+      border-radius: 6px;
+      background: white;
+    }
+    canvas {
+      width: 100%;
+      height: 240px;
+      display: block;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 10px 0;
+      overflow-wrap: anywhere;
+    }
+    dl {
+      display: grid;
+      grid-template-columns: minmax(100px, 180px) 1fr;
+      gap: 10px;
+    }
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    p {
+      color: #59717d;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    td,
+    th {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #e0e9e8;
+    }
+    @media (max-width: 600px) {
+      label {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 8px 0;
+        max-width: 100%;
+      }
+      label input,
+      label select {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+      }
+      main {
+        padding: 14px;
+      }
+      section {
+        padding: 12px;
+      }
+      dl {
+        grid-template-columns: 1fr;
+      }
+      canvas {
+        height: 200px;
+      }
+    }
+  </style>
+  <main>
+    <h1>臻境 · 硬件时序报告</h1>
+    <p id="status"></p>
+    <section>
+      <label
+        >时间范围
+        <select id="range">
+          <option value="all">全部记录</option>
+          <option value="900">最近 15 分钟</option>
+          <option value="3600">最近 1 小时</option>
+          <option value="86400">最近 24 小时</option>
+          <option value="604800">最近 7 天</option>
+          <option value="2592000">最近 30 天</option>
+        </select></label
+      ><label>开始 <input id="from" type="datetime-local" step="0.001" /></label
+      ><label>结束 <input id="to" type="datetime-local" step="0.001" /></label
+      ><button id="apply">应用范围</button
+      ><label
+        >显卡
+        <select id="gpu"></select
+      ></label>
+      <p id="range-status" role="status"></p>
+    </section>
+    <div id="charts"></div>
+    <section>
+      <h2>完整设备信息</h2>
+      <div id="devices"></div>
+    </section>
+  </main>
+  <!-- prettier-ignore -->
+  <script id="report-data" type="application/json">__PAYLOAD__</script>
+  <!-- prettier-ignore -->
+  <script>__SCRIPT__</script>
+</html>

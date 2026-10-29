@@ -1,0 +1,259 @@
+/* 视觉偏好通过变量作用于整个工作空间；不缩放文本或窗口坐标。 */
+.home-layout {
+  font-family: var(--app-font, MiSans, sans-serif);
+}
+.home-layout .glass {
+  backdrop-filter: blur(var(--glass-blur, 22px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 22px));
+}
+.home-layout[data-glass='off'] .glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: #f4f9ff;
+}
+.home-layout[data-glass='transparent'] .glass {
+  background: #eff8ff47;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+}
+.home-layout[data-glass='liquid'] .glass {
+  background: linear-gradient(125deg, #ffffffb8, #e7f6ff45 48%, #ffffff7a);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  box-shadow:
+    inset 0 1px 1px #fff,
+    inset 0 -1px 2px #ffffff88,
+    0 8px 28px #36617d0d;
+  border-color: #ffffffbd;
+}
+.settings-background video,
+.settings-mr {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.settings-mr {
+  background: #091326;
+}
+.home-layout .settings-background-preview {
+  position: relative;
+  inset: auto;
+  height: 190px;
+  width: 100%;
+  z-index: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.home-layout[data-background='preset'] .preset-sky {
+  background:
+    radial-gradient(ellipse at 65% 20%, #fff 0, transparent 55%),
+    linear-gradient(145deg, #b8d7ff, #edfaff 60%, #c9e8f1);
+}
+.home-layout[data-background='preset'] .preset-mint {
+  background:
+    radial-gradient(ellipse at 80% 30%, #fff9, transparent 65%),
+    linear-gradient(130deg, #c4f1df, #e5f4f2, #bbdce9);
+}
+.home-layout[data-background='preset'] .preset-night {
+  background:
+    radial-gradient(ellipse at 20% 30%, #6c5ca088, transparent 65%),
+    linear-gradient(150deg, #162535, #344a70, #2f4662);
+}
+.home-layout[data-background='none'] .home-wallpaper,
+.home-layout[data-background='video'] .home-wallpaper,
+.home-layout[data-background='mr'] .home-wallpaper {
+  background: #c5e4f5;
+}
+.settings-background-error {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  right: 12px;
+  color: #9a303b;
+  background: #fffef0eb;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.settings-startup-logo {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: #f1f9fbe8;
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+}
+.settings-startup-logo img {
+  max-width: 150px;
+  max-height: 190px;
+  object-fit: contain;
+}
+.home-layout[data-theme='dark'] {
+  --home-ink: #e6eef7;
+  --home-muted: #a5b9d0;
+  --home-border: #b8d3f02b;
+  color-scheme: dark;
+  color: var(--home-ink);
+}
+.home-layout[data-theme='dark'] .home-wallpaper::after {
+  background: #07111e6b;
+}
+.home-layout[data-theme='dark'].wallpaper-dim .home-wallpaper::after {
+  background: #07111e9e;
+}
+.home-layout[data-theme='dark'] .glass {
+  background: #162334c9;
+  border-color: #b8d3f02b;
+  color: #e6eef7;
+}
+.home-layout[data-theme='dark'][data-glass='off'] .glass {
+  background: #162334;
+}
+.home-layout[data-theme='dark'][data-glass='transparent'] .glass {
+  background: #16233470;
+}
+.home-layout[data-theme='dark'][data-glass='liquid'] .glass {
+  background: linear-gradient(125deg, #293c50c4, #142034a0);
+  box-shadow:
+    inset 0 1px 1px #e5f4ff38,
+    0 8px 28px #030b1626;
+}
+.home-layout[data-theme='dark']
+  :is(h1, h2, h3, strong, .row-copy, .dock-item, .preferences-navigation button) {
+  color: inherit;
+}
+.home-layout[data-theme='dark']
+  :is(p, small, .preferences-date, .preferences-heading > p, .setting-row p, .settings-note) {
+  color: #adc1da;
+}
+.home-layout[data-theme='dark']
+  :is(
+    input,
+    select,
+    textarea,
+    .utility-row,
+    .settings-update-status,
+    .native-status-banner,
+    .native-card
+  ) {
+  color: #e3edf8;
+  background-color: #223348;
+  border-color: #b8d3f033;
+}
+.home-layout[data-theme='dark']
+  :is(
+    .setting-control button:not(.toggle),
+    .settings-actions button,
+    .settings-network-row > button,
+    .settings-server-form button,
+    .settings-nav-editor button,
+    .preferences-footer button
+  ) {
+  color: #e3edf8;
+  background: #26384b;
+  border-color: #b8d3f033;
+}
+.home-layout[data-theme='dark']
+  :is(.dock-item.selected, .preferences-navigation .selected, .mint-button) {
+  color: #173435;
+  background: var(--home-mint);
+}
+.home-layout[data-theme='dark'] .settings-review {
+  background: #173c38;
+  color: #e3f8ef;
+  border-color: #559d8c;
+}
+.home-layout[data-theme='dark'] .settings-error {
+  color: #ffc3c8;
+  background: #512f38;
+}
+.home-layout[data-theme='dark'] .settings-changelog {
+  color: #c8d6e7;
+}
+.home-layout[data-theme='dark'] .settings-startup-logo {
+  background: #111d2ee8;
+}
+/* 顶部导航和无文字导航仍保留完整可访问名称，窄窗口允许横向滚动。 */
+.home-layout[data-nav='top'] {
+  padding-top: 102px;
+}
+.home-layout[data-nav='top'] .dock {
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  width: auto;
+  height: 68px;
+  min-height: 0;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  border-radius: 18px;
+}
+.home-layout[data-nav='top'] .brand {
+  width: 36px;
+  height: 48px;
+  min-height: 0;
+  flex: 0 0 36px;
+  margin: 0;
+}
+.home-layout[data-nav='top'] .brand img {
+  width: 30px;
+  height: 43px;
+  object-fit: contain;
+  transform: translate(-50%, 0);
+}
+.home-layout[data-nav='top'] .dock nav {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+}
+.home-layout[data-nav='top'] .dock .dock-item {
+  height: 44px;
+  min-height: 44px;
+  min-width: 70px;
+  width: auto;
+  padding: 8px 14px;
+  gap: 9px;
+  flex-direction: row;
+  font-size: 13px;
+}
+.home-layout[data-nav='top'] .dock-item .ui-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+.home-layout[data-nav='top'] .home-workspace {
+  margin-left: 24px;
+  padding: 0;
+}
+.home-layout[data-nav-labels='false'][data-nav='side'] .dock-item {
+  min-height: 48px;
+}
+@media (max-width: 800px) {
+  .home-layout[data-nav='top'] .dock {
+    left: 12px;
+    right: 12px;
+    gap: 12px;
+  }
+  .home-layout[data-nav='top'] .home-workspace {
+    margin-left: 18px;
+  }
+  .home-layout[data-nav='top'] .dock .dock-item {
+    padding-inline: 10px;
+    min-width: 46px;
+  }
+  .home-layout[data-nav='top'] .dock nav {
+    gap: 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-startup-logo {
+    backdrop-filter: none;
+  }
+}

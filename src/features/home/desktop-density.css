@@ -1,0 +1,475 @@
+/* 桌面日常使用的统一密度。调整真实字号、间距和网格，不使用 zoom/transform 缩小页面，保持文字清晰、点击与弹层坐标准确。 */
+.home-layout .feature-icon[class] {
+  --feature-ink: #2a8273;
+  --feature-surface: #eff9f5;
+  --feature-line: #d6ebe2;
+  display: inline-flex;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--feature-line);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #ffffffd9, var(--feature-surface));
+  color: var(--feature-ink);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 2px 4px #355b6605;
+}
+.home-layout .feature-icon[class] .ui-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 23px;
+}
+.home-layout .feature-icon-blue[class] {
+  --feature-ink: #4b739e;
+  --feature-surface: #eef5fd;
+  --feature-line: #d9e6f3;
+}
+.home-layout .feature-icon-violet[class] {
+  --feature-ink: #79719d;
+  --feature-surface: #f3f1fa;
+  --feature-line: #e3deef;
+}
+.home-layout .feature-icon-orange[class] {
+  --feature-ink: #b38553;
+  --feature-surface: #fcf6ed;
+  --feature-line: #eee2cf;
+}
+.home-layout .feature-icon-rose[class] {
+  --feature-ink: #b27687;
+  --feature-surface: #fcf1f5;
+  --feature-line: #efdee5;
+}
+/* main 仅作为路由跳转后的读屏焦点，不是交互控件；控件自身仍保留键盘焦点样式。 */
+.home-layout #main-content:focus {
+  outline: none;
+}
+
+@media (min-width: 701px) {
+  .home-layout {
+    --desktop-title-size: 28px;
+    padding: 18px 20px 24px 0;
+  }
+  .home-layout .home-workspace {
+    margin-left: 112px;
+    margin-right: 0;
+    padding-left: 0;
+    /* 跟随窗口实际宽度，不能在最大化/全屏后留下固定宽度之外的空白。 */
+    max-width: none;
+    min-width: 0;
+  }
+  .home-layout .dock {
+    top: 18px;
+    left: 14px;
+    width: 76px;
+    height: min(552px, calc(100svh - 36px));
+    border-radius: 21px;
+    padding: 16px 10px;
+  }
+  .home-layout .brand {
+    width: 54px;
+    height: 80px;
+    margin-bottom: 14px;
+  }
+  .home-layout .brand img {
+    width: 64px;
+    height: 84px;
+    transform: translate(-50%, -2px);
+  }
+  .home-layout .dock nav {
+    gap: 10px;
+  }
+  .home-layout .dock-item {
+    height: 54px;
+    gap: 5px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+  .home-layout .dock-item .ui-icon {
+    font-size: 19px;
+  }
+  .home-layout .top-bar {
+    height: 42px;
+    gap: 16px;
+  }
+  .home-layout .global-search {
+    width: 360px;
+    max-width: 42%;
+    height: 42px;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+  .home-layout .global-search .shortcut {
+    font-size: 11px;
+  }
+  .home-layout .top-actions {
+    gap: 10px;
+  }
+  .home-layout .avatar-button {
+    width: 42px;
+    height: 42px;
+  }
+  .home-layout .appearance-button {
+    width: 40px;
+    height: 40px;
+  }
+  .home-layout .window-controls {
+    width: 126px;
+    height: 40px;
+    margin-left: 6px;
+    border-radius: 14px;
+  }
+  .home-layout .window-controls button {
+    width: 42px;
+    height: 40px;
+  }
+  .home-layout :is(.greeting, .preferences-main) {
+    margin-top: 22px;
+  }
+  .home-layout :is(.tools-main, .optimization-main, .hw-main, .catalog-main) {
+    padding-top: 22px;
+  }
+  .home-layout
+    :is(
+      .greeting h1,
+      .tools-title h1,
+      .optimization-title h1,
+      .hw-heading h1,
+      .catalog-heading h1,
+      .preferences-title h1
+    ) {
+    font-size: var(--desktop-title-size);
+    line-height: 40px;
+    letter-spacing: 0.2px;
+  }
+  .home-layout :is(.tools-title, .optimization-title, .hw-heading-title, .preferences-title) {
+    height: 40px;
+    gap: 12px;
+  }
+  .home-layout
+    :is(.tools-heading, .optimization-heading, .hw-heading, .catalog-heading, .preferences-heading)
+    > p {
+    font-size: 15px;
+    line-height: 24px;
+  }
+  .home-layout
+    :is(.greeting p, .tools-date, .optimization-date, .hw-date, .catalog-date, .preferences-date) {
+    font-size: 13px;
+    line-height: 22px;
+  }
+  .home-layout
+    :is(.tools-source, .optimization-source, .hw-source-badge, .preferences-title > span) {
+    height: 27px;
+    padding: 3px 11px;
+    font-size: 12px;
+  }
+  .home-layout :is(.tools-toolbar, .optimization-toolbar, .catalog-toolbar) {
+    margin-top: 18px;
+    gap: 10px;
+  }
+  .home-layout
+    :is(
+      .tools-search,
+      .tools-filters,
+      .tools-manage,
+      .optimization-search,
+      .optimization-detect,
+      .optimization-history
+    ) {
+    height: 42px;
+    border-radius: 14px;
+    font-size: 14px;
+  }
+  .home-layout .tools-search {
+    width: 320px;
+  }
+  .home-layout .tools-filters button {
+    min-width: 92px;
+    gap: 8px;
+    padding: 0 16px;
+    border-radius: 13px;
+    font-size: 14px;
+  }
+  .home-layout .tools-filters button:last-child {
+    min-width: 120px;
+  }
+  .home-layout .tools-manage {
+    width: 126px;
+    gap: 8px;
+  }
+  .home-layout .optimization-toolbar {
+    grid-template-columns: minmax(0, 1fr) 184px 152px;
+    max-width: none;
+  }
+  .home-layout :is(.tools-search input, .optimization-search input) {
+    font-size: 14px;
+  }
+  .home-layout :is(.tool-section h2, .optimization-content h2) {
+    font-size: 19px;
+    line-height: 28px;
+  }
+  .home-layout .tool-section + .tool-section {
+    margin-top: 22px;
+  }
+  .home-layout :is(.tool-grid, .optimization-grid) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .home-layout :is(.tool-card, .optimization-category) {
+    height: 116px;
+    border-radius: 15px;
+    background: #f7fbffdb;
+    backdrop-filter: blur(14px);
+  }
+  .home-layout :is(.tool-open, .optimization-category > button) {
+    align-items: center;
+    gap: 15px;
+    padding: 18px 17px;
+  }
+  .home-layout :is(.tool-copy, .optimization-category-copy) {
+    padding-top: 0;
+  }
+  .home-layout :is(.tool-name, .optimization-category-name) {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .home-layout :is(.tool-description, .optimization-category-description) {
+    font-size: 13px;
+    line-height: 20px;
+    margin-top: 4px;
+    padding-right: 24px;
+    color: #5e7489;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .home-layout .tool-favorite {
+    top: 7px;
+    right: 7px;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+  }
+  .home-layout .tool-favorite .ui-icon {
+    font-size: 15px;
+  }
+  .home-layout :is(.tool-arrow, .optimization-arrow) {
+    right: 12px;
+    bottom: 12px;
+    width: 26px;
+    height: 26px;
+    background: #e7f6f1;
+    border-radius: 9px;
+  }
+  .home-layout :is(.tool-arrow, .optimization-arrow) .ui-icon {
+    font-size: 11px;
+  }
+  .home-layout .optimization-common {
+    margin-top: 22px;
+  }
+  .home-layout .optimization-common-item {
+    padding: 18px 20px;
+    gap: 16px;
+    min-height: 143px;
+  }
+  .home-layout .optimization-common-item .feature-icon[class] {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+  .home-layout .optimization-common-info h3 {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .home-layout .optimization-common-info p {
+    font-size: 13px;
+    line-height: 21px;
+  }
+  .home-layout .optimization-setting-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 12px;
+  }
+  .home-layout .tools-detail {
+    margin-top: 20px;
+    padding: 22px;
+    border-radius: 18px;
+  }
+  .home-layout .tools-detail-header {
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+  }
+  .home-layout .native-tool-panel {
+    gap: 16px;
+    font-size: 14px;
+  }
+  .home-layout
+    .native-tool-panel
+    :is(.native-status-banner, .native-device-card, .native-change-review) {
+    padding: 16px;
+  }
+  .home-layout .native-tool-panel h3 {
+    font-size: 18px;
+  }
+  .home-layout .native-tool-panel h4 {
+    font-size: 15px;
+  }
+  .home-layout .native-tool-panel .native-tool-form label {
+    font-size: 13px;
+  }
+  .home-layout .home-columns {
+    grid-template-columns: minmax(0, 1fr) 306px;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .home-layout .status-panel {
+    min-height: 0;
+    padding: 18px 16px;
+  }
+  .home-layout .status-panel h2 {
+    font-size: 16px;
+  }
+  .home-layout .status-panel .utility-row {
+    padding: 12px 8px;
+    min-height: 60px;
+    gap: 10px;
+  }
+  .home-layout .status-panel .row-copy strong {
+    font-size: 13px;
+  }
+  .home-layout .status-panel .row-copy p {
+    font-size: 11px;
+    line-height: 18px;
+  }
+  .home-layout .recent-grid {
+    height: 232px;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .home-layout :is(.recent-featured, .recent-secondary, .recent-small) {
+    min-height: 0;
+  }
+  .home-layout :is(.recent-featured, .recent-secondary) {
+    height: 100%;
+  }
+  .home-layout .empty-recent {
+    min-height: 232px;
+  }
+  .home-layout .featured-bottom h3 {
+    font-size: 25px;
+    line-height: 34px;
+  }
+  .home-layout .continue-button {
+    width: 130px;
+    height: 40px;
+    font-size: 13px;
+  }
+  .home-layout .library-section {
+    margin-top: 22px;
+  }
+  .home-layout .section-heading h2 {
+    font-size: 20px;
+  }
+  .home-layout .preferences-workbench {
+    grid-template-columns: 200px minmax(0, 1fr);
+    min-height: 560px;
+    gap: 22px;
+    padding: 22px;
+  }
+  .home-layout .preferences-navigation {
+    padding-right: 16px;
+    gap: 8px;
+  }
+  .home-layout .preferences-navigation button {
+    min-height: 46px;
+    gap: 14px;
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  .home-layout .preferences-navigation button .ui-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .home-layout .preferences-section-heading h2 {
+    font-size: 24px;
+    line-height: 34px;
+  }
+  .home-layout .preferences-section-heading p {
+    font-size: 14px;
+    line-height: 23px;
+  }
+  .home-layout .preference-row {
+    min-height: 72px;
+    gap: 18px;
+  }
+  .home-layout .preference-row-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 21px;
+  }
+  .home-layout .preference-row-copy h3 {
+    font-size: 17px;
+    line-height: 26px;
+  }
+  .home-layout .preference-row-copy p {
+    font-size: 13px;
+    line-height: 21px;
+  }
+  .home-layout .preferences-color {
+    width: 58px;
+    height: 60px;
+  }
+  .home-layout .preferences-visuals {
+    grid-template-columns: minmax(0, 1fr) 210px;
+    gap: 20px;
+  }
+  .home-layout .catalog-heading {
+    min-height: 120px;
+  }
+  .home-layout .catalog-actions {
+    top: 64px;
+    gap: 10px;
+  }
+  .home-layout .catalog-actions button {
+    width: 136px;
+    height: 42px;
+    font-size: 14px;
+    gap: 10px;
+  }
+  .home-layout .catalog-actions .ui-icon {
+    font-size: 17px;
+  }
+  .home-layout.compact :is(.tool-card, .optimization-category) {
+    height: 104px;
+  }
+  .home-layout.compact .native-tool-panel {
+    gap: 12px;
+  }
+}
+@media (min-width: 701px) and (max-width: 1100px) {
+  .home-layout .global-search {
+    max-width: none;
+  }
+  .home-layout .home-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-layout .status-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .home-layout .tools-toolbar {
+    flex-wrap: wrap;
+  }
+  .home-layout .tools-search {
+    flex: 1;
+    width: auto;
+  }
+}
+@media (min-width: 701px) and (max-width: 960px) {
+  .home-layout :is(.tool-grid, .optimization-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "file": "01-settings-review.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1805422,
+    "sha256": "a5ffa51871407421a43cf994b950e8350b512a191211ef4f702851f85818e35f"
+  },
+  {
+    "file": "02-category-overview.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1879097,
+    "sha256": "38a193e6a14e2715dfb132f7993b850e4288893211a75ee5f8cd4ea965d01c69"
+  },
+  {
+    "file": "03-profile-preview.png",
+    "width": 1486,
+    "height": 1058,
+    "bytes": 1802845,
+    "sha256": "5c8995e5bb4f7c03b25780cb4e7b01138508a3f8b62037cf876a6f14addc3140"
+  }
+]

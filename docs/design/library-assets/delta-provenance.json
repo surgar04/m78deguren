@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "tool": "built-in image_gen.imagegen",
+  "reference": "D:/Android/Temp/codex-clipboard-eed8db6e-0785-4d74-a4c0-4d87f667ae97.png",
+  "delta": {
+    "status": "generated",
+    "promptSummary": "Restore cropped Delta Force artwork while preserving soldier pose, orange visor, rifle, helicopters, stormy palette and upper-left original game logo. Remove only heart, repeated bottom title, Steam/last-played text, play button, mint border and rounded corners; reconstruct underlying artwork. Landscape 411:262; no extra interface.",
+    "inputCrop": "D:/新境/.cache/verification/library/delta-reference-crop.png",
+    "toolOutputFile": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-79a7-7672-a6df-41c8aa5b9a8e\\exec-40b9e5e5-add3-4ace-b860-c70b675689a3.png",
+    "toolOutputDirectory": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-79a7-7672-a6df-41c8aa5b9a8e",
+    "source": {
+      "path": "D:\\新境\\docs\\design\\library-assets\\delta-source.png",
+      "width": 1569,
+      "height": 1002,
+      "sha256": "809A5EDC3DBDCE14F90C435F869EFE8F446220F9499573648070C5A74DFD28C8"
+    },
+    "final": {
+      "path": "D:\\新境\\public\\assets\\library\\delta.webp",
+      "width": 822,
+      "height": 524,
+      "encoding": "WebP quality 96, method 6",
+      "resize": "Pillow ImageOps.fit, Lanczos, centered; no stretching",
+      "sha256": "9A8B72BFC86EE0C8C9839D710E2B474C4F5C9BC65572A6E85A2FC39377B4BB01"
+    },
+    "archive": {
+      "path": "D:\\新境\\.cache\\generated-archive\\library-delta\\exec-40b9e5e5-add3-4ace-b860-c70b675689a3.png",
+      "sha256": "809A5EDC3DBDCE14F90C435F869EFE8F446220F9499573648070C5A74DFD28C8",
+      "emptyDirectory": "D:/新境/.cache/generated-archive/library-delta/empty-output-directory"
+    },
+    "verification": {
+      "originalSha256BeforeTransfer": "809A5EDC3DBDCE14F90C435F869EFE8F446220F9499573648070C5A74DFD28C8",
+      "hashMatchedBeforeMovingOriginal": true,
+      "cleanupMethod": "Copy original to D source and verify SHA256; move exact C original and then its empty output directory to D archive.",
+      "testPathGeneratedFile": false,
+      "testPathGeneratedDirectory": false,
+      "testPathSource": true,
+      "testPathFinal": true,
+      "testPathArchive": true
+    },
+    "remainingDifference": "Generated restoration closely matches composition, but reconstructed artwork details are not guaranteed pixel-identical."
+  },
+  "stardew": {
+    "status": "moderation_blocked",
+    "promptSummary": "Restore cropped Stardew Valley pixel-art cover, preserving centered golden two-row title, blue sky/clouds, mountains, trees, left fence, center-right red-roof barn and farm animals. Remove only top-right heart, bottom dark UI gradient, Chinese title and Steam/last-played text. Edge-to-edge rectangular artwork, no app controls.",
+    "inputCrop": "D:/新境/.cache/verification/library/stardew-reference-crop.png",
+    "httpStatus": 400,
+    "moderationStage": "output",
+    "categories": ["other"],
+    "requestId": "23d2fc1e-78ae-46d6-97c3-6b9d049c74b8",
+    "toolOutputFile": null,
+    "toolOutputDirectory": null,
+    "source": null,
+    "final": null,
+    "sha256": null,
+    "cleanup": "Tool returned no image or C output path; no generated output was available to transfer or clean. No retry was made.",
+    "fallback": "Use the existing official Stardew Valley asset in the main implementation."
+  }
+}

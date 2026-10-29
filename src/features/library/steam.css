@@ -1,0 +1,499 @@
+/* 沿用首页薄荷玻璃语言，按真实长名称、账号和大库存调整桌面信息密度。 */
+.steam-main {
+  padding-top: 24px;
+}
+.steam-main .catalog-heading {
+  min-height: 136px;
+}
+.steam-main .catalog-heading h1 {
+  font-size: 30px;
+  line-height: 44px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.steam-main .catalog-heading > p {
+  font-size: 15px;
+  line-height: 25px;
+}
+.steam-main .catalog-date {
+  font-size: 13px;
+}
+.steam-live-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  background: #f6ffffbd;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  color: #486f79;
+}
+.steam-main .catalog-actions {
+  top: 62px;
+}
+.steam-main .catalog-actions button {
+  width: auto;
+  height: 42px;
+  padding: 0 17px;
+  font-size: 13px;
+  border-radius: 13px;
+  gap: 9px;
+}
+.steam-main .catalog-actions .ui-icon {
+  font-size: 17px;
+}
+.steam-main button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.steam-message,
+.steam-error,
+.steam-warnings {
+  padding: 12px 15px;
+  margin: 12px 0;
+  border: 1px solid #bcded6;
+  border-radius: 12px;
+  background: #f2fffbdf;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.steam-error {
+  background: #fff0e8e8;
+  border-color: #e8c0b1;
+}
+.steam-warnings {
+  background: #fff9e5dd;
+  border-color: #dcd0a5;
+}
+.steam-warnings summary {
+  cursor: pointer;
+}
+.steam-status {
+  padding: 14px 18px;
+  border-radius: 16px;
+  position: relative;
+  font-size: 13px;
+}
+.steam-status > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.steam-status > div > .ui-icon {
+  font-size: 22px;
+}
+.steam-status p {
+  color: var(--home-muted);
+  overflow-wrap: anywhere;
+  margin: 5px 0;
+}
+.steam-status small {
+  font-size: 11px;
+  color: var(--home-muted);
+}
+.steam-tabs {
+  display: flex;
+  gap: 5px;
+  padding: 4px;
+  margin: 16px 0;
+  border-radius: 14px;
+  width: max-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.steam-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 10px 20px;
+  border-radius: 11px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: inherit;
+}
+.steam-tabs button.active {
+  background: #a6f2df;
+  color: #0f3c38;
+}
+.steam-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.steam-toolbar .catalog-search {
+  height: 42px;
+  flex: 1;
+  min-width: 220px;
+  max-width: none;
+}
+.steam-toolbar .catalog-search input {
+  font-size: 13px;
+}
+.steam-toolbar select,
+.steam-main
+  button:not(
+    .catalog-open,
+    .catalog-favorite,
+    .catalog-launch,
+    .catalog-add,
+    .catalog-scan,
+    .mint-button
+  ) {
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  background: #f5fcffdd;
+  border: 1px solid #c8deea;
+  border-radius: 11px;
+  color: inherit;
+}
+.steam-main .steam-tabs button.active {
+  background: #a6f2df;
+}
+.steam-toolbar select {
+  max-width: 220px;
+  min-width: 0;
+}
+.steam-view {
+  display: flex;
+}
+.steam-view button[aria-pressed='true'] {
+  background: #a6f2df !important;
+}
+.steam-inventory-note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: space-between;
+  margin: 12px 0;
+}
+.steam-inventory-note p,
+.steam-subtle {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--home-muted, #536f80);
+  overflow-wrap: anywhere;
+}
+.steam-inventory-note button {
+  flex-shrink: 0;
+}
+.steam-card {
+  aspect-ratio: 1.7;
+  min-width: 0;
+  background: linear-gradient(145deg, #21414b, #446983);
+  border-radius: 14px;
+}
+.steam-card .catalog-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.steam-card .catalog-caption {
+  bottom: 15px;
+  left: 16px;
+  right: 14px;
+}
+.steam-card .catalog-caption h2 {
+  font-size: 18px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.steam-card .catalog-meta {
+  font-size: 11px;
+  line-height: 1.6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.steam-card .catalog-last {
+  display: block;
+}
+.steam-card .catalog-launch {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 12px;
+  bottom: 15px;
+  right: 13px;
+  opacity: 0;
+  transform: translateY(5px);
+}
+.steam-card:hover .catalog-launch,
+.steam-card:focus-within .catalog-launch {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+}
+.steam-card .catalog-favorite {
+  top: 13px;
+  right: 13px;
+  font-size: 19px;
+}
+.steam-install-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  pointer-events: none;
+  font-size: 10px;
+  border: 1px solid #fff6;
+  border-radius: 9px;
+  background: #243745bb;
+  color: white;
+  padding: 3px 8px;
+}
+.steam-install-badge.installed {
+  background: #a7f4dfdf;
+  color: #10493d;
+}
+.steam-cover-empty {
+  padding: 50px 25px;
+  color: #d2e9e3;
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.steam-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0;
+  gap: 10px;
+  font-size: 13px;
+}
+.steam-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 22px 0 8px;
+}
+.steam-section-heading h2 {
+  font-size: 20px;
+}
+.steam-account {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  margin: 12px 0;
+  min-width: 0;
+}
+.steam-account > img,
+.steam-avatar-empty {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.steam-avatar-empty {
+  display: grid;
+  place-items: center;
+  background: #aceedc;
+  font-size: 25px;
+}
+.steam-account h3 {
+  font-size: 17px;
+}
+.steam-account p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--home-muted);
+  overflow-wrap: anywhere;
+}
+.steam-account-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.steam-disks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.steam-disk {
+  padding: 22px;
+  border-radius: 16px;
+  min-width: 0;
+}
+.steam-disk h2 {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+  display: flex;
+  gap: 12px;
+}
+.steam-disk p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 8px 0;
+}
+.steam-disk progress {
+  width: 100%;
+  height: 9px;
+  accent-color: #27b998;
+}
+.steam-details dl,
+.steam-disk dl {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.steam-details dl > div,
+.steam-disk dl > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 15px;
+  margin: 9px 0;
+}
+.steam-details dd,
+.steam-disk dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.steam-detail-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.steam-main .mint-button {
+  min-height: 39px;
+  padding: 10px 16px;
+  font-size: 13px;
+}
+.steam-confirm {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.steam-confirm > p {
+  margin-bottom: 15px;
+  overflow-wrap: anywhere;
+}
+.steam-confirm > label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+}
+.steam-confirm input {
+  accent-color: #20b491;
+}
+.steam-confirm .steam-api-key {
+  flex-direction: column;
+  align-items: stretch;
+  font-size: 13px;
+}
+.steam-api-key input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #bfd8e1;
+  border-radius: 10px;
+  font: inherit;
+}
+.steam-account > div:not(.steam-account-actions) {
+  min-width: 0;
+}
+.steam-backups article {
+  padding: 16px 0;
+  border-bottom: 1px solid #bed8de;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.steam-backups button {
+  margin: 10px;
+}
+.steam-main .catalog-grid {
+  gap: 14px;
+}
+.steam-main .catalog-list .steam-card {
+  aspect-ratio: auto;
+  min-height: 125px;
+}
+.steam-main .catalog-list .catalog-art {
+  width: 32%;
+  max-width: 260px;
+}
+.steam-main .catalog-list .catalog-caption {
+  left: 35%;
+  right: 140px;
+  bottom: 22px;
+}
+.steam-main .catalog-list .catalog-launch {
+  opacity: 1;
+  transform: none;
+}
+.home-layout[data-theme='dark'] .steam-status,
+.home-layout[data-theme='dark'] .steam-disk,
+.home-layout[data-theme='dark'] .steam-account {
+  background: #193945bd;
+}
+.home-layout[data-theme='dark'] .steam-message {
+  background: #1d4845;
+  color: #d5f7ed;
+}
+.home-layout[data-theme='dark'] .steam-toolbar select {
+  background: #173943;
+  color: #e1f8f2;
+}
+@media (max-width: 1150px) {
+  .steam-main .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .steam-toolbar select {
+    max-width: 180px;
+  }
+  .steam-account-actions {
+    flex-direction: column;
+  }
+}
+@media (max-width: 820px) {
+  .steam-main .catalog-heading {
+    min-height: 0;
+    margin-bottom: 16px;
+  }
+  .steam-main .catalog-actions {
+    position: static;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .steam-disks {
+    grid-template-columns: 1fr;
+  }
+  .steam-inventory-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .steam-account {
+    flex-wrap: wrap;
+  }
+  .steam-account-actions {
+    margin-left: 68px;
+    flex-direction: row;
+  }
+  .steam-toolbar > label {
+    flex-basis: 100%;
+  }
+  .steam-toolbar select {
+    flex: 1;
+  }
+  .steam-main .catalog-list .catalog-caption {
+    left: 35%;
+    right: 10px;
+    bottom: 44px;
+  }
+  .steam-main .catalog-list .catalog-launch {
+    bottom: 8px;
+  }
+  .steam-card .catalog-caption h2 {
+    font-size: 16px;
+  }
+}

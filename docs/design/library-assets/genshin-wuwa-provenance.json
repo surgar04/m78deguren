@@ -1,0 +1,51 @@
+{
+  "generatedWith": "built-in image_gen.imagegen",
+  "sourceReference": "D:\\Android\\Temp\\codex-clipboard-eed8db6e-0785-4d74-a4c0-4d87f667ae97.png",
+  "note": "PNG原件经SHA256验证后从C盘移动至D盘；WebP仅做格式转换、未拉伸。图像生成保留构图但并非像素级一致。",
+  "assets": [
+    {
+      "id": "genshin",
+      "promptSummary": "恢复参考图第三张原神封面（约x1054 y334 w406 h262）：保留左侧白色原神Logo、右侧白发蓝眼少女及蓝天云朵构图；移除右上爱心、底部界面标题/Steam/上次游玩文字、圆角边框。辅助参考public/assets/home/genshin.webp，禁止拉伸。",
+      "generatedDimensions": {
+        "width": 1562,
+        "height": 1007
+      },
+      "generatedSourceFile": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-feb9-7f61-aab1-78d4e011b7dd\\exec-89691f9a-480e-44d4-96b7-8beec5b8cf61.png",
+      "generatedSourceDirectory": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-feb9-7f61-aab1-78d4e011b7dd",
+      "originalFile": "D:\\新境\\docs\\design\\library-assets\\genshin-source.png",
+      "originalSha256": "22A8EC99A101DA0B3FC5B5ADE565B0B33707A7453DD6A2B7D3186ACDC9A72342",
+      "runtimeFile": "D:\\新境\\public\\assets\\library\\genshin.webp",
+      "runtimeSha256": "0A14474664B76CDAD644C9311294BDC0111E20A391B3A3E85E594A1027DE4240",
+      "emptyDirectoryArchive": "D:\\新境\\.cache\\generated-archive\\01a16c19-feb9-7f61-aab1-78d4e011b7dd",
+      "cleanupVerification": {
+        "emptyDirectoryArchiveExists": true,
+        "sourceDirectoryExistsAfterMove": false,
+        "originalHashMatchesBeforeMove": true,
+        "sourceFileExistsAfterMove": false
+      },
+      "differences": "Logo略大、人物脸部与背景细节有轻微生成差异。"
+    },
+    {
+      "id": "wuwa",
+      "promptSummary": "恢复参考图第二行中间鸣潮封面（约x634 y610 w405 h263）：保留左侧鸣潮Logo和小字WUTHERING WAVES、右侧暗发少女及冷灰蓝遗迹天空构图；移除右上爱心、底部界面标题/本地游戏/上次游玩文字及图标、黑色UI渐变、圆角边框。辅助参考public/assets/home/wuwa.webp，禁止拉伸。",
+      "generatedDimensions": {
+        "width": 1556,
+        "height": 1011
+      },
+      "generatedSourceFile": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-feb9-7f61-aab1-78d4e011b7dd\\exec-d85da45b-1aba-4640-9ffd-4cfc7e636ce2.png",
+      "generatedSourceDirectory": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-feb9-7f61-aab1-78d4e011b7dd",
+      "originalFile": "D:\\新境\\docs\\design\\library-assets\\wuwa-source.png",
+      "originalSha256": "159CABFDEF9CCE30960581040C2D8451EF6CBEA2127B0ABF8FEB4C8775756C8B",
+      "runtimeFile": "D:\\新境\\public\\assets\\library\\wuwa.webp",
+      "runtimeSha256": "64324A1B84DBC03A956C183EF9F1F85BF24F5DCCB5412EDE51368E2F29762CBA",
+      "emptyDirectoryArchive": "D:\\新境\\.cache\\generated-archive\\01a16c19-feb9-7f61-aab1-78d4e011b7dd-wuwa",
+      "cleanupVerification": {
+        "emptyDirectoryArchiveExists": true,
+        "sourceDirectoryExistsAfterMove": false,
+        "originalHashMatchesBeforeMove": true,
+        "sourceFileExistsAfterMove": false
+      },
+      "differences": "Logo略大且偏中部、人物及背景细节有轻微生成差异。"
+    }
+  ]
+}

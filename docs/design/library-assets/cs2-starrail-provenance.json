@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T12:22:52.4264677+08:00",
+  "assets": [
+    {
+      "asset": "cs2",
+      "tool": "image_gen.imagegen",
+      "promptSummary": "参考游戏库第二张卡片恢复橙色双人构图、左中 COUNTER STRIKE 2 Logo；移除爱心、底部 UI 名称/Steam/时间/圆角，不生成完整界面。",
+      "references": [
+        "D:\\Android\\Temp\\codex-clipboard-eed8db6e-0785-4d74-a4c0-4d87f667ae97.png",
+        "D:\\新境\\public\\assets\\home\\cs2-recent.webp"
+      ],
+      "generatedFile": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-babd-73f0-b282-ba7f719792a6\\exec-c547d446-4519-468c-a88c-0d17f7f335e1.png",
+      "generatedDirectory": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-babd-73f0-b282-ba7f719792a6",
+      "source": "D:\\新境\\docs\\design\\library-assets\\cs2-source.png",
+      "output": "D:\\新境\\public\\assets\\library\\cs2.webp",
+      "width": 1559,
+      "height": 1009,
+      "archivedEmptyDirectory": "D:\\新境\\.cache\\generated-archive\\library\\01a16c19-babd-73f0-b282-ba7f719792a6",
+      "sourceSha256": "2D1626F482C73DF11379EF0B66BD08AD2BC1551339206F93F44629F4063DC503",
+      "outputSha256": "D3FEAB47428ED3012B241CA321DEF77F7F76EF9226A1B2D78467B21796400E39",
+      "cleanup": {
+        "method": "Move exact generated PNG to D after SHA256 verification; move the empty generated directory to the exact D archive path",
+        "generatedFileExists": false,
+        "generatedDirectoryExists": false,
+        "sourceExists": true,
+        "outputExists": true,
+        "archivedEmptyDirectoryExists": true
+      }
+    },
+    {
+      "asset": "starrail",
+      "tool": "image_gen.imagegen",
+      "promptSummary": "参考游戏库左下卡片恢复紫色宇宙、右侧紫发角色、左侧星穹铁道 Logo；移除心形、底部 UI 标题/平台/时间、黑色 UI 遮罩与圆角，保留独立封面。",
+      "references": [
+        "D:\\Android\\Temp\\codex-clipboard-eed8db6e-0785-4d74-a4c0-4d87f667ae97.png",
+        "D:\\新境\\public\\assets\\home\\starrail.webp"
+      ],
+      "generatedFile": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-babd-73f0-b282-ba7f719792a6\\exec-e5a0c8d5-d019-4399-a6c9-691a70b3ebd4.png",
+      "generatedDirectory": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16c19-babd-73f0-b282-ba7f719792a6",
+      "source": "D:\\新境\\docs\\design\\library-assets\\starrail-source.png",
+      "output": "D:\\新境\\public\\assets\\library\\starrail.webp",
+      "width": 1567,
+      "height": 1004,
+      "archivedEmptyDirectory": "D:\\新境\\.cache\\generated-archive\\library\\starrail-output-empty",
+      "sourceSha256": "16DC298D7DEFB05983E67DA80F5C7DE4EE088C84CDE85B7F8D106D59080344F8",
+      "outputSha256": "4DD50FD26E451206332C570684309C045D622FABE318C3A88B69C35AF8FAD750",
+      "cleanup": {
+        "method": "Move exact generated PNG to D after SHA256 verification; move the empty generated directory to the exact D archive path",
+        "generatedFileExists": false,
+        "generatedDirectoryExists": false,
+        "sourceExists": true,
+        "outputExists": true,
+        "archivedEmptyDirectoryExists": true
+      }
+    }
+  ]
+}

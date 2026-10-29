@@ -1,0 +1,287 @@
+/* 保持首页的磨砂、薄荷和桌面密度；大目录在对话框内滚动，长路径允许换行。 */
+.optimization-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: #e5f2f3;
+  color: #64808b;
+  font-size: 12px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+.optimization-native-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 15px;
+  font-size: 13px;
+}
+.optimization-native-summary small,
+.optimization-history-list small {
+  display: block;
+  margin-top: 5px;
+  color: #637d94;
+  font-size: 12px;
+}
+.optimization-scan-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #526d83;
+}
+.optimization-preset-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.optimization-preset-toolbar button {
+  min-height: 38px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+.optimization-preset-toolbar p {
+  flex-basis: 100%;
+  margin: 2px 0;
+  color: #5c768e;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.optimization-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 76px;
+}
+.optimization-risk {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.risk-low {
+  background: #e5f5ee;
+  color: #346f5b;
+}
+.risk-medium {
+  background: #faf0df;
+  color: #8a652b;
+}
+.risk-high {
+  background: #f9e8e7;
+  color: #a04b46;
+}
+.optimization-risk-filter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+  font-size: 14px;
+}
+.optimization-risk-filter select,
+.optimization-editor select {
+  min-height: 38px;
+  border: 1px solid #cfdeeb;
+  border-radius: 10px;
+  padding: 7px 12px;
+  background: #f7fbff;
+  color: #284458;
+  max-width: 100%;
+}
+.optimization-dialog-content {
+  min-width: 0;
+}
+.optimization-dialog-content .optimization-setting-list > button {
+  min-width: 0;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 13px;
+  background: #f8fcffd9;
+}
+.optimization-dialog-content .optimization-setting-list strong {
+  font-size: 15px;
+}
+.optimization-dialog-content .optimization-setting-list small {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.optimization-dialog-content .optimization-setting-list > button > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+.optimization-detail-summary {
+  align-items: flex-start;
+}
+.optimization-detail-summary p {
+  min-width: 0;
+  flex: 1;
+}
+.optimization-editor {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.optimization-editor ul {
+  padding-left: 20px;
+}
+.optimization-registry-list {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 10px;
+}
+.optimization-registry-list article {
+  padding: 12px;
+  background: #eff6fbd9;
+  border: 1px solid #dce7f0;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.optimization-registry-list code {
+  display: block;
+  color: #55728b;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.optimization-confirm-list {
+  display: grid;
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid #d9e5ed;
+  border-radius: 13px;
+  margin: 12px 0;
+}
+.optimization-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #dfebf2;
+  background: #f8fbffd9;
+  font-size: 14px;
+}
+.optimization-confirm-row:last-child {
+  border: 0;
+}
+.optimization-confirm-row > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.optimization-confirm-row small {
+  display: block;
+  color: #6a8196;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.optimization-confirm-row input,
+.optimization-final-consent input {
+  width: 17px;
+  height: 17px;
+  accent-color: #279c85;
+  flex-shrink: 0;
+}
+.optimization-review-actions,
+.optimization-draft-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0;
+  font-size: 14px;
+}
+.optimization-draft-toolbar details button {
+  display: block;
+  border: 0;
+  background: transparent;
+  color: #577b96;
+  padding: 6px 0;
+}
+.optimization-prepared {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #d4e1ec;
+  font-size: 13px;
+}
+.optimization-prepared details {
+  margin: 12px 0;
+}
+.optimization-prepared ul {
+  padding-left: 20px;
+  max-height: 220px;
+  overflow: auto;
+}
+.optimization-final-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0;
+  line-height: 1.8;
+  font-size: 13px;
+}
+.optimization-history-list {
+  display: grid;
+  gap: 10px;
+}
+.optimization-history-list article {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background: #f6fbff;
+  border: 1px solid #dbe7ef;
+  border-radius: 13px;
+  font-size: 13px;
+}
+.optimization-history-list article > div {
+  flex: 1;
+  min-width: 220px;
+}
+.optimization-main .optimization-secondary:disabled,
+.optimization-main button:disabled,
+.optimization-dialog-content button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .optimization-row-meta {
+    min-width: 60px;
+  }
+  .optimization-dialog-content .optimization-setting-list > button {
+    padding: 12px 8px;
+    gap: 10px;
+  }
+  .optimization-confirm-row {
+    padding: 10px 8px;
+    gap: 8px;
+  }
+  .optimization-detail-summary {
+    flex-wrap: wrap;
+  }
+  .optimization-native-summary {
+    padding: 12px;
+  }
+  .optimization-history-list article > div {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+}

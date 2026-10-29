@@ -1,0 +1,391 @@
+/* 延续玻璃、薄荷色和桌面紧凑密度。规格允许换行，原始表格在面板内水平滚动。 */
+.hw-live .hw-heading {
+  margin-bottom: 16px;
+}
+.hw-live .hw-heading-title h1 {
+  font-size: 30px;
+}
+.hw-live .hw-source-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+.hw-live .hw-heading > p {
+  font-size: 15px;
+}
+.hw-live .hw-date {
+  font-size: 13px;
+}
+.hw-live .hw-actions {
+  gap: 10px;
+}
+.hw-live .hw-actions button {
+  font-size: 13px;
+  padding: 10px 16px;
+  min-height: 40px;
+  height: auto;
+}
+.hw-live .hw-tabs {
+  max-width: 450px;
+  margin-top: 16px;
+  height: 43px;
+}
+.hw-live .hw-tabs button {
+  font-size: 14px;
+  gap: 10px;
+}
+.hw-live .hw-metrics {
+  gap: 12px;
+}
+.hw-live .hw-metric {
+  padding: 18px;
+  min-height: 210px;
+}
+.hw-live .hw-metric-heading h2 {
+  font-size: 19px;
+}
+.hw-live .hw-metric-heading p {
+  font-size: 13px;
+}
+.hw-live .hw-gauge {
+  width: 110px;
+  height: 110px;
+}
+.hw-live .hw-gauge-value strong {
+  font-size: 25px;
+}
+.hw-live .hw-readings {
+  font-size: 15px;
+  gap: 12px;
+}
+.hw-live .hw-readings .ui-icon {
+  font-size: 15px;
+}
+.hw-live .hw-lower {
+  gap: 14px;
+  margin-top: 14px;
+}
+.hw-live .hw-device {
+  padding: 20px;
+}
+.hw-live .hw-device h2,
+.hw-live .hw-trend h2,
+.hw-live .hw-sensor-panel h2 {
+  font-size: 20px;
+}
+.hw-live .hw-device dd,
+.hw-live .hw-device dt {
+  font-size: 13px;
+}
+.hw-live .hw-trend {
+  padding: 18px;
+}
+.hw-live .hw-footer {
+  font-size: 12px;
+  margin: 16px 0;
+}
+.hw-live-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+.hw-live-toolbar > input {
+  flex: 1;
+  min-width: 160px;
+}
+.hw-live-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hw-live-toolbar button,
+.hw-live-toolbar select,
+.hw-live-toolbar input,
+.hw-fps-panel button,
+.hw-remote button,
+.hw-remote select,
+.hw-remote input:not([type='checkbox']),
+.hw-report-dialog input:not([type='checkbox']),
+.hw-copy-fallback {
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #bfd6e5;
+  background: #f9fffcba;
+  color: inherit;
+  max-width: 100%;
+  min-height: 36px;
+}
+.hw-live-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.hw-live-toolbar button .ui-icon {
+  font-size: 14px;
+}
+.hw-live button:disabled,
+.hw-remote button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.hw-live-note,
+.hw-live-warnings p,
+.hw-fps-panel p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--home-muted, #597482);
+  overflow-wrap: anywhere;
+}
+.hw-live-warnings {
+  background: #fff9debb;
+  padding: 10px 14px;
+  border: 1px solid #e4d9b1;
+  border-radius: 12px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.hw-live-warnings summary {
+  cursor: pointer;
+}
+.hw-live-feedback {
+  padding: 10px 14px;
+  border: 1px solid #c5dcd8;
+  background: #f8fffae0;
+  border-radius: 10px;
+  margin: 10px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.hw-live-devices {
+  padding: 20px;
+  margin: 16px 0;
+  border-radius: 18px;
+}
+.hw-device-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.hw-device-detail {
+  border: 1px solid #c6d9e5;
+  border-radius: 12px;
+  padding: 12px 15px;
+  background: #ffffff7d;
+  min-width: 0;
+}
+.hw-device-detail summary {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.hw-device-detail summary span {
+  color: #618294;
+  margin-right: 10px;
+  font-size: 12px;
+}
+.hw-device-detail dl > div {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.8fr) minmax(0, 1.6fr);
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #d7e3e799;
+  font-size: 12px;
+}
+.hw-device-detail dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.hw-device-detail dt {
+  color: var(--home-muted, #597482);
+}
+.hw-group-heading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  padding: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: #e5f3efb0;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  gap: 12px;
+  cursor: pointer;
+}
+.hw-group-heading small {
+  margin-left: 9px;
+  color: var(--home-muted, #597482);
+  font-size: 12px;
+}
+.hw-sensor-group {
+  margin: 12px 0;
+}
+.hw-raw .hw-sensors {
+  font-size: 12px;
+  min-width: 520px;
+}
+.hw-raw .hw-sensors th,
+.hw-raw .hw-sensors td {
+  padding: 9px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.hw-fps-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.hw-fps-panel h2 {
+  font-size: 16px;
+}
+.hw-fps-panel dl {
+  display: flex;
+  gap: 24px;
+}
+.hw-fps-panel dt {
+  font-size: 12px;
+  color: var(--home-muted, #597482);
+}
+.hw-fps-panel dd {
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.hw-copy-fallback {
+  width: 100%;
+  background: #f7fcfa;
+}
+.hw-consent {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0;
+  font-size: 13px !important;
+}
+.hw-consent input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  accent-color: #24b995;
+}
+.hw-export-receipt {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.hw-remote > label {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+.hw-remote > label input {
+  width: 100%;
+  min-width: 0;
+}
+.hw-remote > button {
+  margin: 6px 8px 6px 0;
+}
+.hw-remote-qr {
+  display: block;
+  background: white;
+  border-radius: 12px;
+  margin: 16px auto;
+}
+.sensor-monitor-window {
+  min-height: 100svh;
+  background: linear-gradient(145deg, #e1f2e9, #eef7ff);
+  padding: 22px;
+  color: #183b49;
+}
+.sensor-monitor-window h1 {
+  font-size: 24px;
+}
+.sensor-monitor-window header p {
+  font-size: 13px;
+  color: #617c8b;
+}
+.sensor-monitor-window .hw-sensors {
+  background: #fff9;
+  border-collapse: collapse;
+  width: 100%;
+}
+.sensor-monitor-window .hw-sensors th,
+.sensor-monitor-window .hw-sensors td {
+  border-bottom: 1px solid #d0e2e4;
+  text-align: left;
+}
+.home-layout[data-theme='dark'] .hw-device-detail,
+.home-layout[data-theme='dark'] .hw-group-heading {
+  background: #193b455c;
+}
+.home-layout[data-theme='dark'] .hw-live-toolbar button,
+.home-layout[data-theme='dark'] .hw-live-toolbar select,
+.home-layout[data-theme='dark'] .hw-live-toolbar input {
+  background: #183341;
+  color: #ebf6f7;
+}
+.home-layout[data-theme='dark'] .hw-live-warnings {
+  background: #4b422fd9;
+  color: #fff3d0;
+}
+.home-layout[data-theme='dark'] .hw-live-feedback {
+  background: #25443d;
+  color: #e1f7ef;
+}
+@media (max-width: 1100px) {
+  .hw-live .hw-heading-title h1 {
+    font-size: 27px;
+  }
+  .hw-live .hw-metric {
+    padding: 14px;
+  }
+  .hw-live .hw-readings {
+    gap: 8px;
+  }
+  .hw-live .hw-metric-body {
+    gap: 10px;
+  }
+  .hw-device-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 820px) {
+  .hw-live .hw-actions {
+    position: static;
+    margin: 12px 0;
+  }
+  .hw-live .hw-metrics {
+    grid-template-columns: 1fr;
+  }
+  .hw-live .hw-metric {
+    min-height: 0;
+  }
+  .hw-live .hw-lower {
+    grid-template-columns: 1fr;
+  }
+  .hw-live .hw-heading {
+    padding-top: 0;
+  }
+  .hw-fps-panel dl {
+    gap: 18px;
+  }
+  .hw-live .hw-gauge {
+    width: 100px;
+    height: 100px;
+  }
+  .hw-live-toolbar > input {
+    flex-basis: 100%;
+  }
+}

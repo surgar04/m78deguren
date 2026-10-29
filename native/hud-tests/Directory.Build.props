@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)..\..\.cache\dotnet\hud-tests\obj\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)..\..\.cache\dotnet\hud-tests\bin\</BaseOutputPath>
+  </PropertyGroup>
+</Project>

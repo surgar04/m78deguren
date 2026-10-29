@@ -1,0 +1,379 @@
+.home-layout .dock:has(.custom-navigation) {
+  height: auto;
+  max-height: calc(100dvh - 40px);
+  padding-bottom: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+.home-layout .dock:has(.custom-navigation) > nav {
+  flex: 1;
+  min-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.custom-navigation {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  border-top: 1px solid var(--home-border, #d6e7e5);
+  margin-top: 10px;
+  padding-top: 9px;
+  flex-shrink: 0;
+  position: relative;
+}
+.custom-navigation > button {
+  min-width: 0;
+  height: 36px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.3);
+  color: var(--home-muted, #6e8995);
+  border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+}
+.custom-navigation > button.configured {
+  background: rgba(173, 239, 222, 0.45);
+  color: var(--home-ink, #17444a);
+}
+.custom-navigation > button:hover {
+  background: var(--home-mint, #adf0df);
+}
+.custom-navigation > button img {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+}
+.custom-navigation > button > .ui-icon {
+  width: 15px;
+  height: 15px;
+}
+.custom-navigation > button span {
+  font-size: 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.custom-navigation > button:not(.configured) span {
+  position: absolute;
+  right: 3px;
+  top: 1px;
+  font-size: 8px;
+}
+.custom-navigation .custom-navigation-edit {
+  grid-column: 1/-1;
+  height: 20px;
+  background: transparent;
+}
+.custom-navigation .custom-navigation-edit .ui-icon {
+  width: 11px;
+  height: 11px;
+}
+.home-layout[data-nav='top'] .custom-navigation {
+  display: flex;
+  width: auto;
+  align-items: center;
+  margin: 0 0 0 8px;
+  padding: 0 0 0 8px;
+  border-top: 0;
+  border-left: 1px solid var(--home-border, #d6e7e5);
+}
+.home-layout[data-nav='top'] .custom-navigation > button {
+  width: 35px;
+  flex-shrink: 0;
+}
+.home-layout[data-nav='top'] .custom-navigation .custom-navigation-edit {
+  width: 25px;
+}
+.home-layout[data-nav='top'] .dock:has(.custom-navigation) > nav {
+  min-height: 0;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+.home-layout[data-nav='top'] .dock:has(.custom-navigation) {
+  height: auto;
+  min-height: 64px;
+  max-height: none;
+}
+.home-layout[data-nav='top'] .dock:has(.custom-navigation) .dock-item {
+  flex: 0 0 auto;
+  min-width: max-content;
+  white-space: nowrap;
+}
+.home-layout[data-theme='dark'] .dock:has(.custom-navigation) .dock-item .ui-icon {
+  color: inherit;
+}
+.quick-launch-settings {
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--home-border, #d5e7e8);
+}
+.quick-launch-settings h3 {
+  font-size: 19px;
+  margin-bottom: 18px;
+}
+.quick-settings-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+.quick-settings-tabs button,
+.quick-settings-actions button {
+  padding: 10px 15px;
+  border: 1px solid var(--home-border, #cfe3e6);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.55);
+  color: inherit;
+}
+.quick-settings-tabs button.active {
+  background: var(--home-mint, #a8efdc);
+  font-weight: 600;
+}
+.navigation-slot-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 16px 0;
+}
+.navigation-slot-editor > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  text-align: left;
+  padding: 14px;
+  border: 1px solid var(--home-border, #d7e8e9);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.45);
+  color: inherit;
+}
+.navigation-slot-editor > button.selected {
+  border-color: #52bea5;
+  box-shadow: 0 0 0 2px #80dcc03d;
+}
+.navigation-slot-editor > button > span {
+  font-size: 10px;
+  color: #6d928c;
+}
+.navigation-slot-editor strong {
+  font-weight: 500;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quick-target-icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+.quick-slot-picker {
+  padding: 15px;
+  margin: 14px 0;
+  border-radius: 14px;
+  background: rgba(230, 247, 244, 0.55);
+  border: 1px solid var(--home-border, #d7e8e9);
+}
+.quick-slot-picker h4 {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.quick-target-picker {
+  display: grid;
+  gap: 10px;
+}
+.quick-target-picker input,
+.quick-target-picker select,
+.wheel-options select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--home-border, #ccdde5);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  color: inherit;
+}
+.quick-target-picker small {
+  font-size: 11px;
+  color: var(--home-muted, #6d8795);
+}
+.quick-setting-toggle {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 15px 0;
+}
+.quick-setting-toggle span {
+  display: grid;
+  gap: 7px;
+}
+.quick-setting-toggle small {
+  font-size: 12px;
+  color: var(--home-muted, #6a8393);
+}
+.quick-setting-toggle input {
+  accent-color: #27b797;
+  width: 18px;
+}
+.wheel-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.8fr);
+  gap: 20px;
+  align-items: center;
+}
+.wheel-preview {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 370px;
+  width: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 27%,
+    rgba(222, 246, 240, 0.6) 28%,
+    rgba(255, 255, 255, 0.6) 69%,
+    transparent 70%
+  );
+}
+.wheel-preview-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 28%;
+  height: 24%;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(249, 255, 252, 0.85);
+  border-radius: 17px;
+  color: inherit;
+  min-width: 0;
+}
+.wheel-preview-slot.selected {
+  border-color: #59cab1;
+  background: #b5f2df;
+}
+.wheel-preview-slot > span {
+  font-size: 10px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wheel-preview-slot > .ui-icon {
+  font-size: 21px;
+  color: #36a990;
+}
+.wheel-preview-center {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  font-size: 12px;
+  pointer-events: none;
+}
+.wheel-preview-center > .ui-icon {
+  font-size: 22px;
+  color: #3bb397;
+}
+.wheel-preview-center small {
+  font-size: 9px;
+  color: #7c9794;
+}
+.wheel-options {
+  display: grid;
+  gap: 16px;
+}
+.wheel-options label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--home-muted, #66828a);
+}
+.wheel-options strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: inherit;
+}
+.wheel-options input[type='range'] {
+  width: 100%;
+  accent-color: #27b797;
+}
+.wheel-options .quick-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.quick-settings-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.quick-settings-actions span {
+  font-size: 11px;
+  color: var(--home-muted, #65868e);
+}
+.quick-settings-actions .settings-primary {
+  background: var(--home-mint, #a8efdc);
+  font-weight: 600;
+}
+.quick-settings-actions button .ui-icon {
+  margin-right: 8px;
+}
+[data-theme='dark'] .quick-slot-picker,
+[data-theme='dark'] .wheel-preview-slot,
+[data-theme='dark'] .navigation-slot-editor > button {
+  background: rgba(34, 64, 70, 0.8);
+}
+[data-theme='dark'] .wheel-preview-slot.selected {
+  background: #296e60;
+}
+[data-theme='dark'] .quick-target-picker :is(input, select),
+[data-theme='dark'] .wheel-options select {
+  background: rgba(35, 58, 68, 0.85);
+}
+@media (max-width: 1100px) {
+  .wheel-settings-layout {
+    grid-template-columns: 1fr;
+  }
+  .wheel-preview {
+    max-width: 330px;
+    margin: auto;
+  }
+  .wheel-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wheel-options .settings-note {
+    grid-column: 1/-1;
+  }
+}
+@media (max-width: 700px) {
+  .navigation-slot-editor {
+    grid-template-columns: 1fr;
+  }
+  .wheel-options {
+    grid-template-columns: 1fr;
+  }
+  .quick-settings-tabs {
+    flex-wrap: wrap;
+  }
+  .home-layout[data-nav='top'] .custom-navigation {
+    max-width: 160px;
+    overflow-x: auto;
+  }
+  .dock:has(.custom-navigation) > nav {
+    min-height: 90px;
+  }
+}

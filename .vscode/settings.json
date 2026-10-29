@@ -1,0 +1,18 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" },
+  "files.watcherExclude": { "**/.tools/**": true, "**/.cache/**": true, "**/.local/**": true },
+  "search.exclude": { "**/.tools": true, "**/.cache": true, "**/.local": true },
+  "rust-analyzer.cargo.targetDir": "D:/新境/.cache/cargo/target",
+  "rust-analyzer.server.path": "D:/新境/.tools/cargo/bin/rust-analyzer.exe",
+  "rust-analyzer.server.extraEnv": {
+    "CARGO_HOME": "D:/新境/.tools/cargo",
+    "RUSTUP_HOME": "D:/新境/.tools/rustup",
+    "RUSTUP_TOOLCHAIN": "1.96.0",
+    "TEMP": "D:/新境/.cache/tmp",
+    "TMP": "D:/新境/.cache/tmp"
+  },
+  "rust-analyzer.checkOnSave": false
+}

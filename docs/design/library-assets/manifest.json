@@ -1,0 +1,55 @@
+{
+  "referenceSize": [1487, 1058],
+  "reference": "reference-selected.png",
+  "assets": [
+    {
+      "file": "public/assets/library/cs2.webp",
+      "width": 1559,
+      "height": 1009,
+      "bytes": 190980,
+      "sha256": "d3feab47428ed3012b241ca321def77f7f76ef9226a1b2d78467b21796400e39",
+      "source": "Built-in Image Gen restoration; see provenance files"
+    },
+    {
+      "file": "public/assets/library/delta.webp",
+      "width": 822,
+      "height": 524,
+      "bytes": 151248,
+      "sha256": "9a8b72bfc86ee0c8c9839d710e2b474c4f5c9bc65572a6e85a2fc39377b4bb01",
+      "source": "Built-in Image Gen restoration; see provenance files"
+    },
+    {
+      "file": "public/assets/library/genshin.webp",
+      "width": 1562,
+      "height": 1007,
+      "bytes": 412794,
+      "sha256": "0a14474664b76cdad644c9311294bdc0111e20a391b3a3e85e594a1027de4240",
+      "source": "Built-in Image Gen restoration; see provenance files"
+    },
+    {
+      "file": "public/assets/library/stardew.jpg",
+      "width": 616,
+      "height": 353,
+      "bytes": 142111,
+      "sha256": "7d63e78cb970f72e4c7c85b5dd47cac60a55cef68d91b1c1278c65b7186260e6",
+      "source": "Official Steam capsule; same as homepage"
+    },
+    {
+      "file": "public/assets/library/starrail.webp",
+      "width": 1567,
+      "height": 1004,
+      "bytes": 529528,
+      "sha256": "4dd50fd26e451206332c570684309c045d622fabe318c3a88b69c35af8fad750",
+      "source": "Built-in Image Gen restoration; see provenance files"
+    },
+    {
+      "file": "public/assets/library/wuwa.webp",
+      "width": 1556,
+      "height": 1011,
+      "bytes": 459240,
+      "sha256": "64324a1b84dbc03a956c183ef9f1f85bf24f5dccb5412ede51368e2f29762cba",
+      "source": "Built-in Image Gen restoration; see provenance files"
+    }
+  ],
+  "note": "Restored imagery is not pixel-identical. Original artwork and UI remain separate."
+}

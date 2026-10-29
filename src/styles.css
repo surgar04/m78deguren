@@ -1,0 +1,108 @@
+@import 'tailwindcss' source(none);
+@source './';
+
+/* 小米 MiSans 原始可变字体，未做改编；授权与出处见 docs/licenses/MiSans.md。 */
+@font-face {
+  font-family: 'MiSans';
+  src: url('/fonts/MiSansVF.ttf') format('truetype');
+  font-weight: 150 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-ground: #eff7fb;
+  --color-surface: #f7fbfdd9;
+  --color-line: #d7e3ed;
+  --color-ink: #172431;
+  --color-muted: #718399;
+  --color-accent: #a3efdc;
+  --font-sans: 'MiSans', 'Segoe UI', 'Microsoft YaHei UI', system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-ground);
+    color-scheme: light;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    min-width: 360px;
+  }
+  button:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
+  :focus-visible {
+    outline: 3px solid #158d7c;
+    outline-offset: 4px;
+  }
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 120px;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: #a3efdc;
+  color: #172431;
+}
+/* 透明原生 HUD 的根画布也必须透明；仅清 body 背景仍会露出主界面的浅蓝色矩形。 */
+html.hud-document,
+html.hud-document body,
+html.hud-document #root {
+  background: transparent !important;
+  min-width: 0;
+  overflow: hidden;
+}
+html.hud-document .page-loading {
+  background: transparent;
+  color: transparent;
+}
+html.hud-document .skip-link {
+  display: none;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+.page-loading {
+  display: grid;
+  place-content: center;
+  min-height: 100svh;
+  gap: 24px;
+  background: #e5f2fa;
+  text-align: center;
+}
+.not-found-page {
+  margin: 8vh auto;
+  max-width: 780px;
+  padding: 32px;
+}
+.not-found-page > a {
+  display: inline-block;
+  margin-bottom: 32px;
+  color: #19786d;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-line bg-surface p-6;
+  }
+  .eyebrow {
+    @apply text-[10px] font-semibold tracking-[.2em] text-muted;
+  }
+  .button {
+    @apply inline-flex min-h-11 items-center justify-center gap-3 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-ink hover:brightness-105;
+  }
+}

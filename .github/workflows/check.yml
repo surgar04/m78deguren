@@ -1,0 +1,36 @@
+name: Quality
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Prepare D drive workspace
+        shell: pwsh
+        run: |
+          $destination = 'D:\新境'
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          robocopy $env:GITHUB_WORKSPACE $destination /E /XD .git /NFL /NDL /NJH /NJS /NP
+          if ($LASTEXITCODE -ge 8) { throw 'Workspace copy failed' }
+          exit 0
+      - name: Prepare isolated tools
+        shell: pwsh
+        working-directory: D:\新境
+        run: |
+          $vc = Get-ChildItem 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC' -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $sdk = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\Lib' -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          ./scripts/bootstrap.ps1 -MsvcSource $vc.FullName -SdkVersion $sdk.Name
+      - name: Quality checks
+        shell: pwsh
+        working-directory: D:\新境
+        run: ./dev.ps1 check
+      - name: Build desktop executable
+        shell: pwsh
+        working-directory: D:\新境
+        # 公共质量任务只验证实际链接，不获取或生成用于公开分发的签名凭据。
+        # 正式 MSI 打包在具有持久私钥和发布审批的环境执行。
+        run: ./dev.ps1 tauri build --no-bundle

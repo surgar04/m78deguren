@@ -1,0 +1,103 @@
+{
+  "reference": "reference-selected.png",
+  "referenceSize": [1487, 1058],
+  "note": "Restored art differs in some details; this manifest does not claim pixel identity.",
+  "assets": [
+    {
+      "file": "public/assets/home/avatar.webp",
+      "width": 256,
+      "height": 256,
+      "bytes": 22372,
+      "sha256": "4eb9021bec5bee92475a0d5d165b039d4639e4f2adb8e2dec525f9789ec03113",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/brand.webp",
+      "width": 112,
+      "height": 156,
+      "bytes": 6174,
+      "sha256": "3fed3209ff700f06c65a507d837864120439d9e68a0a283afce689a96db091c0",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/cs2-library.jpg",
+      "width": 1920,
+      "height": 620,
+      "bytes": 247991,
+      "sha256": "b2dce00d292c217af9e207ad3622279a0affe47ac26ad053dfeaff5d4ad65425",
+      "source": "Official Steam key art: https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/730/library_hero.jpg"
+    },
+    {
+      "file": "public/assets/home/cs2-recent.webp",
+      "width": 1779,
+      "height": 884,
+      "bytes": 156792,
+      "sha256": "329243b158e2bd20bda702d4c586f0bc9f46da248ffd3270fde38dfe25d1afbb",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/delta-hero.webp",
+      "width": 1084,
+      "height": 588,
+      "bytes": 184902,
+      "sha256": "bc8eab743c85f0b75d0d23ebb6341f88b3bff973c5a195c3c80009374b9f9b0f",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/delta.webp",
+      "width": 1080,
+      "height": 536,
+      "bytes": 163788,
+      "sha256": "b90434837c31511116e74fa0e79e4b14bea5eeaf384b44a5a421c29d2c2381ad",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/genshin-recent.webp",
+      "width": 1780,
+      "height": 884,
+      "bytes": 321484,
+      "sha256": "2f40d9cf26130356f7dbbe7b4f5c5930f6eb21b4a6db232dedcf9a0b614f2f7e",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/genshin.webp",
+      "width": 1780,
+      "height": 884,
+      "bytes": 321484,
+      "sha256": "2f40d9cf26130356f7dbbe7b4f5c5930f6eb21b4a6db232dedcf9a0b614f2f7e",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/stardew.jpg",
+      "width": 616,
+      "height": 353,
+      "bytes": 142111,
+      "sha256": "7d63e78cb970f72e4c7c85b5dd47cac60a55cef68d91b1c1278c65b7186260e6",
+      "source": "Official Steam capsule: https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/413150/capsule_616x353.jpg"
+    },
+    {
+      "file": "public/assets/home/starrail.webp",
+      "width": 1760,
+      "height": 894,
+      "bytes": 450586,
+      "sha256": "3a6f4e7ce71cad612667e4efb36513c0dc5948807fff44ea1c2e925be662cd1e",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/wallpaper.webp",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 445796,
+      "sha256": "03af9a66ea2b03e135a1fc6b76942a575229ce626d84abdf4873e4b757c3df34",
+      "source": "Image Gen restoration from selected design"
+    },
+    {
+      "file": "public/assets/home/wuwa.webp",
+      "width": 1756,
+      "height": 895,
+      "bytes": 308178,
+      "sha256": "b24f0830b591f337898af30b84dba296961b115848f3ca88ef7d5b6666a1e790",
+      "source": "Image Gen restoration from selected design"
+    }
+  ]
+}

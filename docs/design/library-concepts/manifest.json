@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "stage": "User selected displayed option 1 via exact attachment. Library interaction implementation available; strict pixel fidelity remains blocked. See project root design-qa.md.",
+  "requestedDimensions": [1487, 1058],
+  "numberingAuthority": "Actual displayed order in current conversation: gallery, master-detail, platform shelves",
+  "tool": "built-in image_gen",
+  "promptFile": "prompts.json",
+  "storage": "Original PNGs safely moved from exact C output files to D and SHA-256 verified. No resizing.",
+  "notes": [
+    "All statuses, counts and play times are design examples.",
+    "Option 1 has AI-generated platform-label inaccuracies on Genshin and Star Rail; correct to local games if selected."
+  ],
+  "options": [
+    {
+      "displayedOption": 1,
+      "concept": "全景书架",
+      "direction": "cover-gallery",
+      "file": "01-cover-gallery.png",
+      "sha256": "40658BC5C388BFC258A89EBE243417993A9BB2058E6714C9D1A35032F111157C",
+      "bytes": 2348419,
+      "sourceFile": "exec-30fe5a37-8322-4bad-b679-bf641a9d1cd7.png",
+      "sourceResidueExists": false,
+      "width": 1487,
+      "height": 1058
+    },
+    {
+      "displayedOption": 2,
+      "concept": "游玩工作台",
+      "direction": "master-detail",
+      "file": "02-master-detail.png",
+      "sha256": "A62788B7EDDDC8D0030EFFF8084011867F75DC3A005D540324E80897B5ACF347",
+      "bytes": 2230013,
+      "sourceFile": "exec-470f4a90-f4ec-42a1-980e-c80e268762f5.png",
+      "sourceResidueExists": false,
+      "width": 1487,
+      "height": 1058
+    },
+    {
+      "displayedOption": 3,
+      "concept": "平台藏馆",
+      "direction": "platform-shelves",
+      "file": "03-platform-shelves.png",
+      "sha256": "A5DAAF2EA89174BE89DE49CF400E2932FC5D75EA7C29B5ED652C07FF12DF3102",
+      "bytes": 2094095,
+      "sourceFile": "exec-182d3208-ce03-4cb5-8905-117085fb2700.png",
+      "sourceResidueExists": false,
+      "width": 1486,
+      "height": 1058
+    }
+  ],
+  "selectedOption": 1,
+  "selectedReference": "../library-assets/reference-selected.png"
+}

@@ -1,0 +1,424 @@
+{
+  "commit": "e7ad6a0bb9197e206bb9a719ca86c6353a5cad43",
+  "date": "2026-10-24",
+  "provenance": "Repository official preview images, not live screenshots captured by this analysis.",
+  "images": [
+    {
+      "id": "V01",
+      "title": "首页",
+      "file": "01-home.png",
+      "source": "docs/screenshots/home.png",
+      "width": 1538,
+      "height": 964,
+      "sha256": "548bc03a2c02032e2afa95ded6425a6a0440f027ad09bd1273f8dd470f19b4e2",
+      "topColors": [
+        {
+          "hex": "#FEFEFE",
+          "count": 27425
+        },
+        {
+          "hex": "#FEFDFE",
+          "count": 6571
+        },
+        {
+          "hex": "#FFFFFF",
+          "count": 5545
+        },
+        {
+          "hex": "#FDFDFD",
+          "count": 5063
+        },
+        {
+          "hex": "#1A202C",
+          "count": 3790
+        },
+        {
+          "hex": "#FEFDFD",
+          "count": 3723
+        },
+        {
+          "hex": "#FFFEFF",
+          "count": 3487
+        },
+        {
+          "hex": "#EBE9EF",
+          "count": 3378
+        },
+        {
+          "hex": "#FFFEFE",
+          "count": 3368
+        },
+        {
+          "hex": "#F1ECF2",
+          "count": 3294
+        },
+        {
+          "hex": "#F87171",
+          "count": 3257
+        },
+        {
+          "hex": "#EFE9F2",
+          "count": 3256
+        }
+      ]
+    },
+    {
+      "id": "V02",
+      "title": "硬件监控",
+      "file": "02-hardware.png",
+      "source": "docs/screenshots/hardware.png",
+      "width": 1538,
+      "height": 964,
+      "sha256": "26c35d48f3f4f062c9b6ca1bc2f8dc5b063db0e7212b2dc046aa4ae0a42c096b",
+      "topColors": [
+        {
+          "hex": "#FBF2F3",
+          "count": 12159
+        },
+        {
+          "hex": "#FFFFFF",
+          "count": 11669
+        },
+        {
+          "hex": "#F87171",
+          "count": 8351
+        },
+        {
+          "hex": "#FAF0F2",
+          "count": 5652
+        },
+        {
+          "hex": "#1A202C",
+          "count": 5539
+        },
+        {
+          "hex": "#F2E9EF",
+          "count": 4735
+        },
+        {
+          "hex": "#F9EFF2",
+          "count": 3996
+        },
+        {
+          "hex": "#FBF1F2",
+          "count": 3664
+        },
+        {
+          "hex": "#F5ECF2",
+          "count": 3589
+        },
+        {
+          "hex": "#F9F2F5",
+          "count": 3275
+        },
+        {
+          "hex": "#FBF1F3",
+          "count": 3263
+        },
+        {
+          "hex": "#B9B6C8",
+          "count": 3036
+        }
+      ]
+    },
+    {
+      "id": "V03",
+      "title": "内置工具",
+      "file": "03-toolbox.png",
+      "source": "docs/screenshots/toolbox.png",
+      "width": 1536,
+      "height": 964,
+      "sha256": "248a4767dd00b7efce2e208a091c67367d5bb7fdf514d4aad523da4a73925626",
+      "topColors": [
+        {
+          "hex": "#FBFAFA",
+          "count": 35476
+        },
+        {
+          "hex": "#FBF9FA",
+          "count": 25340
+        },
+        {
+          "hex": "#FAF8F9",
+          "count": 17868
+        },
+        {
+          "hex": "#FBF8F9",
+          "count": 17469
+        },
+        {
+          "hex": "#FAF8F8",
+          "count": 15038
+        },
+        {
+          "hex": "#FBF9F9",
+          "count": 12929
+        },
+        {
+          "hex": "#F8F5F7",
+          "count": 10572
+        },
+        {
+          "hex": "#F8F5F6",
+          "count": 10505
+        },
+        {
+          "hex": "#FAF7F8",
+          "count": 9956
+        },
+        {
+          "hex": "#FBFAFB",
+          "count": 9871
+        },
+        {
+          "hex": "#FBF8F8",
+          "count": 9786
+        },
+        {
+          "hex": "#F9F7F8",
+          "count": 9549
+        }
+      ]
+    },
+    {
+      "id": "V04",
+      "title": "系统优化",
+      "file": "04-system-optimize.png",
+      "source": "docs/screenshots/system-optimize.png",
+      "width": 1536,
+      "height": 963,
+      "sha256": "512e05adb75676b20fa23fbb195321ce17dc056433d5dc4c4ceeafc7901e250b",
+      "topColors": [
+        {
+          "hex": "#F8F5F9",
+          "count": 12259
+        },
+        {
+          "hex": "#FAF7FA",
+          "count": 11215
+        },
+        {
+          "hex": "#F9F7FA",
+          "count": 9640
+        },
+        {
+          "hex": "#F7F5F9",
+          "count": 8413
+        },
+        {
+          "hex": "#FCFAFC",
+          "count": 8338
+        },
+        {
+          "hex": "#FEFEFE",
+          "count": 7702
+        },
+        {
+          "hex": "#F5F2F7",
+          "count": 7557
+        },
+        {
+          "hex": "#F7F6F9",
+          "count": 7249
+        },
+        {
+          "hex": "#F87171",
+          "count": 7212
+        },
+        {
+          "hex": "#FEFDFE",
+          "count": 6973
+        },
+        {
+          "hex": "#F6F3F8",
+          "count": 6915
+        },
+        {
+          "hex": "#F9F6FA",
+          "count": 6647
+        }
+      ]
+    },
+    {
+      "id": "V05",
+      "title": "Steam 游戏库",
+      "file": "05-steam-library.png",
+      "source": "docs/screenshots/steam-library.png",
+      "width": 1536,
+      "height": 963,
+      "sha256": "23b44b1b3c57304381389842a019818fa1151eac6d3e081cc203a5746ea64163",
+      "topColors": [
+        {
+          "hex": "#F87171",
+          "count": 113757
+        },
+        {
+          "hex": "#FEFEFE",
+          "count": 10312
+        },
+        {
+          "hex": "#718096",
+          "count": 9047
+        },
+        {
+          "hex": "#000000",
+          "count": 6591
+        },
+        {
+          "hex": "#FFFFFF",
+          "count": 4800
+        },
+        {
+          "hex": "#FEFDFE",
+          "count": 3938
+        },
+        {
+          "hex": "#F2ECF5",
+          "count": 3571
+        },
+        {
+          "hex": "#F2EFF5",
+          "count": 3371
+        },
+        {
+          "hex": "#F5EFF5",
+          "count": 3107
+        },
+        {
+          "hex": "#B0B3C8",
+          "count": 2902
+        },
+        {
+          "hex": "#FDFDFD",
+          "count": 2712
+        },
+        {
+          "hex": "#EDF2F7",
+          "count": 2654
+        }
+      ]
+    },
+    {
+      "id": "V06",
+      "title": "音乐",
+      "file": "06-music-player.png",
+      "source": "docs/screenshots/music-player.png",
+      "width": 1536,
+      "height": 964,
+      "sha256": "f58ce1b7aec1d7be5dbf3b6cf090304bae8a938ba5a6319bdef16c6ad70d6105",
+      "topColors": [
+        {
+          "hex": "#F87171",
+          "count": 15532
+        },
+        {
+          "hex": "#FEFEFE",
+          "count": 14933
+        },
+        {
+          "hex": "#F5EFF5",
+          "count": 6663
+        },
+        {
+          "hex": "#389FD8",
+          "count": 6121
+        },
+        {
+          "hex": "#FBF8FB",
+          "count": 5615
+        },
+        {
+          "hex": "#EFF5FF",
+          "count": 5598
+        },
+        {
+          "hex": "#FEFDFE",
+          "count": 4966
+        },
+        {
+          "hex": "#ECE9F2",
+          "count": 4949
+        },
+        {
+          "hex": "#F2EFF5",
+          "count": 4723
+        },
+        {
+          "hex": "#F4EFF5",
+          "count": 4709
+        },
+        {
+          "hex": "#EDF2F7",
+          "count": 4154
+        },
+        {
+          "hex": "#EFECF3",
+          "count": 4047
+        }
+      ]
+    },
+    {
+      "id": "V07",
+      "title": "音乐沉浸预览",
+      "file": "07-immersive.webp",
+      "source": "public/style-previews/immersive.webp",
+      "width": 1365,
+      "height": 816,
+      "sha256": "196a0a19a2401a1de50967da2ff2543ce43124e211145de85fd1722c8687dccd"
+    },
+    {
+      "id": "V08",
+      "title": "音乐频谱预览",
+      "file": "08-spectrum.webp",
+      "source": "public/style-previews/spectrum.webp",
+      "width": 1323,
+      "height": 803,
+      "sha256": "5b5c41efbfbe2e4a53b9b0ccf533120b8d2328b9aaa047f46f331da21f93dcb9"
+    }
+  ],
+  "sampledAccent": {
+    "hex": "#F87171",
+    "image": "01-home.png",
+    "verificationPixels": [
+      [60, 125],
+      [50, 140],
+      [90, 150],
+      [50, 160],
+      [70, 120],
+      [1270, 30]
+    ]
+  },
+  "contrastMethod": "WCAG relative sRGB luminance; opaque sample colors only, not a rendered-state conformance test.",
+  "contrasts": [
+    {
+      "foreground": "#FFFFFF",
+      "background": "#98DDD0",
+      "ratio": 1.5454
+    },
+    {
+      "foreground": "#1A1A1A",
+      "background": "#98DDD0",
+      "ratio": 11.2618
+    },
+    {
+      "foreground": "#FFFFFF",
+      "background": "#F87171",
+      "ratio": 2.7661
+    },
+    {
+      "foreground": "#1A1A1A",
+      "background": "#F87171",
+      "ratio": 6.2919
+    },
+    {
+      "foreground": "#FFFFFF",
+      "background": "#4C8DFF",
+      "ratio": 3.2006
+    },
+    {
+      "foreground": "#FFFFFF",
+      "background": "#1F63D2",
+      "ratio": 5.5649
+    }
+  ]
+}

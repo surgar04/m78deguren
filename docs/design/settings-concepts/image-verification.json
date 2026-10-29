@@ -1,0 +1,23 @@
+[
+  {
+    "file": "01-appearance-workspace.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1911507,
+    "sha256": "bd7ae2332c587c39869cc30acc6af47a6560c88bec4197d235a61d74a790d0e1"
+  },
+  {
+    "file": "02-horizontal-preferences.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1965129,
+    "sha256": "94bb9cf38a5e842ce76879f41fd2ea0f0e72e6c9e6a4b3591e40dbcc5a3c5f2b"
+  },
+  {
+    "file": "03-grouped-preferences.png",
+    "width": 1487,
+    "height": 1058,
+    "bytes": 1943289,
+    "sha256": "4ebc69683f6d637f28f0f340207f333ddd93b08cf160e7b17a2ec7fc88eec4ec"
+  }
+]

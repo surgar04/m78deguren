@@ -1,0 +1,9 @@
+[build]
+jobs = 1
+target-dir = ".cache/cargo/target"
+
+[net]
+retry = 3
+
+[registries.crates-io]
+protocol = "sparse"

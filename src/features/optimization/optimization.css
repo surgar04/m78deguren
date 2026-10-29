@@ -1,0 +1,632 @@
+/* 1487×1058基准：公共壁纸/导航/字体令牌不复制，局部布局按设计实测。 */
+.optimization-main {
+  position: relative;
+  isolation: isolate;
+  padding-top: 30px;
+  outline: none;
+}
+.optimization-main::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 122px -8px -8px -18px;
+  border-radius: 20px;
+  background: #f1f8ff4d;
+  box-shadow: 0 0 30px 24px #f3f9ff42;
+  pointer-events: none;
+}
+.optimization-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 50px;
+}
+.optimization-title h1 {
+  font-size: 38px;
+  line-height: 50px;
+  font-weight: var(--home-weight-display);
+  color: #081824;
+  letter-spacing: 0.2px;
+}
+.optimization-source {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  padding: 0 14px;
+  border-radius: 20px;
+  border: 1px solid #ffffffc9;
+  background: #eff8ffb3;
+  color: #496681;
+  font-size: 14px;
+  font-weight: var(--home-weight-medium);
+}
+.optimization-heading > p {
+  color: #66829c;
+  font-size: 20px;
+  line-height: 30px;
+  font-weight: var(--home-weight-medium);
+}
+.optimization-heading .optimization-date {
+  font-size: 18px;
+  line-height: 28px;
+}
+/* 操作栏在基准图中右侧留白54px；缩窄后由弹性网格自然收缩。 */
+.optimization-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 244px 208px;
+  gap: 12px;
+  max-width: 1206px;
+  margin-top: 22px;
+}
+.optimization-search {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 57px;
+  padding: 0 18px;
+  border-radius: 20px;
+  color: #536f91;
+}
+.optimization-search > .ui-icon {
+  font-size: 18px;
+}
+.optimization-search input {
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #263d52;
+  font-size: 16px;
+}
+.optimization-search input::placeholder {
+  color: #8aa1bd;
+}
+.optimization-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.optimization-search:focus-within {
+  outline: 2px solid #248d7c;
+  outline-offset: 2px;
+}
+.optimization-search button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #536f91;
+}
+.optimization-detect,
+.optimization-history {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  height: 57px;
+  border: 1px solid #ffffffda;
+  border-radius: 19px;
+  font-size: 17px;
+  font-weight: var(--home-weight-semibold);
+  color: #173847;
+}
+.optimization-detect {
+  background: #a4f1dfdf;
+}
+.optimization-detect:hover {
+  background: #8be8d2;
+}
+.optimization-detect .ui-icon {
+  font-size: 20px;
+}
+.optimization-history {
+  color: #3e5876;
+}
+.optimization-history .ui-icon {
+  font-size: 23px;
+}
+.optimization-content {
+  margin-top: 25px;
+}
+.optimization-content h2 {
+  font-size: 24px;
+  line-height: 34px;
+  font-weight: var(--home-weight-display);
+  color: #0a1c29;
+}
+.optimization-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.99fr) minmax(0, 1.03fr);
+  gap: 12px 8px;
+  margin-top: 10px;
+}
+.optimization-category {
+  position: relative;
+  min-width: 0;
+  height: 155px;
+  border-radius: 17px;
+}
+.optimization-category > button {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  width: 100%;
+  height: 100%;
+  padding: 24px 21px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.optimization-category > button:hover {
+  background: #edfff84d;
+}
+.optimization-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 88px;
+  height: 88px;
+  border-radius: 19px;
+}
+.optimization-symbol .ui-icon {
+  font-size: 46px;
+}
+.optimization-tone-mint {
+  color: #049d83;
+  background: #b3f2e5;
+}
+.optimization-tone-blue {
+  color: #0753c6;
+  background: #b9dcff;
+}
+.optimization-tone-violet {
+  color: #5040b5;
+  background: #dcd7ff;
+}
+.optimization-tone-orange {
+  color: #ff9b13;
+  background: #fff0e3;
+}
+.optimization-category-copy {
+  min-width: 0;
+  flex: 1;
+  padding-top: 7px;
+}
+.optimization-category-name {
+  display: block;
+  color: #111f2e;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: var(--home-weight-bold);
+}
+.optimization-category-description {
+  display: block;
+  margin-top: 6px;
+  color: #6b83a1;
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: var(--home-weight-medium);
+  white-space: pre-line;
+}
+.optimization-arrow {
+  position: absolute;
+  right: 18px;
+  bottom: 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #c8f4ecbb;
+  color: #163e4c;
+}
+.optimization-arrow .ui-icon {
+  font-size: 14px;
+}
+.optimization-common {
+  margin-top: 28px;
+}
+.optimization-common-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.967fr) minmax(0, 1.033fr);
+  margin-top: 14px;
+  border-radius: 18px;
+}
+.optimization-common-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  min-width: 0;
+  min-height: 173px;
+  padding: 21px 29px 17px;
+}
+.optimization-common-item + .optimization-common-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 21px;
+  bottom: 21px;
+  border-left: 1px solid #d5e5f3;
+}
+.optimization-common-item .optimization-symbol {
+  flex-basis: 64px;
+  height: 64px;
+  border-radius: 16px;
+}
+.optimization-common-item .optimization-symbol .ui-icon {
+  font-size: 33px;
+}
+.optimization-common-info {
+  flex: 1;
+  min-width: 0;
+}
+.optimization-common-info h3 {
+  font-size: 20px;
+  line-height: 29px;
+  font-weight: var(--home-weight-bold);
+  color: #142130;
+}
+.optimization-common-info > p {
+  min-height: 46px;
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 23px;
+  color: #6b83a1;
+  font-weight: var(--home-weight-medium);
+  white-space: pre-line;
+}
+.optimization-setting-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  border-top: 1px solid #d4e5f2;
+  padding-top: 10px;
+  color: #617d9c;
+  font-size: 15px;
+  line-height: 24px;
+}
+.optimization-setting-footer strong {
+  font-weight: var(--home-weight-semibold);
+}
+.optimization-setting-footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #4a6889;
+  font-size: 14px;
+  font-weight: var(--home-weight-semibold);
+}
+.optimization-setting-footer button:hover {
+  color: #137b68;
+}
+.optimization-setting-footer .ui-icon {
+  font-size: 13px;
+}
+.optimization-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+  padding-right: 24px;
+  color: #617d9b;
+  font-size: 15px;
+  line-height: 26px;
+}
+.optimization-footer .ui-icon {
+  font-size: 18px;
+}
+.optimization-empty {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  margin-top: 36px;
+  padding: 60px 24px;
+  border-radius: 20px;
+  text-align: center;
+}
+.optimization-empty h2 {
+  font-size: 24px;
+}
+.optimization-empty p {
+  color: #657f98;
+}
+/* 弹窗扩展阅读与草稿操作，不向主屏增加设计图中不存在的执行状态。 */
+.optimization-setting-list {
+  display: grid;
+  gap: 0;
+  margin-top: 20px;
+}
+.optimization-setting-list > button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 15px 0;
+  border: 0;
+  background: transparent;
+  color: #294357;
+  text-align: left;
+}
+.optimization-setting-list > button + button {
+  border-top: 1px solid #d7e6ef;
+}
+.optimization-setting-list > button:hover {
+  background: #e4faf0;
+}
+.optimization-setting-list .optimization-symbol {
+  flex-basis: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+.optimization-setting-list .optimization-symbol .ui-icon {
+  font-size: 24px;
+}
+.optimization-setting-list > button > span:not(.optimization-symbol) {
+  flex: 1;
+}
+.optimization-setting-list strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.optimization-setting-list small {
+  display: block;
+  margin-top: 5px;
+  color: #68839b;
+  font-size: 13px;
+}
+.optimization-detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+.optimization-detail-summary .optimization-symbol {
+  flex-basis: 64px;
+  height: 64px;
+}
+.optimization-detail-summary .optimization-symbol .ui-icon {
+  font-size: 32px;
+}
+.optimization-detail-summary p,
+.optimization-editor li {
+  color: #59758e;
+}
+.optimization-current {
+  margin-top: 20px !important;
+  font-size: 14px;
+  color: #5b7690;
+}
+.optimization-editor ul {
+  padding-left: 22px;
+}
+.optimization-editor li + li {
+  margin-top: 8px;
+}
+.optimization-editor form {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+}
+.optimization-editor label {
+  display: grid;
+  gap: 8px;
+  color: #314c63;
+}
+.optimization-editor select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #c6dce7;
+  border-radius: 10px;
+  background: #f7fcff;
+  color: #243c50;
+}
+.optimization-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.optimization-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid #c8dfe7;
+  border-radius: 12px;
+  background: #edf6fa;
+  color: #36586d;
+}
+.optimization-notice {
+  margin-top: 14px !important;
+  color: #16795e;
+  font-size: 14px;
+}
+.optimization-empty-dialog {
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+  margin-top: 20px;
+  color: #5e7a92;
+}
+.optimization-empty-dialog > .ui-icon {
+  font-size: 36px;
+}
+.optimization-empty-dialog h3 {
+  font-size: 20px;
+  color: #253f54;
+}
+.optimization-review-table {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+.optimization-review table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  color: #45647d;
+  font-size: 14px;
+}
+.optimization-review th,
+.optimization-review td {
+  padding: 14px 10px;
+  border-bottom: 1px solid #d5e6ee;
+}
+.optimization-review th {
+  font-weight: 500;
+}
+.optimization-review td button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: #e2f2ec;
+  color: #256e5b;
+}
+/* 仅重排网格，不压缩整页；窄屏取消编辑性换行并保留全部说明文字。 */
+@media (max-width: 1300px) {
+  .optimization-toolbar {
+    grid-template-columns: minmax(0, 1fr) 200px 170px;
+  }
+  .optimization-category > button {
+    gap: 16px;
+    padding: 22px 18px;
+  }
+  .optimization-symbol {
+    flex-basis: 72px;
+    height: 72px;
+  }
+  .optimization-symbol .ui-icon {
+    font-size: 38px;
+  }
+  .optimization-category-name {
+    font-size: 20px;
+  }
+  .optimization-category-description {
+    font-size: 15px;
+    line-height: 23px;
+    white-space: normal;
+  }
+  .optimization-category-copy {
+    padding-top: 0;
+  }
+  .optimization-common-item {
+    gap: 16px;
+    padding-inline: 22px;
+  }
+  .optimization-common-info > p {
+    white-space: normal;
+    font-size: 14px;
+  }
+}
+@media (max-width: 1000px) {
+  .optimization-toolbar {
+    grid-template-columns: minmax(0, 1fr) 190px;
+  }
+  .optimization-search {
+    grid-column: 1 / -1;
+  }
+  .optimization-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .optimization-common-panel {
+    grid-template-columns: 1fr;
+  }
+  .optimization-common-item {
+    min-height: 165px;
+  }
+  .optimization-common-item + .optimization-common-item::before {
+    left: 22px;
+    right: 22px;
+    top: 0;
+    bottom: auto;
+    border-left: 0;
+    border-top: 1px solid #d5e5f3;
+  }
+}
+@media (max-width: 600px) {
+  .optimization-title h1 {
+    font-size: 32px;
+  }
+  .optimization-title {
+    gap: 12px;
+  }
+  .optimization-source {
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+  .optimization-heading > p {
+    font-size: 17px;
+  }
+  .optimization-heading .optimization-date {
+    font-size: 15px;
+  }
+  .optimization-toolbar {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+  .optimization-detect,
+  .optimization-history {
+    height: 48px;
+    gap: 9px;
+    font-size: 14px;
+  }
+  .optimization-grid {
+    grid-template-columns: 1fr;
+  }
+  .optimization-category {
+    height: 152px;
+  }
+  .optimization-category-name {
+    font-size: 20px;
+  }
+  .optimization-common-item {
+    gap: 14px;
+    padding: 20px 16px;
+  }
+  .optimization-common-item .optimization-symbol {
+    flex-basis: 48px;
+    height: 48px;
+  }
+  .optimization-common-item .optimization-symbol .ui-icon {
+    font-size: 27px;
+  }
+  .optimization-common-info h3 {
+    font-size: 18px;
+  }
+  .optimization-setting-footer {
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+  .optimization-footer {
+    align-items: flex-start;
+    padding-right: 0;
+    font-size: 12px;
+  }
+  .optimization-content h2 {
+    font-size: 22px;
+  }
+}

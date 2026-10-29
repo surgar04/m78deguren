@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../hardware-monitor/Hud/Upstream/Models.cs" Link="Models.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/HudTriggerRule.cs" Link="HudTriggerRule.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/WorldClockTimeZones.cs" Link="WorldClockTimeZones.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/ExpressionEngine.cs" Link="ExpressionEngine.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/TemplateEngine.cs" Link="TemplateEngine.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/HudProfileRenderer.cs" Link="HudProfileRenderer.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/BuiltInProfileLocalization.cs" Link="BuiltInProfileLocalization.cs" />
+    <Compile Include="../hardware-monitor/Hud/Upstream/FrameRateTypes.cs" Link="FrameRateTypes.cs" />
+    <Compile Include="../hardware-monitor/Hud/HudPlatform.cs" Link="HudPlatform.cs" />
+    <Compile Include="../hardware-monitor/Hud/HudHttp.cs" Link="HudHttp.cs" />
+  </ItemGroup>
+</Project>

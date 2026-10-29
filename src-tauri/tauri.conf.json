@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "臻境",
+  "version": "0.9.0",
+  "identifier": "dev.zhenjing.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "pnpm build",
+    "beforeBundleCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-msi-actions.ps1",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "臻境",
+        "create": false,
+        "width": 1200,
+        "height": 800,
+        "minWidth": 760,
+        "minHeight": 560,
+        "center": true,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://shared.fastly.steamstatic.com asset: http://asset.localhost http://zhenjing-asset.localhost data:; font-src 'self' data: http://zhenjing-asset.localhost; connect-src ipc: http://ipc.localhost; media-src 'self' http://zhenjing-media.localhost http://zhenjing-asset.localhost; object-src 'none'; base-uri 'self'; frame-src 'none'",
+      "devCsp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://shared.fastly.steamstatic.com data: http://zhenjing-asset.localhost; font-src 'self' data: http://zhenjing-asset.localhost; connect-src ipc: http://ipc.localhost http://127.0.0.1:1420 ws://127.0.0.1:1420; media-src 'self' http://zhenjing-media.localhost http://zhenjing-asset.localhost; object-src 'none'; base-uri 'self'; frame-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "publisher": "Sur方糖",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "targets": ["msi"],
+    "resources": {
+      "../THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md",
+      "resources/helpers/PresentMon-LICENSE.txt": "licenses/PresentMon-LICENSE.txt",
+      "resources/licenses/": "licenses/",
+      "resources/hardware-monitor/licenses/": "licenses/hardware/"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "skip"
+      },
+      "allowDowngrades": false,
+      "wix": {
+        "template": "../.cache/msi/installer.wxs",
+        "upgradeCode": "C75C71A9-389D-4B49-9DD4-57D4625BD797",
+        "language": ["zh-CN"]
+      }
+    }
+  }
+}

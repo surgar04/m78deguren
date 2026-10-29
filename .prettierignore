@@ -1,0 +1,17 @@
+.tools
+.cache
+.local
+node_modules
+dist
+pnpm-lock.yaml
+src-tauri/Cargo.lock
+src-tauri/gen
+src-tauri/icons
+src-tauri/resources/hardware-web
+src-tauri/resources/hardware-monitor/licenses
+native/hardware-monitor/obj
+# 原样迁入的上游语言包与节假日数据保留来源字节；不属于本项目手写 JSON。
+native/hardware-monitor/Hud/Locales
+native/hardware-monitor/Hud/china-holidays.json
+# WiX XML 由 candle/light 校验；Prettier 将 .wxs 误识别为小程序脚本。
+src-tauri/installer/*.wxs

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "sensor-monitor",
+  "description": "原始传感器窗口仅有核心事件权限；硬件网关按窗口标签限制为只读快照",
+  "windows": ["sensor-monitor"],
+  "permissions": ["core:default"]
+}
