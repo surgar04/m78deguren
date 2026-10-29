@@ -6,6 +6,7 @@
 $ErrorActionPreference = 'Stop'
 $originalProfile = [Environment]::GetFolderPath('UserProfile')
 . "$PSScriptRoot\env.ps1"
+Set-Location -LiteralPath $projectRoot
 
 if (-not (Test-Path '.tools\msvc\bin\link.exe') -and -not (Test-Path "$MsvcSource\bin\Hostx64\x64\link.exe")) {
     throw '缺少可只读复用的 MSVC 源组件；禁止调用系统安装器。'
@@ -45,7 +46,8 @@ if (-not (Test-Path '.tools\pnpm\bin\pnpm.cjs')) {
     finally { $algorithm.Dispose() }
     if ($actual -ne $metadata.dist.integrity) { throw 'pnpm 完整性校验失败' }
     New-Item -ItemType Directory -Force -Path '.tools\pnpm' | Out-Null
-    & tar -xzf $archive -C '.tools\pnpm' --strip-components=1
+    # Windows tar 在英文区域可能将绝对中文路径按 ANSI 转成问号；仅传 ASCII 相对路径。
+    & tar -xzf '.cache\tmp\pnpm.tgz' -C '.tools\pnpm' --strip-components=1
     if ($LASTEXITCODE -ne 0) { throw 'pnpm 解压失败' }
 }
 if (-not (Test-Path '.tools\cargo\bin\rustup.exe')) {
