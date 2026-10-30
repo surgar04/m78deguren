@@ -1,0 +1,9 @@
+{
+  "extractedWithoutInstallation": true,
+  "fileSha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+  "signer": "CN=Microsoft Windows Software Compatibility Publisher, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+  "packageSha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+  "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
+  "version": "14.44.35211.0",
+  "source": "packages/vcRuntimeMinimum_amd64/cab1.cab/vcruntime140.dll_amd64"
+}

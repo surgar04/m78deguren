@@ -137,7 +137,11 @@ try {
       assert.equal(hash(await readFile(file)), digest, `包内组件摘要不匹配：${name}`);
     }
   }
-  for (const name of ['licenses/MiSans-License.pdf', 'licenses/Sysinfo-MIT.txt'])
+  for (const name of [
+    'licenses/MiSans-License.pdf',
+    'licenses/Sysinfo-MIT.txt',
+    'licenses/VC-Redist-License.rtf',
+  ])
     assert.ok(installed.has(name), `MSI 缺少许可：${name}`);
   await writeFile(
     '.cache/verification/installed-layout.json',

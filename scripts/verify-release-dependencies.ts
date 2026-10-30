@@ -36,25 +36,33 @@ const results = targets.map((path) => {
   );
   const dependencies = [...output.matchAll(/^\s+([\w.-]+\.dll)\s*$/gimu)].map((row) => row[1]);
   if (dependencies.length === 0) {
-    // .NET Core 的 x64 托管映像可以没有原生导入表；必须同时证实 CLR 头和空导入表，
-    // 不能将 dumpbin 解析失败或普通损坏文件当作“无依赖”放行。
+    // .NET Core 托管映像和纯资源 DLL 可以没有原生导入表；分别验证 CLR 头，
+    // 或零代码/零入口加有效资源目录，不能把解析失败当作“无依赖”放行。
     const headers = execFileSync(
       resolve('.tools/msvc/bin/dumpbin.exe'),
       ['/headers', resolve(path)],
       { encoding: 'utf8', windowsHide: true, timeout: 30_000, maxBuffer: 1024 * 1024 },
     );
     assert.match(headers, /^\s+0 \[\s+0\] RVA \[size\] of Import Directory\s*$/mu);
-    assert.match(
-      headers,
-      /^\s+(?=[\dA-F]*[1-9A-F])[\dA-F]+ \[\s+[\dA-F]+\] RVA \[size\] of COM Descriptor Directory\s*$/mu,
-      `零导入映像缺少有效 CLR 头：${path}`,
-    );
+    const managed =
+      /^\s+(?=[\dA-F]*[1-9A-F])[\dA-F]+ \[\s+[\dA-F]+\] RVA \[size\] of COM Descriptor Directory\s*$/mu.test(
+        headers,
+      );
+    const resourceOnly =
+      /^\s+0 size of code\s*$/mu.test(headers) &&
+      /^\s+0 entry point\s*$/mu.test(headers) &&
+      /^\s+(?=[\dA-F]*[1-9A-F])[\dA-F]+ \[\s+[\dA-F]+\] RVA \[size\] of Resource Directory\s*$/mu.test(
+        headers,
+      );
+    assert.ok(managed || resourceOnly, `零导入映像既非托管程序集，也非纯资源 DLL：${path}`);
   }
   assert.ok(
     dependencies.every(
       (name) =>
         name !== undefined &&
-        (!/^(?:vcruntime|msvcp|msvcr|concrt)/iu.test(name) || runtimeNames.has(name.toLowerCase())),
+        // msvcrt.dll / msvcp_win.dll 是 Windows 组件；额外 VC++ 运行库带版本数字。
+        (!/^(?:vcruntime|msvcp|msvcr|concrt)\d/iu.test(name) ||
+          runtimeNames.has(name.toLowerCase())),
     ),
     `发现需要额外 VC++ 安装的直接依赖：${path}`,
   );

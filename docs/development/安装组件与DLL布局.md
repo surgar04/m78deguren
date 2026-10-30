@@ -20,11 +20,13 @@ MSI 显式安装应用组件，C# 源码不再内嵌后动态编译，硬件助�
       LibreHardwareMonitorLib.dll
       System.Management.dll
       hostfxr.dll / hostpolicy.dll / coreclr.dll
+      vcruntime140.dll
       其余自包含 .NET 8 运行库 DLL
       ECPFrames-x64.exe
   licenses/
     MiSans-License.pdf
     Sysinfo-MIT.txt
+    VC-Redist-License.rtf
     其他组件许可及 hardware/ 子目录
 ```
 
@@ -48,3 +50,5 @@ MSI 显式安装应用组件，C# 源码不再内嵌后动态编译，硬件助�
 `scripts/generate-msi-components.ts` 从受校验的发布清单生成安装条目，并补全现有模板遗漏的 MiSans/Sysinfo 许可。安装器测试从真实 CAB 文件和 MSI 表重建安装布局，再核对每一个 DLL 的摘要；此过程不执行安装动作或修改系统登记。
 
 所有构建、依赖、暂存、解包和独立运行验收文件均留在 D 盘。正式发行仍仅生成 MSI，不生成便携版或 MSIX。
+
+修改版本号或受控 C# 源码后，先运行 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-windows-bridge.ps1` 和 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-hardware-monitor.ps1` 生成相同版本的真实 DLL，再使用 `dev.ps1 desktop:build`。私有 VC++ DLL 已随受控来源保存，普通构建不下载或运行 VC++ 安装器。

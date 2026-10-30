@@ -7,6 +7,7 @@
 *.ttf binary
 *.woff2 binary
 *.pdf binary
+*.rtf binary
 *.cmd text eol=crlf
 # 硬件助手的来源清单按原始字节校验，签入/签出不能转换其行尾。
 native/hardware-monitor/** -text

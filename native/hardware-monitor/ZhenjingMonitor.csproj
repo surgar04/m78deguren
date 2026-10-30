@@ -24,6 +24,8 @@
     <EmbeddedResource Include="Hud/china-holidays.json" LogicalName="EndfieldChargePlus.china-holidays.json" />
     <EmbeddedResource Include="Hud/Locales/*.json" LogicalName="Zhenjing.Hud.Locale.%(Filename)" />
     <None Include="Hud/Collector/ECPFrames-x64.exe" Link="ECPFrames-x64.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- 上游 MonoPosixHelper 引用 VC CRT；随应用私有部署，不依赖用户系统安装 VC++。 -->
+    <None Include="Runtime/vcruntime140.dll" Link="vcruntime140.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="../../src-tauri/resources/licenses/ECPFrames-MIT.txt" LogicalName="EndfieldChargePlus.PresentMon.License" />
   </ItemGroup>
 </Project>

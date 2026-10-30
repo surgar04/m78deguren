@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             } else if path
                 .extension()
                 .and_then(|v| v.to_str())
-                .is_some_and(|v| ["cs", "csproj", "props", "json", "exe"].contains(&v))
+                .is_some_and(|v| ["cs", "csproj", "props", "json", "exe", "dll"].contains(&v))
                 || entry.file_name() == "NuGet.Config"
             {
                 files.push(path);

@@ -42,6 +42,7 @@ HUD 的显示器／指定窗口 FPS 方案按需使用 ECPFrames，它基于 Int
 
 ## 硬件页面与传感器
 
+- VC++ 私有运行库 `vcruntime140.dll` **14.44.35211.0** 来自微软官方 Visual C++ Redistributable，经微软签名验证后只读解包；随应用部署，不执行系统安装器。来源与 SHA256 见 `native/hardware-monitor/Runtime/source.json`，原版许可随 MSI 的 `licenses/VC-Redist-License.rtf` 分发。部署方式依据 [Microsoft 本地部署说明](https://learn.microsoft.com/en-us/cpp/windows/choosing-a-deployment-method?view=msvc-170)。
 - 硬件功能参考本地 NexBox 的硬件、传感器、报告、远程监控与 ETW 模块；本项目独立实现 Rust 服务、协议、统计、报告、页面及 C# 桥接，未嵌入上游 GPL 应用代码。
 - LibreHardwareMonitorLib **0.9.6**（MPL-2.0），使用 NuGet 原版，来源提交 `3d331e3370efb858411f19511373eff65a218701`：https://github.com/LibreHardwareMonitor/LibreHardwareMonitor 。未修改库源码。其 PawnIO 模块与其他内部组件的声明见随附 `hardware-licenses`，不自动安装驱动。
 - DiskInfoToolkit **1.1.2**（MPL-2.0）：https://github.com/Blacktempel/DiskInfoToolkit/tree/25319eae5781e75bcf141e844ceab2afe94d40ea 。RAMSPDToolkit-NDD **1.4.2**（MPL-2.0）：https://github.com/Blacktempel/RAMSPDToolkit/tree/3b47b960e0830fef344624ad5e389675d5f0a1ce 。BlackSharp.Core **1.0.7**（MPL-2.0）：https://github.com/Blacktempel/BlackSharp/tree/c70b735c6cec123ee8a046ac4a0bc6c606f52cf0 。均使用原版组件，具体依赖及内容哈希见 `native/hardware-monitor/packages.lock.json`。

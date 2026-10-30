@@ -24,12 +24,12 @@ foreach($file in Get-ChildItem -LiteralPath $publish -File -Recurse){
     Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
     $files[$name]=(Get-FileHash -LiteralPath $destination).Hash.ToLowerInvariant()
 }
-foreach($required in @('ZhenjingMonitor.exe','ZhenjingMonitor.dll','ZhenjingMonitor.deps.json','ZhenjingMonitor.runtimeconfig.json','hostfxr.dll','hostpolicy.dll','coreclr.dll','ECPFrames-x64.exe')){
+foreach($required in @('ZhenjingMonitor.exe','ZhenjingMonitor.dll','ZhenjingMonitor.deps.json','ZhenjingMonitor.runtimeconfig.json','hostfxr.dll','hostpolicy.dll','coreclr.dll','ECPFrames-x64.exe','vcruntime140.dll')){
     if(-not $files.ContainsKey($required)){throw ('自包含组件缺失：'+$required)}
 }
 $sources=@{}
 $sourceRoot=Join-Path $projectRoot 'native/hardware-monitor'
-foreach($file in Get-ChildItem -LiteralPath $sourceRoot -File -Recurse | Where-Object { $_.FullName -notmatch '[\\/](obj|bin)[\\/]' -and ($_.Extension -in @('.cs','.csproj','.props','.json','.exe') -or $_.Name -eq 'NuGet.Config') }){
+foreach($file in Get-ChildItem -LiteralPath $sourceRoot -File -Recurse | Where-Object { $_.FullName -notmatch '[\\/](obj|bin)[\\/]' -and ($_.Extension -in @('.cs','.csproj','.props','.json','.exe','.dll') -or $_.Name -eq 'NuGet.Config') }){
     if(($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw '硬件助手来源不能包含链接'}
     $name=$file.FullName.Substring($sourceRoot.Length+1).Replace('\','/')
     $sources[$name]=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
