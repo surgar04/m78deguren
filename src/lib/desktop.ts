@@ -10,12 +10,26 @@ import { steamRequestSchema, type SteamRequest } from './steam-contracts';
 import { homeRequestSchema, type HomeRequest } from './home-contracts';
 import { hudRequestSchema, type HudRequest } from './hud-contracts';
 import { setupRequestSchema, type SetupRequest } from './onboarding-contracts';
+import { accelerationRequestSchema, type AccelerationRequest } from './acceleration-contracts';
 import {
   gamesRequestSchema,
   quickRequestSchema,
   type GamesRequest,
   type QuickRequest,
 } from './launcher-contracts';
+
+/** 加速准备仅开放固定官方页面、登记客户端及单次游戏会话。 */
+export async function executeAcceleration<T>(
+  request: AccelerationRequest,
+  response: z.ZodType<T>,
+): Promise<T> {
+  requireDesktop();
+  return response.parse(
+    await invoke<unknown>('acceleration_execute', {
+      request: accelerationRequestSchema.parse(request),
+    }),
+  );
+}
 export async function executeOtherGames<T>(
   request: GamesRequest,
   response: z.ZodType<T>,

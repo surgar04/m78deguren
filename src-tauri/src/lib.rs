@@ -192,6 +192,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         .manage(services::steam::SteamState::new(&root)?)
         .manage(services::home::HomeState::new(&root)?)
         .manage(services::other_games::OtherGamesState::new(&root)?)
+        .manage(services::acceleration::AccelerationState::new(&root)?)
         .manage(services::quick_launch::QuickLaunchState::new(&root)?)
         .manage(services::tools::ToolsState::new(&root)?)
         .register_asynchronous_uri_scheme_protocol(
@@ -434,7 +435,8 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
             commands::steam::steam_execute,
             commands::home::home_execute,
             commands::launchers::other_games_execute,
-            commands::launchers::quick_launch_execute
+            commands::launchers::quick_launch_execute,
+            commands::acceleration::acceleration_execute
         ])
         .build(context)?
         .run({

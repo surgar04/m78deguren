@@ -89,12 +89,17 @@ export const launchTargetSchema = z.discriminatedUnion('kind', [
     .strict(),
 ]);
 export type LaunchTarget = z.infer<typeof launchTargetSchema>;
+export const CUSTOM_NAVIGATION_SLOTS = 6;
 export const quickConfigSchema = z
   .object({
-    navigation: z.array(launchTargetSchema.nullable()).length(8),
+    navigation: z.array(launchTargetSchema.nullable()).length(CUSTOM_NAVIGATION_SLOTS),
     wheel: z
       .object({
         enabled: z.boolean(),
+        triggerKey: z
+          .string()
+          .regex(/^[A-Z]$/u)
+          .default('G'),
         holdMs: z.number().int().min(200).max(1500),
         size: z.number().int().min(300).max(640),
         opacity: z.number().min(0.35).max(1),
@@ -135,7 +140,16 @@ export const quickRequestSchema = z.discriminatedUnion('operation', [
       revision: z.string().regex(/^[a-f0-9]{64}$/u),
     })
     .strict(),
-  z.object({ operation: z.literal('navigation'), index: z.number().int().min(0).max(7) }).strict(),
+  z
+    .object({
+      operation: z.literal('navigation'),
+      index: z
+        .number()
+        .int()
+        .min(0)
+        .max(CUSTOM_NAVIGATION_SLOTS - 1),
+    })
+    .strict(),
   z.object({ operation: z.literal('preview') }).strict(),
 ]);
 export type QuickRequest = z.infer<typeof quickRequestSchema>;

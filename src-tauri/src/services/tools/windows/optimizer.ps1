@@ -1,8 +1,7 @@
-# 优化目录和适配器全部嵌入受内容哈希及文件锁保护的脚本，不加载外部 .reg 或任意脚本。
+# 优化目录位于受保护脚本；注册表适配器由安装目录中的已验证 DLL 提供。
+# __MANAGED_BRIDGE__
 function Initialize-Optimizer {
-    if(-not ('Zhenjing.OptimizationRegistry' -as [type])){Add-Type -TypeDefinition @'
-// __OPTIMIZER_CS__
-'@ -Language CSharp}
+    if(-not ('Zhenjing.OptimizationRegistry' -as [type])){Initialize-ZhenjingManaged}
     if(-not $script:OptimizerCatalog){$script:OptimizerCatalog=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('__OPTIMIZER_CATALOG_BASE64__'))|ConvertFrom-Json}
     if(-not $script:OptimizerItems){
         $script:OptimizerItems=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)

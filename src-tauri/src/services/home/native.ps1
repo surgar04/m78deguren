@@ -4,9 +4,8 @@ $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
 $parameters=ConvertFrom-Json -InputObject $ArgumentJson
 if($Operation -notin @('home-icon','home-runtime','home-probe','home-launch')){throw '未知首页原生操作'}
-Add-Type -TypeDefinition @'
-// __HOME_CS__
-'@ -ReferencedAssemblies @('System.Drawing','System.Windows.Forms','System.Web.Extensions','System.Core')
+# __MANAGED_BRIDGE__
+Initialize-ZhenjingManaged
 if($Operation -eq 'home-icon'){
     $value=[Zhenjing.Home.Native]::Icon([string]$parameters[0])
     # 部分控制台 EXE 没有图标。PowerShell 5 对空对象不输出 JSON，需显式返回 null，保持协议完整。

@@ -174,7 +174,9 @@ impl HomeState {
             .await
             .ok()
             .and_then(|bytes| serde_json::from_slice::<Picture>(&bytes).ok());
-        if !refresh && let Some(value) = cached.as_ref() {
+        // 切换服务后不沿用旧来源缓存，避免升级后仍然显示原图片接口的内容。
+        if !refresh && let Some(value) = cached.as_ref().filter(|value| value.source == "微雨 ACG")
+        {
             return Ok(value.clone());
         }
         let mut at = self.picture_at.lock().await;
@@ -183,29 +185,9 @@ impl HomeState {
         }
         *at = Some(Instant::now());
         drop(at);
-        let seed = uuid::Uuid::new_v4();
-        let info = self
-            .get(&format!("https://picsum.photos/seed/{seed}/info"), 65536)
-            .await?;
-        #[derive(serde::Deserialize)]
-        struct Photo {
-            id: String,
-            author: String,
-        }
-        let info: Photo = serde_json::from_slice(&info).map_err(|_| error("图片信息格式无效"))?;
-        if info.id.is_empty()
-            || info.id.len() > 12
-            || !info.id.bytes().all(|b| b.is_ascii_digit())
-            || info.author.len() > 1024
-        {
-            return Err(error("图片信息超出限制"));
-        }
-        let image = self
-            .get(
-                &format!("https://picsum.photos/id/{}/1000/600.jpg", info.id),
-                8_388_608,
-            )
-            .await?;
+        // 接口直接返回图片，不捏造作者或远程图片 ID。保留本地数字标识的封闭文件名约束。
+        let id = (uuid::Uuid::new_v4().as_u128() % 1_000_000_000_000_u128).to_string();
+        let image = self.get("https://api.weirain.com/acg", 8_388_608).await?;
         let jpeg = tauri::async_runtime::spawn_blocking(move || -> Result<Vec<u8>> {
             // 先检查尺寸再完整解码，拒绝压缩炸弹；去掉第三方图片的元数据后统一输出 JPEG。
             let reader = image::ImageReader::new(std::io::Cursor::new(&image))
@@ -217,7 +199,9 @@ impl HomeState {
             if width == 0 || height == 0 || width > 4096 || height > 4096 {
                 return Err(error("图片尺寸超出限制"));
             }
-            let decoded = image::load_from_memory(&image).map_err(|_| error("图片解码失败"))?;
+            let decoded = image::load_from_memory(&image)
+                .map_err(|_| error("图片解码失败"))?
+                .thumbnail(1600, 1200);
             let mut bytes = Vec::new();
             image::codecs::jpeg::JpegEncoder::new_with_quality(&mut bytes, 88)
                 .encode_image(&decoded)
@@ -231,15 +215,15 @@ impl HomeState {
         tokio::fs::create_dir_all(&directory)
             .await
             .map_err(io_error)?;
-        let image_path = directory.join(format!("picture-{}.jpg", info.id));
+        let image_path = directory.join(format!("picture-{id}.jpg"));
         crate::services::tools::check_local_path(&image_path).await?;
         tokio::fs::write(&image_path, &jpeg)
             .await
             .map_err(io_error)?;
         let picture = Picture {
-            id: info.id,
-            author: info.author,
-            source: "Lorem Picsum / Unsplash".into(),
+            id,
+            author: String::new(),
+            source: "微雨 ACG".into(),
             data: format!(
                 "data:image/jpeg;base64,{}",
                 base64::engine::general_purpose::STANDARD.encode(jpeg)

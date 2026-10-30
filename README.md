@@ -6,9 +6,13 @@ Tauri 2 桌面工程，React + TypeScript 前端，Rust 后端，pnpm 管理前�
 
 设置页使用真实 Rust 服务，包含外观、通用、全局热键、高级、网络和关于。更新源固定为 [surgar04/m78deguren Releases](https://github.com/surgar04/m78deguren/releases)，只接受本项目发布签名。
 
+“游戏加速”提供 QuickFox 官方客户端检测、定位、签名核验及单次国服游戏准备流程；在官方客户端开启加速并人工确认后，复用游戏库启动。不会保存厂商账号或声称自动连通，实际效果需在海外实测。见 [游戏加速协作接入](docs/development/游戏加速协作接入.md)。
+
 ## 安装与用户数据
 
-面向 Windows 10/11 x64 用户分发 MSI 安装包，不需要安装 Node、Rust、pnpm、.NET SDK 或 Visual Studio。硬件监控助手以自包含单文件随主程序提供；部分温度、驱动和系统优化能力仍取决于设备支持和用户授权。
+面向 Windows 10/11 x64 用户分发 MSI 安装包，不需要安装 Node、Rust、pnpm、.NET SDK 或 Visual Studio。0.9.1 起采用显式 DLL 布局，硬件/HUD 引擎和自包含 .NET 运行库安装到 `components/monitor`，预编译 Windows 工具安装到 `components/windows-bridge`；不再运行时编译 C# 或解包程序二进制。部分温度、驱动和系统优化能力仍取决于设备支持和用户授权。
+
+完整目录、组件校验、必要 EXE 宿主与 MSI 文件管理规则见 [安装组件与 DLL 布局](docs/development/安装组件与DLL布局.md)。
 
 0.5.1 起默认按当前用户安装到 %LOCALAPPDATA%\\Programs\\Zhenjing，可在向导中选择其他本地磁盘的独立空目录，不再要求存在 D 盘。默认配置、壁纸、WebView 缓存、下载、日志和备份保存在当前用户的 %LOCALAPPDATA%\\Zhenjing，不再读取开发机工作区。可使用 --data-dir 或 ZHENJING_DATA_DIR 显式沿用原有档案；兼容旧变量 XINJING_DATA_DIR，不会自动移动或清空旧数据。卸载保留用户数据。
 
@@ -44,7 +48,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:bundle
 
 独立游戏库位于 `/#/library`，使用真实 Steam 客户端、账号、目录、安装清单和当前账号缓存，提供搜索、筛选、分页、启动、安装/卸载请求及账号备份恢复。需要完整可见库存时可临时提供官方 Web API Key；密钥不落盘，私密或不可见数据不伪造。见 [Steam 游戏库与安装包说明](docs/development/Steam游戏库与安装包实现.md)。
 
-0.9.0 新增 `/#/library/other`，识别八款游戏及其对应区服、提取本机图标并同步首页快捷启动。设置 → 快捷键可配置八个自定义导航和桌面八向轮盘；轮盘支持长按 Tab、鼠标选择、大小、位置及透明度，主窗口收至托盘后仍可运行。识别证据、搜索边界和验收范围见 [其他游戏与桌面轮盘](docs/development/其他游戏与快捷轮盘.md)。
+0.9.0 新增 `/#/library/other`，识别八款游戏及其对应区服、提取本机图标并同步首页快捷启动。设置 → 快捷键可配置六个单列自定义导航和桌面八向轮盘；轮盘默认长按 G，支持 A–Z 字母选择、八等分扇区、鼠标选择、大小、位置及透明度，主窗口收至托盘后仍可运行。识别证据、搜索边界和验收范围见 [其他游戏与桌面轮盘](docs/development/其他游戏与快捷轮盘.md)。
 
 系统与硬件位于 `/#/hardware`，使用真实硬件服务，包含设备详情、实时传感器、趋势图、独立传感器窗口与远程监测入口。HTML 硬件报告包含时序图表及时间范围筛选，保存到应用数据目录，详见[硬件页面实现说明](docs/development/硬件页面实现说明.md)。
 

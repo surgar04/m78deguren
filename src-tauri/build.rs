@@ -45,13 +45,53 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err(format!("硬件助手源码与发布件不一致：{name}。请运行 powershell -NoProfile -File scripts/build-hardware-monitor.ps1").into());
         }
     }
-    let digest = format!(
-        "{:x}",
-        Sha256::digest(std::fs::read(directory.join("ZhenjingMonitor.exe"))?)
-    );
-    if manifest["sha256"].as_str() != Some(digest.as_str()) {
-        return Err("硬件助手 SHA256 不符合构建清单".into());
+    let entries = manifest["files"]
+        .as_object()
+        .ok_or("硬件 DLL 布局清单缺失")?;
+    for (name, expected) in entries {
+        let digest = format!(
+            "{:x}",
+            Sha256::digest(std::fs::read(directory.join("runtime").join(name))?)
+        );
+        if expected.as_str() != Some(digest.as_str()) {
+            return Err(format!("硬件组件摘要不匹配：{name}").into());
+        }
     }
+    let bridge = base.join("resources/windows-bridge");
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(bridge.join("manifest.json"))?)?;
+    if manifest["version"].as_str() != Some(env!("CARGO_PKG_VERSION")) {
+        return Err("Windows DLL 与应用版本不一致".into());
+    }
+    for (name, expected) in manifest["sources"]
+        .as_object()
+        .ok_or("Windows DLL 来源清单缺失")?
+    {
+        let path = base.join("..").join(name);
+        println!("cargo:rerun-if-changed={}", path.display());
+        let digest = format!("{:x}", Sha256::digest(std::fs::read(path)?));
+        if expected.as_str() != Some(digest.as_str()) {
+            return Err(format!(
+                "Windows DLL 来源与发布件不一致：{name}，请运行 scripts/build-windows-bridge.ps1"
+            )
+            .into());
+        }
+    }
+    for (name, expected) in manifest["files"]
+        .as_object()
+        .ok_or("Windows DLL 文件清单缺失")?
+    {
+        let path = bridge.join(name);
+        println!("cargo:rerun-if-changed={}", path.display());
+        let digest = format!("{:x}", Sha256::digest(std::fs::read(path)?));
+        if expected.as_str() != Some(digest.as_str()) {
+            return Err("Windows DLL 摘要不匹配".into());
+        }
+    }
+    println!(
+        "cargo:rerun-if-changed={}",
+        bridge.join("manifest.json").display()
+    );
     tauri_build::build();
     Ok(())
 }

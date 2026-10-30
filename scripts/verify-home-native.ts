@@ -6,16 +6,14 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { z } from 'zod';
 import { homeRuntimeSchema } from '../src/lib/home-contracts.ts';
+import { injectManagedBridge } from './managed-components.ts';
 
 // 仅编译/读取图标、读取自身 API、测试关闭与父进程退出看门狗；从不启用游戏模式或 Win 钩子。
 const root = resolve('.cache/verification/home-native');
 await mkdir(root, { recursive: true });
 const script = resolve(root, `helper-${randomUUID()}.ps1`);
-const source = (await readFile('src-tauri/src/services/home/native.ps1', 'utf8')).replace(
-  '// __HOME_CS__',
-  (await readFile('src-tauri/src/services/home/native.cs', 'utf8')) +
-    '\n' +
-    (await readFile('src-tauri/src/services/home/wheel.cs', 'utf8')),
+const source = await injectManagedBridge(
+  await readFile('src-tauri/src/services/home/native.ps1', 'utf8'),
 );
 await writeFile(script, '\ufeff' + source);
 async function once(operation: string, args: string[]) {

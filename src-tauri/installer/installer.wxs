@@ -87,6 +87,7 @@
               <File Id="NoticeFile" Name="THIRD_PARTY_NOTICES.md" Source="__PROJECT_ROOT__\THIRD_PARTY_NOTICES.md" />
               <RegistryValue Root="HKCU" Key="Software\SurFangTang\Zhenjing\Components" Name="Notices" Type="integer" Value="1" KeyPath="yes" />
             </Component>
+            __COMPONENT_DIRECTORIES__
             <Directory Id="LicensesDir" Name="licenses">
               <Component Id="HudLicense" Guid="423D0C46-FBA5-42BF-8C30-E865075939D8" Win64="yes">
                 <File Id="HudLicenseFile" Source="__PROJECT_ROOT__\src-tauri\resources\licenses\EndfieldChargePlus-MIT.txt" />
@@ -155,7 +156,9 @@
         </Component>
       </Directory>
     </Directory>
+    __ADDITIONAL_LICENSES__
     <Feature Id="Application" Title="臻境" Level="1" Absent="disallow" AllowAdvertise="no">
+      __COMPONENT_REFS__
       <ComponentRef Id="MainExecutable" /><ComponentRef Id="InstallRegistration" /><ComponentRef Id="Notices" />
       <ComponentRef Id="PresentMonLicense" /><ComponentRef Id="DotnetLicense" /><ComponentRef Id="DotnetNotices" />
       <ComponentRef Id="HudLicense" /><ComponentRef Id="EcpLicense" /><ComponentRef Id="InterLicense" />

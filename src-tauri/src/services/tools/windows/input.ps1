@@ -9,26 +9,8 @@ if ($config.button -notin @('left','right') -or $config.intervalMs -lt 4 -or $co
 
 # SendInput 一次提交完整的按下/抬起对，停止或宿主退出不会留下被按住的鼠标键。
 # 不安装驱动、不注入目标进程；Windows 的权限边界依然有效。
-Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
-public static class ZhenjingClicker {
-    [StructLayout(LayoutKind.Sequential)] public struct Mouse { public int X,Y; public uint Data,Flags,Time; public IntPtr Extra; }
-    [StructLayout(LayoutKind.Explicit, Size=40)] public struct Input { [FieldOffset(0)] public uint Type; [FieldOffset(8)] public Mouse Mouse; }
-    [DllImport("user32.dll", SetLastError=true)] static extern uint SendInput(uint count, Input[] input, int size);
-    [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int key);
-    public static bool Click(bool right) {
-        Input down = new Input(); Input up = new Input();
-        down.Mouse.Flags = right ? 8u : 2u; up.Mouse.Flags = right ? 16u : 4u;
-        uint sent=SendInput(2, new Input[]{down,up}, 40);
-        // 系统只接受部分输入时，额外尝试释放；不让失败路径留下按住的鼠标键。
-        if(sent!=2)SendInput(1,new Input[]{up},40);
-        return sent==2;
-    }
-    public static bool Down(int key) { return (GetAsyncKeyState(key) & 0x8000) != 0; }
-    public static System.Threading.Tasks.Task<string> ReadCommand() { return System.Threading.Tasks.Task.Run(() => Console.ReadLine()); }
-}
-'@
+# __MANAGED_BRIDGE__
+Initialize-ZhenjingManaged
 $running = [bool]$config.immediate
 $previous = $false
 $count = [long]0

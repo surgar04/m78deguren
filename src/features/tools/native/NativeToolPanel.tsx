@@ -20,10 +20,13 @@ import { DriverHistoryPanel } from './DriverHistoryPanel';
 import { AudioPanel } from './AudioPanel';
 import { OverlayPanel } from './OverlayPanel';
 import { FilterPanel } from './FilterPanel';
+import { AccelerationPanel } from '@/features/acceleration/AccelerationPanel';
 
 /** 仅按目录白名单分发界面，未识别ID显式失败，不退回说明性假工具。 */
 export default function NativeToolPanel({ id }: { id: string }) {
   switch (id) {
+    case 'game-acceleration':
+      return <AccelerationPanel />;
     case 'display-filter':
       return <FilterPanel />;
     case 'overlay-panel':

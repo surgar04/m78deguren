@@ -170,8 +170,9 @@ impl HudState {
         values: &BTreeMap<String, String>,
     ) -> Result<BTreeMap<String, String>> {
         let hw = app.state::<hardware::Hardware>();
-        let executable = hardware::helper(&hw.root).await?;
-        let mut command = tokio::process::Command::new(executable);
+        let component = hardware::helper(&hw.root).await?;
+        let mut command = tokio::process::Command::new(&component.executable);
+        crate::services::components::configure_child(&mut command);
         command
             .arg("--hud-protect")
             .stdin(Stdio::piped())
@@ -179,14 +180,7 @@ impl HudState {
             .stderr(Stdio::null())
             .kill_on_drop(true)
             .current_dir(&self.root);
-        for name in [
-            "TEMP",
-            "TMP",
-            "APPDATA",
-            "LOCALAPPDATA",
-            "USERPROFILE",
-            "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
-        ] {
+        for name in ["TEMP", "TMP", "APPDATA", "LOCALAPPDATA", "USERPROFILE"] {
             let directory = self.root.join("crypto").join(name);
             check_local_path(&directory).await?;
             tokio::fs::create_dir_all(&directory)

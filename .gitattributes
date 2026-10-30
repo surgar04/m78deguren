@@ -3,9 +3,16 @@
 *.ico binary
 *.icns binary
 *.exe binary
+*.dll binary
 *.ttf binary
 *.woff2 binary
 *.pdf binary
 *.cmd text eol=crlf
 # 硬件助手的来源清单按原始字节校验，签入/签出不能转换其行尾。
 native/hardware-monitor/** -text
+# 发布组件及其来源按原始字节验签；Git 不能转换运行时 JSON 或受控源码的行尾。
+src-tauri/resources/hardware-monitor/runtime/** -text whitespace=cr-at-eol
+src-tauri/src/services/home/*.cs -text
+src-tauri/src/services/tools/windows/*.cs -text
+native/windows-bridge/** -text
+scripts/build-windows-bridge.ps1 -text

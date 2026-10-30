@@ -270,10 +270,8 @@ async fn read_limited(path: &Path, limit: usize) -> Result<Vec<u8>> {
 fn allowed_url(url: &reqwest::Url) -> bool {
     url.scheme() == "https"
         && url.port_or_known_default() == Some(443)
-        && matches!(
-            url.host_str(),
-            Some("api.github.com" | "v1.hitokoto.cn" | "picsum.photos" | "fastly.picsum.photos")
-        )
+        && (matches!(url.host_str(), Some("api.github.com" | "v1.hitokoto.cn"))
+            || (url.host_str() == Some("api.weirain.com") && url.path() == "/acg"))
         && url.username().is_empty()
         && url.password().is_none()
 }
@@ -316,15 +314,21 @@ mod tests {
     #[test]
     fn network_boundary_does_not_allow_arbitrary_redirects() -> Result<()> {
         for url in [
-            "http://picsum.photos",
+            "http://api.weirain.com/acg",
             "https://127.0.0.1",
             "https://api.github.com:444",
-            "https://picsum.photos.evil.test",
+            "https://api.weirain.com.evil.test/acg",
+            "https://api.weirain.com/other",
+            "https://user@api.weirain.com/acg",
         ] {
             assert!(!allowed_url(
                 &reqwest::Url::parse(url).map_err(|_| error("测试 URL 无效"))?
             ));
         }
+        assert!(allowed_url(
+            &reqwest::Url::parse("https://api.weirain.com/acg")
+                .map_err(|_| error("测试 URL 无效"))?
+        ));
         Ok(())
     }
     #[tokio::test]

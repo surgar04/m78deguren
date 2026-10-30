@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile, lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { z } from 'zod';
+import { readExistingGitHubCredential } from './github-credentials.ts';
 
 /** 先建立草稿，全部资产回读校验后再发布；任何一步失败都不能报告“更新已上线”。 */
 const root = resolve('dist/desktop');
@@ -42,6 +43,10 @@ if (!token) {
     token = (await readFile('.local/github-release-token.txt', 'utf8')).trim();
   }
 }
+assert.ok(
+  (token ??= readExistingGitHubCredential()),
+  '没有可用的仓库发布身份；本地安装包已保留，等待发布。',
+);
 assert.ok(
   token && token.length <= 4096 && !/\s/u.test(token),
   '缺少 GitHub 发布令牌：使用 GH_TOKEN 或 .local/github-release-token.txt；不要将令牌放入源码或聊天。',

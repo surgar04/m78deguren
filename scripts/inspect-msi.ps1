@@ -11,10 +11,12 @@ function Query([string]$sql,[int]$columns){
 }
 try{
     $properties=@{};foreach($row in Query 'SELECT `Property`,`Value` FROM `Property`' 2){$properties[$row.cells[0]]=$row.cells[1]}
-    $files=@(Query 'SELECT `File`,`FileName`,`Version` FROM `File`' 3)
+    $files=@(Query 'SELECT `File`,`FileName`,`Version`,`Component_`,`FileSize` FROM `File`' 5)
+    $directories=@(Query 'SELECT `Directory`,`Directory_Parent`,`DefaultDir` FROM `Directory`' 3)
+    $components=@(Query 'SELECT `Component`,`Directory_` FROM `Component`' 2)
     $registry=@(Query 'SELECT `Root`,`Key`,`Name` FROM `Registry`' 3)
     $summary=$database.SummaryInformation(0)
     try{$template=$summary.Property(7)}finally{$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($summary)}
-    $data=@{properties=$properties;files=$files;registry=$registry;template=$template}
+    $data=@{properties=$properties;files=$files;directories=$directories;components=$components;registry=$registry;template=$template}
     [IO.File]::WriteAllText([IO.Path]::GetFullPath($Output),($data|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
 }finally{$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($database);$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($installer)}

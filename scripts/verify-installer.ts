@@ -6,6 +6,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { resolve, join, sep, isAbsolute } from 'node:path';
 import { z } from 'zod';
 import { msiExecutable } from './installer-format.ts';
+import { materializeMsiLayout } from './msi-layout.ts';
 
 const pkg = z
   .object({ version: z.string() })
@@ -78,6 +79,8 @@ try {
     .object({
       properties: z.record(z.string(), z.string()),
       files: z.array(row),
+      directories: z.array(row),
+      components: z.array(row),
       registry: z.array(row),
       template: z.string(),
     })
@@ -118,6 +121,28 @@ try {
   const extracted = join(temporary, 'files');
   run(seven, ['x', '-sccUTF-8', installer, `-o${extracted}`, '-y']);
   const images = await find(extracted);
+  const installedDirectory = resolve('.cache/verification', `installed-layout-${randomUUID()}`);
+  const installed = await materializeMsiLayout(table, extracted, installedDirectory);
+  const componentManifest = z.object({ files: z.record(z.string(), z.string()) });
+  for (const [manifestPath, componentRoot] of [
+    ['src-tauri/resources/hardware-monitor/manifest.json', 'components/monitor'],
+    ['src-tauri/resources/windows-bridge/manifest.json', 'components/windows-bridge'],
+  ] as const) {
+    const manifest = componentManifest.parse(
+      JSON.parse(await readFile(manifestPath, 'utf8')) as unknown,
+    );
+    for (const [name, digest] of Object.entries(manifest.files)) {
+      const file = installed.get(`${componentRoot}/${name}`);
+      assert.ok(file, `MSI 未安装组件：${name}`);
+      assert.equal(hash(await readFile(file)), digest, `包内组件摘要不匹配：${name}`);
+    }
+  }
+  for (const name of ['licenses/MiSans-License.pdf', 'licenses/Sysinfo-MIT.txt'])
+    assert.ok(installed.has(name), `MSI 缺少许可：${name}`);
+  await writeFile(
+    '.cache/verification/installed-layout.json',
+    JSON.stringify({ path: installedDirectory, files: [...installed.keys()] }, null, 2),
+  );
   assert.equal(images.length, 1);
   const image = images[0];
   assert.ok(image);
@@ -169,6 +194,9 @@ try {
         publiclyTrusted: false,
         updateManifestVerified: true,
         msiTablesVerified: true,
+        explicitComponentsVerified: true,
+        installedDirectory,
+        installedFileCount: installed.size,
       },
       null,
       2,

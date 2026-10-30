@@ -9,6 +9,8 @@ src-tauri/gen
 src-tauri/icons
 src-tauri/resources/hardware-web
 src-tauri/resources/hardware-monitor/licenses
+# 由 .NET SDK 发布、逐字节校验的运行库布局，不改写运行时配置。
+src-tauri/resources/hardware-monitor/runtime
 native/hardware-monitor/obj
 # 原样迁入的上游语言包与节假日数据保留来源字节；不属于本项目手写 JSON。
 native/hardware-monitor/Hud/Locales

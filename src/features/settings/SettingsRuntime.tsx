@@ -70,6 +70,11 @@ export function SettingsRuntime({ notify }: { notify: (message: string) => void 
       }),
     );
     add(
+      listen('acceleration-changed', () => {
+        void client.invalidateQueries({ queryKey: ['acceleration', 'snapshot'] });
+      }),
+    );
+    add(
       listen('settings-assets-changed', () => {
         void client.invalidateQueries({ queryKey: ['settings', { operation: 'snapshot' }] });
       }),

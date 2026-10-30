@@ -1,0 +1,21 @@
+{
+  "sources": {
+    "src-tauri/src/services/tools/windows/driver.cs": "66dc2eed089ab75aa75aa64f11e8da7438cd74f96a427f4c14a1e64b4f35fd28",
+    "src-tauri/src/services/tools/windows/color.cs": "c42d40971985f16b590ea1104264665dd7971c53aeb14e848cceb2ef53a186f5",
+    "src-tauri/src/services/tools/windows/optimizer.cs": "838bd58d219ff2b82377a645cf26119513231cbe2eb1253caec773474d69ee7d",
+    "src-tauri/src/services/home/wheel.cs": "ffcd98e4368153e9f35b43c5abc42bff4671021270ce3f4cef42cee64165827d",
+    "scripts/build-windows-bridge.ps1": "98bc900002a22f8ef6d9bd6436217a479e05c257c6e4095b465bb7b75dc98093",
+    "native/windows-bridge/MediaInput.cs": "09fa3d8a5a364a5621a9c115e72abd1f3017310ea70cfbc2e44fd6fdf09a3620",
+    "src-tauri/src/services/tools/windows/native.cs": "7d84cfaf15a6dd0f36456a3c9673ba59463bd51d14c7b0ca3e0d51ffee266319",
+    "src-tauri/src/services/home/native.cs": "c66c559fb8016c70d5a95f78932771b122060999d1f41e84692ae032d092c8e4",
+    "native/windows-bridge/KeyState.cs": "7496770aa50597475d27e9d3500cf2fdb835fb19d58c07e3fa65bc23b8a50aea",
+    "src-tauri/src/services/tools/windows/nvidia.cs": "94ef6c9c7c5563f4f8cc36125bf3b4d85978b23673d1c16da04702c03d6583db",
+    "native/windows-bridge/Clicker.cs": "dd570a7575e3378f28cee57771200ed5c6b250047fa777b56ec79c78a4e3fd56"
+  },
+  "files": {
+    "Zhenjing.Windows.dll": "8640ac4b1ed292d9ede3753a3728b3272e7b4ecec48656ca04e88e4b56b29094"
+  },
+  "schema": 1,
+  "version": "0.9.1",
+  "targetFramework": "net48"
+}

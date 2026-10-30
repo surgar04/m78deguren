@@ -5,16 +5,18 @@ $ErrorActionPreference='Stop'
 $project=Split-Path -Parent $PSScriptRoot
 $base=Join-Path $project 'src-tauri\src\services\tools\windows'
 $source=[IO.File]::ReadAllText((Join-Path $base 'system.ps1'))
-$parts=@{'# __NATIVE_HELPERS__'='native.ps1';'# __FILTER_HELPERS__'='filter.ps1';'// __NATIVE_CS__'='native.cs';'// __NVIDIA_CS__'='nvidia.cs';'// __DRIVER_CS__'='driver.cs';'// __TELEMETRY_CS__'='telemetry.cs';'// __COLOR_CS__'='color.cs';'__NVIDIA_SETTINGS__'='nvidia-settings.json'}
+$parts=@{'# __NATIVE_HELPERS__'='native.ps1';'# __FILTER_HELPERS__'='filter.ps1';'__NVIDIA_SETTINGS__'='nvidia-settings.json'}
 # 先展开 PowerShell 入口，再展开入口所包含的 C#；与 Rust 的编译期绑定顺序一致。
-foreach($marker in @('# __NATIVE_HELPERS__','# __FILTER_HELPERS__','// __NATIVE_CS__','// __NVIDIA_CS__','// __DRIVER_CS__','// __TELEMETRY_CS__','// __COLOR_CS__','__NVIDIA_SETTINGS__')){$source=$source.Replace($marker,[IO.File]::ReadAllText((Join-Path $base $parts[$marker])))}
+foreach($marker in @('# __NATIVE_HELPERS__','# __FILTER_HELPERS__','__NVIDIA_SETTINGS__')){$source=$source.Replace($marker,[IO.File]::ReadAllText((Join-Path $base $parts[$marker])))}
 $directory=Join-Path $project '.cache\verification\builtin-readonly'
 [IO.Directory]::CreateDirectory($directory)|Out-Null
 $probe=Join-Path $directory 'system-probe.ps1'
  $source=$source.Replace('# __OPTIMIZATION_HELPERS__',[IO.File]::ReadAllText((Join-Path $base 'optimizer.ps1')))
- $source=$source.Replace('// __OPTIMIZER_CS__',[IO.File]::ReadAllText((Join-Path $base 'optimizer.cs')))
  $source=$source.Replace('__OPTIMIZER_CATALOG_BASE64__',[Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $base 'optimizer-catalog.json'))))
 $source=$source.Replace('# __STORAGE_POLICY__',[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/tools/windows/storage-policy.ps1')))
+$dll=Join-Path $projectRoot 'src-tauri/resources/windows-bridge/Zhenjing.Windows.dll'
+$loader=[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/managed-loader.ps1')).Replace('__MANAGED_PATH_BASE64__',[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($dll))).Replace('__MANAGED_SHA256__',(Get-FileHash -LiteralPath $dll).Hash.ToLowerInvariant())
+$source=$source.Replace('# __MANAGED_BRIDGE__',$loader)
 [IO.File]::WriteAllText($probe,$source,[Text.UTF8Encoding]::new($true))
 $env:PSModulePath=Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\Modules'
 $allowed=@('apps','gpus','virtualization','disks','context','vac-status','displays','nvidia','features-runtime','features-boot','telemetry-probe','filter-probe','optimizer-scan')

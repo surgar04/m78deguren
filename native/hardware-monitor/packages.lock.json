@@ -17,12 +17,6 @@
           "System.Threading.AccessControl": "10.0.3"
         }
       },
-      "Microsoft.NET.ILLink.Tasks": {
-        "type": "Direct",
-        "requested": "[8.0.32, )",
-        "resolved": "8.0.32",
-        "contentHash": "FQXkG87JK9+SEbF6vRcWmevk0Pjqgehhz+9e1hHATDh7U8EvgmVQQcEUJTXj1IKi8VqLrdi/c1QHOpVjZcd9ng=="
-      },
       "System.Management": {
         "type": "Direct",
         "requested": "[10.0.2, )",

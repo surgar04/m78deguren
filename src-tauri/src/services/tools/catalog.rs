@@ -25,6 +25,15 @@ pub struct ToolCatalog {
 pub fn catalog() -> ToolCatalog {
     let definitions = [
         (
+            "game-acceleration",
+            "游戏加速",
+            "通过 QuickFox 官方客户端准备国服游戏线路，确认后启动本机游戏。",
+            "network",
+            "wifi",
+            "mint",
+            vec!["QuickFox", "回国", "马来西亚", "国服", "三角洲", "游戏加速"],
+        ),
+        (
             "crosshair",
             "辅助准心",
             "自定义屏幕准心样式与显示设置，提升游戏瞄准体验。",

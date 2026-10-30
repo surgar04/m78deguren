@@ -10,12 +10,8 @@ switch ($Operation) {
     'admin' { Output-Json (Is-Admin) }
     'hold' {
         # 只读取指定按键状态，不安装驱动、不发送输入、不读取其他程序内存。
-        Add-Type -TypeDefinition @'
-using System.Runtime.InteropServices;
-public static class ZhenjingInput {
-    [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int key);
-}
-'@
+        # __MANAGED_BRIDGE__
+        Initialize-ZhenjingManaged
         $key = [int]$arguments[0]; $delay = [int]$arguments[1]
         # 即使宿主异常退出，也不留下无限轮询的PowerShell子进程；句柄对应实际进程实例。
         $owner = [Diagnostics.Process]::GetProcessById([int]$arguments[2])

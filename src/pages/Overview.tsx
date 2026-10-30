@@ -333,7 +333,7 @@ export default function Overview() {
                   onClick={() => workspace.setDialog({ kind: 'random-image' })}
                 >
                   {picture.data ? (
-                    <img src={picture.data.data} alt={`随机图片，摄影：${picture.data.author}`} />
+                    <img src={picture.data.data} alt={`随机图片，来源：${picture.data.source}`} />
                   ) : (
                     <div className="home-picture-placeholder">
                       <Icon icon={faImage} />

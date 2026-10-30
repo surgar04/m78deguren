@@ -1,6 +1,6 @@
 [package]
 name = "zhenjing"
-version = "0.9.0"
+version = "0.9.1"
 description = "臻境桌面应用"
 publish = false
 rust-version = "1.96"
@@ -51,6 +51,8 @@ qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 roxmltree = "0.21"
 rfd = { version = "=0.16.1", default-features = false }
 tempfile = "=3.27.0"
+# 仅启用进程信息；不采集 CPU/磁盘/网络计数，避免为加速准备重复启动硬件监测。
+sysinfo = { version = "=0.37.2", default-features = false, features = ["system"] }
 
 [lints.rust]
 unsafe_code = "forbid"

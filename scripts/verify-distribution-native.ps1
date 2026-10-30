@@ -14,8 +14,7 @@ try{
 }finally{$env:ZHENJING_RESTRICT_WRITES_TO_D=$restriction}
 
 # 编译真实 C# 助手，仅反射调用路径验证；不调用 Run、键盘钩子或进程调整。
-$homeSource=[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/home/native.cs'))+"`n"+[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/home/wheel.cs'))
-Add-Type -TypeDefinition $homeSource -ReferencedAssemblies @('System.Drawing','System.Windows.Forms','System.Web.Extensions','System.Core')
+Add-Type -Path (Join-Path $projectRoot 'src-tauri/resources/windows-bridge/Zhenjing.Windows.dll')
 $validator=[Zhenjing.Home.Native].GetMethod('AssertLocal',([Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic))
 Check ($null -ne $validator) '原生路径验证函数缺失'
 try{

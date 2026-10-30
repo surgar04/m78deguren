@@ -47,7 +47,7 @@ try {
   await page.locator('.dock').waitFor();
   assert.equal(
     await page.locator('.custom-navigation>button:not(.custom-navigation-edit)').count(),
-    8,
+    6,
   );
   original = quickSnapshotSchema.parse(
     await invoke('quick_launch_execute', { operation: 'snapshot' }),
@@ -56,7 +56,7 @@ try {
     await invoke('settings_execute', { operation: 'snapshot' }),
   ).config.hotkeysEnabled;
   assert.equal(original.config.wheel.enabled, false);
-  await assert.rejects(invoke('quick_launch_execute', { operation: 'navigation', index: 8 }));
+  await assert.rejects(invoke('quick_launch_execute', { operation: 'navigation', index: 6 }));
   await assert.rejects(
     invoke('quick_launch_execute', {
       operation: 'save',
@@ -124,7 +124,7 @@ try {
   );
   await page.screenshot({ path: resolve(output, 'navigation-compact.png') });
   await page.setViewportSize({ width: 1200, height: 800 });
-  // 预览采用原生分层窗口，不执行方向目标，也不安装 Tab 钩子。
+  // 预览采用原生分层窗口，不执行方向目标，也不安装触发键钩子。
   await invoke('quick_launch_execute', { operation: 'preview' });
   const previewDeadline = Date.now() + 25000;
   let preview = quickSnapshotSchema.parse(
@@ -202,7 +202,7 @@ try {
     ),
   );
   console.log(
-    '真实本机扫描、八槽位配置、导航、窄窗口和原生轮盘预览通过；未启动游戏、安装软件或修改系统。',
+    '真实本机扫描、六项导航、八向轮盘、窄窗口和原生轮盘预览通过；未启动游戏、安装软件或修改系统。',
   );
 } finally {
   if (original) {

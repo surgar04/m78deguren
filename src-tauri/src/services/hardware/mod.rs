@@ -402,45 +402,13 @@ fn valid_sensor(sensor: &Sensor) -> bool {
             .value
             .is_none_or(|value| value.is_finite() && value.abs() < 1e15)
 }
-pub(crate) async fn helper(root: &Path) -> Result<PathBuf> {
-    use sha2::{Digest, Sha256};
-    const BYTES: &[u8] = include_bytes!("../../../resources/hardware-monitor/ZhenjingMonitor.exe");
-    let digest = tauri::async_runtime::spawn_blocking(|| format!("{:x}", Sha256::digest(BYTES)))
-        .await
-        .map_err(|_| error("硬件助手摘要任务失败"))?;
-    let directory = root.join(format!("monitor-{digest}"));
-    check_local_path(&directory).await?;
-    tokio::fs::create_dir_all(&directory)
-        .await
-        .map_err(io_error)?;
-    let path = directory.join("ZhenjingMonitor.exe");
-    if tokio::fs::read(&path).await.ok().as_deref() != Some(BYTES) {
-        let temporary = directory.join(format!("{}.tmp", uuid::Uuid::new_v4()));
-        tokio::fs::write(&temporary, BYTES)
-            .await
-            .map_err(io_error)?;
-        tokio::fs::rename(&temporary, &path)
-            .await
-            .map_err(io_error)?;
-    }
-    Ok(path)
+pub(crate) async fn helper(_root: &Path) -> Result<crate::services::components::Bundle> {
+    crate::services::components::monitor().await
 }
 async fn run_child(state: &HardwareState, privileged: bool, stop: CancellationToken) -> Result<()> {
-    let executable = helper(&state.root).await?;
-    let protected = executable.clone();
-    let _guard = tauri::async_runtime::spawn_blocking(move || {
-        let mut options = std::fs::OpenOptions::new();
-        options.read(true);
-        #[cfg(windows)]
-        {
-            use std::os::windows::fs::OpenOptionsExt;
-            options.share_mode(1);
-        }
-        options.open(protected).map_err(io_error)
-    })
-    .await
-    .map_err(|_| error("硬件助手保护任务失败"))??;
-    let mut command = Command::new(&executable);
+    let component = helper(&state.root).await?;
+    let mut command = Command::new(&component.executable);
+    crate::services::components::configure_child(&mut command);
     command
         .env("ZHENJING_HUD_DIR", state.root.join("hud"))
         .arg(std::process::id().to_string())
@@ -449,14 +417,7 @@ async fn run_child(state: &HardwareState, privileged: bool, stop: CancellationTo
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .kill_on_drop(true);
-    for name in [
-        "TEMP",
-        "TMP",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "USERPROFILE",
-        "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
-    ] {
+    for name in ["TEMP", "TMP", "APPDATA", "LOCALAPPDATA", "USERPROFILE"] {
         let path = state.root.join("process").join(name);
         check_local_path(&path).await?;
         tokio::fs::create_dir_all(&path).await.map_err(io_error)?;

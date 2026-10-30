@@ -1,5 +1,9 @@
 # 第三方组件说明
 
+## sysinfo 0.37.2 / QuickFox 协作
+
+加速准备使用 [sysinfo](https://github.com/GuillaumeGomez/sysinfo) 的 system 最小特性只读进程路径、PID 与创建时间。MIT，Copyright (c) 2015 Guillaume Gomez；许可全文随安装资源保留在 `src-tauri/resources/licenses/Sysinfo-MIT.txt`。QuickFox 为用户自行安装的第三方软件，其安装包、驱动、账户及节点配置不随本项目分发，相关商标与服务归属其权利人。
+
 ## MiSans
 
 界面使用小米 MiSans 可变字体，保留原始字体文件，用于本应用界面。许可原文随项目保留在 `src-tauri/resources/licenses/MiSans-License.pdf`，供后续构建随许可目录分发。官方来源及协议：https://hyperos.mi.com/font/zh/download/ 。本项目不将该字体声明为自身的开源代码或作为独立字体包出售。

@@ -96,7 +96,7 @@ pub async fn quick_launch_execute(
             value(state.save(&app, *config, &revision).await?)
         }
         QuickRequest::Navigation { index } => {
-            if index >= 8 {
+            if index >= crate::services::quick_launch::NAVIGATION_SLOTS {
                 return Err(error("导航槽位无效"));
             }
             state.navigation_dispatch(&app, index).await?;

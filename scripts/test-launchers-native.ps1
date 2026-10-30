@@ -2,13 +2,25 @@
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot\env.ps1"
 function Check($condition,[string]$message){if(-not $condition){throw $message}}
-$native=[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/home/native.cs'))+"`n"+[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/home/wheel.cs'))
-Add-Type -TypeDefinition $native -ReferencedAssemblies @('System.Drawing','System.Windows.Forms','System.Web.Extensions','System.Core')
+Add-Type -Path (Join-Path $projectRoot 'src-tauri/resources/windows-bridge/Zhenjing.Windows.dll')
 $type=[Zhenjing.Home.Native].Assembly.GetType('Zhenjing.Home.WheelController',$true)
 $direction=$type.GetMethod('Direction',[Reflection.BindingFlags]'Public,Static')
 for($i=0;$i -lt 8;$i++){$angle=($i*45-90)*[math]::PI/180;$x=[math]::Cos($angle)*70;$y=[math]::Sin($angle)*70;$actual=$direction.Invoke($null,@($x,$y,100.0));Check ($actual -eq $i) ('Incorrect direction '+$i)}
 Check ($direction.Invoke($null,@(0.0,0.0,100.0)) -eq -1) 'Center must cancel'
+Check ($direction.Invoke($null,@(35.0,0.0,100.0)) -eq -1) 'Entire visible center must cancel'
 Check ($direction.Invoke($null,@(1000.0,0.0,100.0)) -eq -1) 'Outside circle must cancel'
+$trigger=$type.GetMethod('TriggerCode',[Reflection.BindingFlags]'Public,Static')
+Check ($trigger.Invoke($null,@('G')) -eq 71) 'Default trigger must be G'
+Check ($trigger.Invoke($null,@('R')) -eq 82) 'Configured letter must use its own virtual key'
+foreach($key in @('Tab','Ctrl+G','g','')){Check ($trigger.Invoke($null,@($key)) -eq 0) 'Non-letter trigger accepted'}
+# 直接调用纯钩子入口验证 Tab 透传；不安装系统钩子、不注入键盘事件。
+$keyboard=$type.GetMethod('Keyboard',[Reflection.BindingFlags]'Public,Static')
+$eventData=[Runtime.InteropServices.Marshal]::AllocHGlobal(24)
+try{
+ for($offset=0;$offset -lt 24;$offset+=4){[Runtime.InteropServices.Marshal]::WriteInt32($eventData,$offset,0)}
+ [Runtime.InteropServices.Marshal]::WriteInt32($eventData,9)
+ foreach($message in @(0x100,0x101)){Check (-not $keyboard.Invoke($null,@(0,[IntPtr]$message,$eventData))) 'Tab must always pass through'}
+}finally{[Runtime.InteropServices.Marshal]::FreeHGlobal($eventData)}
 $inputType=$type.GetNestedType('Input',[Reflection.BindingFlags]::NonPublic)
 Check ([Runtime.InteropServices.Marshal]::SizeOf([Activator]::CreateInstance($inputType)) -eq 40) 'Incorrect x64 INPUT ABI'
 # Windows metadata parser runs as a child with temporary files exclusively on D.
@@ -49,4 +61,4 @@ $process=[Diagnostics.Process]::Start($info);$text=$process.StandardOutput.ReadT
 Check ($process.ExitCode -eq 0) ('Isolated discovery failed: '+$details)
 $hints=$text|ConvertFrom-Json;Check (@($hints.drives).Count -gt 0) 'Discovery must return actual fixed disks'
 Check (@($hints.roots|Where-Object {$_.source -eq '用户启动器目录' -and $_.path.StartsWith($fixture,[StringComparison]::OrdinalIgnoreCase)}).Count -eq 0) 'Discovery used isolated process folders instead of player folders'
-Write-Output 'Wheel: 8 directions, center/outside cancellation and x64 INPUT ABI passed. Encrypted CN/global metadata fixtures passed. No hook or game executed.'
+Write-Output 'Wheel: 8 directions, center/outside cancellation, letter trigger, Tab pass-through and x64 INPUT ABI passed. Encrypted CN/global metadata fixtures passed. No hook or game executed.'

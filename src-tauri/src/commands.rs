@@ -1,5 +1,6 @@
 use crate::error::AppError;
 use serde::Serialize;
+pub mod acceleration;
 pub mod builtin;
 pub mod hardware;
 pub mod home;

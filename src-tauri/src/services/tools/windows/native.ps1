@@ -1,13 +1,8 @@
 # __STORAGE_POLICY__
+# __MANAGED_BRIDGE__
 function Initialize-Native {
     if('Zhenjing.Native' -as [type]){return}
-    Add-Type -TypeDefinition @'
-// __NATIVE_CS__
-// __NVIDIA_CS__
-// __DRIVER_CS__
-// __TELEMETRY_CS__
-// __COLOR_CS__
-'@ -Language CSharp
+    Initialize-ZhenjingManaged
 }
 function Get-FeatureSnapshot([uint32]$store) {
     Initialize-Native

@@ -24,7 +24,7 @@ for (const key of [
   env[key] = path;
 }
 const child = spawn(
-  resolve('src-tauri/resources/hardware-monitor/ZhenjingMonitor.exe'),
+  resolve('src-tauri/resources/hardware-monitor/runtime/ZhenjingMonitor.exe'),
   [String(process.pid), 'safe'],
   { env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] },
 );

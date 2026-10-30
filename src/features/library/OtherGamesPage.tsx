@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import {
   faGamepad,
@@ -9,6 +10,7 @@ import {
   faStop,
   faSliders,
   faCompass,
+  faWifi,
 } from '@fortawesome/free-solid-svg-icons';
 import { WorkspaceLayout } from '@/features/home/components/WorkspaceLayout';
 import { Icon } from '@/features/home/components/Icon';
@@ -44,6 +46,7 @@ function GameCard({
   busy: boolean;
 }) {
   const icon = useLaunchIcon(game.id);
+  const navigate = useNavigate();
   const [details, setDetails] = useState(false);
   return (
     <article className={`other-game-card glass ${game.available ? '' : 'unavailable'}`}>
@@ -89,6 +92,18 @@ function GameCard({
           <Icon icon={faSliders} />
         </button>
       </div>
+      {game.region === 'cn' && game.available && (
+        <button
+          type="button"
+          className="native-button"
+          disabled={busy}
+          onClick={() => {
+            void navigate(`/tools/game-acceleration?game=${encodeURIComponent(game.id)}`);
+          }}
+        >
+          <Icon icon={faWifi} /> 国服加速准备
+        </button>
+      )}
       {details && (
         <div className="other-game-evidence">
           <p>

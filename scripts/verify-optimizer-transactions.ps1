@@ -10,7 +10,7 @@ foreach($name in @('storage-policy.ps1','native.ps1','system.ps1','optimizer.ps1
     if($parseErrors.Count){throw ($parseErrors -join ';')}
     foreach($function in $tree.FindAll({param($node)$node -is [Management.Automation.Language.FunctionDefinitionAst]},$false)){. ([ScriptBlock]::Create($function.Extent.Text))}
 }
-Add-Type -TypeDefinition ([IO.File]::ReadAllText((Join-Path $base 'optimizer.cs'))) -Language CSharp
+Add-Type -Path (Join-Path $projectRoot 'src-tauri/resources/windows-bridge/Zhenjing.Windows.dll')
 $script:OptimizerCatalog=[IO.File]::ReadAllText((Join-Path $base 'optimizer-catalog.json'))|ConvertFrom-Json
 $sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $script:FakeContext=@{sid=$sid;intelCpu=$true;adapters=@(@{vendor='nvidia';path='HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\9991'},@{vendor='amd';path='HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\9992'},@{vendor='intel';path='HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\9993'})}

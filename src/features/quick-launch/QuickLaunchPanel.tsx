@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { z } from 'zod';
-import { faCircleNotch, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
+import { faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@/features/home/components/Icon';
 import { Failure } from '@/features/settings/controls';
 import {
@@ -13,8 +13,9 @@ import {
 import { isDesktop } from '@/lib/desktop';
 import { useQuickLaunch, useQuickAction } from './repository';
 import { LaunchTargetIcon } from './LaunchTargetIcon';
+import { WheelPreview } from './WheelPreview';
+import { WHEEL_DIRECTIONS as DIRECTIONS } from './wheel-layout';
 import './quick-launch.css';
-const DIRECTIONS = ['上', '右上', '右', '右下', '下', '左下', '左', '左上'];
 function TargetPicker({
   options,
   value,
@@ -125,7 +126,7 @@ function Editor({
             setIndex(0);
           }}
         >
-          八个自定义导航
+          六个自定义导航
         </button>
         <button
           type="button"
@@ -163,7 +164,10 @@ function Editor({
           <label className="quick-setting-toggle">
             <span>
               <strong>启用桌面轮盘</strong>
-              <small>长按 Tab 唤醒，移动鼠标选择，松开 Tab 启动。中心区域或 Esc 取消。</small>
+              <small>
+                长按 {draft.wheel.triggerKey} 唤醒，移动鼠标选择，松开按键启动。中心区域或 Esc
+                取消。
+              </small>
             </span>
             <input
               type="checkbox"
@@ -172,33 +176,27 @@ function Editor({
             />
           </label>
           <div className="wheel-settings-layout">
-            <div className="wheel-preview" role="group" aria-label="轮盘方向配置">
-              {draft.wheel.slots.map((target, i) => {
-                const angle = ((i * 45 - 90) * Math.PI) / 180;
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    className={`wheel-preview-slot ${index === i ? 'selected' : ''}`}
-                    style={{
-                      left: `${50 + 35 * Math.cos(angle)}%`,
-                      top: `${50 + 35 * Math.sin(angle)}%`,
-                    }}
-                    aria-label={`${DIRECTIONS[i]}方向`}
-                    onClick={() => setIndex(i)}
-                  >
-                    <LaunchTargetIcon option={option(target)} />
-                    <span>{option(target)?.label ?? '未配置'}</span>
-                  </button>
-                );
-              })}
-              <div className="wheel-preview-center">
-                <Icon icon={faCircleNotch} />
-                <strong>快捷轮盘</strong>
-                <small>长按 Tab</small>
-              </div>
-            </div>
+            <WheelPreview
+              slots={draft.wheel.slots}
+              options={snapshot.options}
+              selected={index}
+              onSelect={setIndex}
+              triggerKey={draft.wheel.triggerKey}
+            />
             <div className="wheel-options">
+              <label>
+                轮盘触发字母
+                <select
+                  value={draft.wheel.triggerKey}
+                  onChange={(event) => wheelPatch({ triggerKey: event.target.value })}
+                >
+                  {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ', (key) => (
+                    <option key={key} value={key}>
+                      {key}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label>
                 长按阈值 <strong>{draft.wheel.holdMs} ms</strong>
                 <input
@@ -252,8 +250,9 @@ function Editor({
                 仅在 Windows 桌面响应
               </label>
               <p className="settings-note">
-                默认不占用游戏和输入框的 Tab。关闭限制后会延迟短按 Tab 的响应；Ctrl / Alt / Shift /
-                Win 组合仍透传。
+                Tab 始终保持 Windows
+                原有行为。建议仅在桌面响应，避免与其他应用的字母输入冲突；短按当前字母及 Ctrl / Alt
+                / Shift / Win 组合仍透传。
               </p>
             </div>
           </div>

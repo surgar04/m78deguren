@@ -11,6 +11,7 @@ use std::{
 };
 use tauri::{Emitter, Manager};
 use tokio::sync::{Mutex, RwLock};
+pub const NAVIGATION_SLOTS: usize = 6;
 pub const TOOL_IDS: &[&str] = &[
     "crosshair",
     "overlay",
@@ -72,6 +73,8 @@ impl Target {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Wheel {
     pub enabled: bool,
+    #[serde(default = "default_trigger_key")]
+    pub trigger_key: String,
     pub hold_ms: u32,
     pub size: u32,
     pub opacity: f64,
@@ -79,10 +82,14 @@ pub struct Wheel {
     pub position: String,
     pub slots: [Option<Target>; 8],
 }
+fn default_trigger_key() -> String {
+    "G".into()
+}
 impl Default for Wheel {
     fn default() -> Self {
         Self {
             enabled: false,
+            trigger_key: default_trigger_key(),
             hold_ms: 350,
             size: 420,
             opacity: 0.94,
@@ -95,7 +102,7 @@ impl Default for Wheel {
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Config {
-    pub navigation: [Option<Target>; 8],
+    pub navigation: [Option<Target>; NAVIGATION_SLOTS],
     pub wheel: Wheel,
 }
 impl Config {
@@ -106,9 +113,15 @@ impl Config {
         }
     }
     pub fn validate(&self) -> Result<()> {
-        if self.navigation.len() != 8
+        if self.navigation.len() != NAVIGATION_SLOTS
             || self.wheel.slots.len() != 8
             || !(200..=1500).contains(&self.wheel.hold_ms)
+            || self.wheel.trigger_key.len() != 1
+            || !self
+                .wheel
+                .trigger_key
+                .bytes()
+                .all(|key| key.is_ascii_uppercase())
             || !(300..=640).contains(&self.wheel.size)
             || !self.wheel.opacity.is_finite()
             || !(0.35..=1.0).contains(&self.wheel.opacity)
@@ -161,28 +174,96 @@ fn revision(config: &Config) -> Result<String> {
         Sha256::digest(serde_json::to_vec(config).map_err(|_| error("快捷配置编码失败"))?)
     ))
 }
+/// 只对磁盘旧配置执行迁移；IPC 仍严格要求六项，不能把多余输入悄悄截断。
+fn decode_saved_config(text: &str) -> Result<(Config, bool)> {
+    let mut value: serde_json::Value =
+        serde_json::from_str(text).map_err(|_| error("快捷启动配置损坏，原件已保留"))?;
+    let migrated = if let Some(slots) = value
+        .get_mut("navigation")
+        .and_then(serde_json::Value::as_array_mut)
+        && slots.len() == 8
+    {
+        // 缩减前验证全部八项；无效目标不能借助迁移绕过白名单检查。
+        for target in slots.iter() {
+            let target: Option<Target> =
+                serde_json::from_value(target.clone()).map_err(|_| error("旧导航包含无效目标"))?;
+            if let Some(target) = target {
+                target.validate()?;
+            }
+        }
+        slots.truncate(NAVIGATION_SLOTS);
+        true
+    } else {
+        false
+    };
+    let config: Config =
+        serde_json::from_value(value).map_err(|_| error("快捷启动配置格式无效，原件已保留"))?;
+    config.validate()?;
+    Ok((config, migrated))
+}
+
+/// 内容寻址备份仅写入本应用目录，保留原第七、八项与完整轮盘配置。
+/// 重启反复读取旧配置不会重复生成备份；备份失败时不覆盖原配置。
+fn archive_navigation(root: &Path, text: &str) -> Result<()> {
+    use sha2::{Digest, Sha256};
+    use std::io::Write;
+    let backup = root.join(format!(
+        "navigation-eight-{:x}.json",
+        Sha256::digest(text.as_bytes())
+    ));
+    ensure_local_path(&backup)?;
+    match std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&backup)
+    {
+        Ok(mut file) => {
+            let result = file
+                .write_all(text.as_bytes())
+                .and_then(|()| file.sync_all());
+            if let Err(cause) = result {
+                drop(file);
+                let _ = std::fs::remove_file(&backup);
+                return Err(io_error(cause));
+            }
+        }
+        Err(cause) if cause.kind() == std::io::ErrorKind::AlreadyExists => {
+            if super::other_games::scan::read_small(&backup, 131072).as_deref() != Some(text) {
+                return Err(error("旧导航备份校验失败，原配置未覆盖"));
+            }
+        }
+        Err(cause) => return Err(io_error(cause)),
+    }
+    Ok(())
+}
 impl QuickLaunchState {
     pub fn new(root: &Path) -> Result<Self> {
         let root = root.join("home/quick-launch");
         ensure_local_path(&root)?;
         std::fs::create_dir_all(&root).map_err(io_error)?;
-        let loaded = (|| -> Result<Config> {
+        let loaded = (|| -> Result<(Config, Option<String>)> {
             Ok(
                 if let Some(text) =
                     super::other_games::scan::read_small(&root.join("config.json"), 131072)
                 {
-                    let config: Config = serde_json::from_str(&text)
-                        .map_err(|_| error("快捷启动配置损坏，原件已保留"))?;
-                    config.validate()?;
-                    config
+                    let (config, migrated) = decode_saved_config(&text)?;
+                    (config, migrated.then_some(text))
                 } else {
-                    Config::initial()
+                    (Config::initial(), None)
                 },
             )
         })();
         let mut warning = String::new();
         let config = match loaded {
-            Ok(value) => value,
+            Ok((value, legacy)) => {
+                if let Some(text) = legacy {
+                    archive_navigation(&root, &text)?;
+                    warning =
+                        "自定义导航已缩减为六项；原第七、八项已随完整旧配置备份，轮盘保持八向。"
+                            .into();
+                }
+                value
+            }
             Err(cause) => {
                 let file = root.join("config.json");
                 if file.is_file() {
@@ -430,7 +511,7 @@ impl QuickLaunchState {
                 "game": option.is_some_and(|item| matches!(item.target, Target::Shortcut{..} | Target::Steam{..}))
             })
         }).collect();
-        serde_json::json!({"enabled":config.wheel.enabled&&allowed,"holdMs":config.wheel.hold_ms,"size":config.wheel.size,"opacity":config.wheel.opacity,"desktopOnly":config.wheel.desktop_only,"position":config.wheel.position,"slots":slots})
+        serde_json::json!({"enabled":config.wheel.enabled&&allowed,"triggerKey":config.wheel.trigger_key,"holdMs":config.wheel.hold_ms,"size":config.wheel.size,"opacity":config.wheel.opacity,"desktopOnly":config.wheel.desktop_only,"position":config.wheel.position,"slots":slots})
     }
 }
 fn open_page(app: &tauri::AppHandle, path: &str) -> Result<()> {
@@ -441,6 +522,82 @@ fn open_page(app: &tauri::AppHandle, path: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn old_eight_navigation_preserves_six_and_entire_wheel() -> Result<()> {
+        let mut old = serde_json::to_value(Config::initial()).map_err(|_| error("测试编码失败"))?;
+        old["navigation"] = serde_json::json!([
+            {"kind":"page","id":"home"},null,null,null,null,
+            {"kind":"page","id":"hardware"},
+            {"kind":"page","id":"tools"},
+            {"kind":"page","id":"settings"}
+        ]);
+        old["wheel"]["enabled"] = true.into();
+        old["wheel"]["slots"][7] = serde_json::json!({"kind":"page","id":"other-games"});
+        let text = serde_json::to_string_pretty(&old).map_err(|_| error("测试编码失败"))?;
+        let (migrated, changed) = decode_saved_config(&text)?;
+        assert!(changed);
+        assert_eq!(migrated.navigation.len(), 6);
+        assert_eq!(
+            migrated.navigation[5],
+            Some(Target::Page {
+                id: "hardware".into()
+            })
+        );
+        assert!(migrated.wheel.enabled);
+        assert_eq!(
+            migrated.wheel.slots[7],
+            Some(Target::Page {
+                id: "other-games".into()
+            })
+        );
+        // 迁移只存在于磁盘读取路径；直接 IPC 反序列化八项必须失败。
+        assert!(serde_json::from_str::<Config>(&text).is_err());
+        let root = crate::services::tools::test_root("navigation-six")?;
+        archive_navigation(&root, &text)?;
+        archive_navigation(&root, &text)?;
+        let files: Vec<_> = std::fs::read_dir(&root).map_err(io_error)?.collect();
+        assert_eq!(files.len(), 1);
+        let entry = files
+            .into_iter()
+            .next()
+            .ok_or_else(|| error("缺少备份"))?
+            .map_err(io_error)?;
+        assert_eq!(
+            std::fs::read_to_string(entry.path()).map_err(io_error)?,
+            text
+        );
+        Ok(())
+    }
+    #[test]
+    fn migration_rejects_invalid_retired_slots_and_wrong_lengths() -> Result<()> {
+        let mut old = serde_json::to_value(Config::initial()).map_err(|_| error("测试编码失败"))?;
+        for count in [0, 5, 7, 9] {
+            old["navigation"] = serde_json::Value::Array(vec![serde_json::Value::Null; count]);
+            assert!(decode_saved_config(&old.to_string()).is_err());
+        }
+        old["navigation"] = serde_json::Value::Array(vec![serde_json::Value::Null; 8]);
+        old["navigation"][7] = serde_json::json!({"kind":"tool","id":"powershell"});
+        assert!(decode_saved_config(&old.to_string()).is_err());
+        Ok(())
+    }
+    #[test]
+    fn legacy_wheel_uses_letter_and_rejects_tab() -> Result<()> {
+        let mut value =
+            serde_json::to_value(Config::initial()).map_err(|_| error("测试配置失败"))?;
+        value["wheel"]
+            .as_object_mut()
+            .ok_or_else(|| error("缺少轮盘配置"))?
+            .remove("triggerKey");
+        let mut config: Config =
+            serde_json::from_value(value).map_err(|_| error("旧配置迁移失败"))?;
+        assert_eq!(config.wheel.trigger_key, "G");
+        assert!(config.validate().is_ok());
+        for key in ["Tab", "g", "Ctrl+G", "", "1", "中"] {
+            config.wheel.trigger_key = key.into();
+            assert!(config.validate().is_err());
+        }
+        Ok(())
+    }
     #[test]
     fn fixed_slots_and_closed_targets() {
         let mut config = Config::initial();

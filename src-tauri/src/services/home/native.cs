@@ -203,6 +203,9 @@ namespace Zhenjing.Home {
    bool active=manualOverride?manual:(config.autoGameMode&&hadGame);effective=active;
    uint foreground;GetWindowThreadProcessId(GetForegroundWindow(),out foreground);
    var exempt=Descendants(new HashSet<int>(new[]{(int)foreground,owner.Id,Process.GetCurrentProcess().Id}.Concat(gameFamily)),rows);
+   // 加速链路必须保留调度能力；连同 QuickFox 的服务/子进程一并排除后台压制。
+   // 此处只放宽压制范围，不以进程名称认定其官方身份；客户端启动仍由签名校验网关负责。
+   exempt.UnionWith(Descendants(new HashSet<int>(rows.Where(x=>x.name.StartsWith("quickfox",StringComparison.OrdinalIgnoreCase)||x.path.IndexOf("\\QuickFox\\",StringComparison.OrdinalIgnoreCase)>=0).Select(x=>x.pid)),rows));
    bool discarded=false;foreach(var original in owned.Values.ToArray())if(!rows.Any(x=>x.pid==original.pid&&x.created==original.created)){owned.Remove(original.pid);discarded=true;}if(discarded)Save();
    double elapsed=Math.Max(1,(DateTime.UtcNow-sampled).TotalMilliseconds);var keep=new HashSet<int>();
    if(active){foreach(var row in rows){

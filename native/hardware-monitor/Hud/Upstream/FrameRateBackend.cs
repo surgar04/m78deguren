@@ -111,19 +111,11 @@ public static class FrameRateBackend
         try
         {
             WindowsFrameTrace.CleanupOrphans();
-            string folder=Path.Combine(AppPaths.DataDirectory,"collectors","ECPFrames-PresentMon-2.6.0"); Directory.CreateDirectory(folder);
             var collector=CollectorFor(RuntimeInformation.OSArchitecture);
-            string path=Path.Combine(folder,collector.FileName);
-            bool valid=false;
-            if (File.Exists(path)) using(var existing=File.OpenRead(path)) valid=Convert.ToHexString(SHA256.HashData(existing))==collector.Sha256;
-            if (!valid)
-            {
-                using var source=Assembly.GetExecutingAssembly().GetManifestResourceStream(collector.Resource) ?? throw new IOException("PresentMon resource missing");
-                using(var output=File.Create(path)) source.CopyTo(output);
-                using var check=File.OpenRead(path); if (Convert.ToHexString(SHA256.HashData(check))!=collector.Sha256) throw new IOException("PresentMon integrity check failed");
-            }
-            string licensePath=Path.Combine(folder,"LICENSE.txt");
-            if(!File.Exists(licensePath)) { using var license=Assembly.GetExecutingAssembly().GetManifestResourceStream("EndfieldChargePlus.PresentMon.License"); if(license is not null) { using var output=File.Create(licensePath); license.CopyTo(output); } }
+            // 帧采集器是显式 MSI 组件；不再把可执行文件释放到可写的用户数据目录。
+            string path=Path.Combine(AppContext.BaseDirectory,collector.FileName);
+            using var collectorGuard=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);
+            if(Convert.ToHexString(SHA256.HashData(collectorGuard))!=collector.Sha256)throw new IOException("PresentMon integrity check failed; repair installation");
             var start=new ProcessStartInfo(path) { UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true };
             foreach(var arg in new[] { "--session_name",session,"--owner",Environment.ProcessId.ToString(CultureInfo.InvariantCulture) }) start.ArgumentList.Add(arg);
             process=Process.Start(start) ?? throw new IOException("Could not start PresentMon");

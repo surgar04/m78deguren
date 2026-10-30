@@ -4,15 +4,17 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- C# 主体和 .NET 运行库由 MSI 显式安装；不在运行时解包或依赖用户安装 SDK。 -->
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
     <PublishTrimmed>false</PublishTrimmed>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <DebugType>none</DebugType>
+    <Company>Sur方糖</Company>
+    <Product>臻境硬件与 HUD 引擎</Product>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
@@ -21,7 +23,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Hud/china-holidays.json" LogicalName="EndfieldChargePlus.china-holidays.json" />
     <EmbeddedResource Include="Hud/Locales/*.json" LogicalName="Zhenjing.Hud.Locale.%(Filename)" />
-    <EmbeddedResource Include="Hud/Collector/ECPFrames-x64.exe" LogicalName="EndfieldChargePlus.PresentMon" />
+    <None Include="Hud/Collector/ECPFrames-x64.exe" Link="ECPFrames-x64.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="../../src-tauri/resources/licenses/ECPFrames-MIT.txt" LogicalName="EndfieldChargePlus.PresentMon.License" />
   </ItemGroup>
 </Project>

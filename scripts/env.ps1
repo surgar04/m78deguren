@@ -48,6 +48,11 @@ $env:NUGET_HTTP_CACHE_PATH = Join-Path $projectRoot '.cache\nuget\http'
 $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR = Join-Path $projectRoot '.cache\dotnet\bundle'
 $env:PSModuleAnalysisCachePath = Join-Path $projectRoot '.cache\powershell\ModuleAnalysisCache'
 [IO.Directory]::CreateDirectory((Split-Path -Parent $env:PSModuleAnalysisCachePath)) | Out-Null
+# Windows PowerShell 子进程不能误加载父 PowerShell 7 的同名模块。
+# 仅影响当前进程/子进程；不修改用户配置，也不安装系统模块。
+if($PSVersionTable.PSVersion.Major -le 5){
+    $env:PSModulePath=Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/Modules'
+}
 $env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER = Join-Path $projectRoot '.tools\msvc\bin\link.exe'
 $env:CC_x86_64_pc_windows_msvc = Join-Path $projectRoot '.tools\msvc\bin\cl.exe'
 $env:CXX_x86_64_pc_windows_msvc = $env:CC_x86_64_pc_windows_msvc

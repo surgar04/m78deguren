@@ -15,14 +15,7 @@ pub(super) struct Worker {
     replies: Replies,
 }
 pub(super) fn source() -> String {
-    include_str!("native.ps1").replace(
-        "// __HOME_CS__",
-        &format!(
-            "{}\n{}",
-            include_str!("native.cs"),
-            include_str!("wheel.cs")
-        ),
-    )
+    include_str!("native.ps1").to_owned()
 }
 async fn bounded_line(
     reader: &mut BufReader<tokio::process::ChildStdout>,

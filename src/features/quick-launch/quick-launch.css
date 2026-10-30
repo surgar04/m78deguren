@@ -1,30 +1,43 @@
 .home-layout .dock:has(.custom-navigation) {
-  height: auto;
+  height: calc(100dvh - 40px);
   max-height: calc(100dvh - 40px);
   padding-bottom: 12px;
   min-height: 0;
   overflow: hidden;
 }
 .home-layout .dock:has(.custom-navigation) > nav {
-  flex: 1;
-  min-height: 120px;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: visible;
 }
+.home-layout .dock:has(.custom-navigation) .brand {
+  flex-shrink: 0;
+}
+/* 六个主入口保留呼吸间距；窗口较矮时仅自定义区滚动，六项始终单列。 */
 .custom-navigation {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 40px;
+  grid-template-rows: repeat(6, 40px) 24px;
+  justify-items: center;
+  gap: 10px;
   border-top: 1px solid var(--home-border, #d6e7e5);
-  margin-top: 10px;
-  padding-top: 9px;
-  flex-shrink: 0;
+  margin-top: 16px;
+  padding-top: 14px;
+  padding-bottom: 4px;
+  flex: 1 1 auto;
+  min-height: 80px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #87bfb45c transparent;
   position: relative;
 }
 .custom-navigation > button {
   min-width: 0;
-  height: 36px;
+  width: 44px;
+  height: 40px;
+  flex-shrink: 0;
   border: 1px solid transparent;
   background: rgba(255, 255, 255, 0.3);
   color: var(--home-muted, #6e8995);
@@ -44,13 +57,13 @@
   background: var(--home-mint, #adf0df);
 }
 .custom-navigation > button img {
-  width: 21px;
-  height: 21px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
 }
 .custom-navigation > button > .ui-icon {
-  width: 15px;
-  height: 15px;
+  width: 21px;
+  height: 21px;
 }
 .custom-navigation > button span {
   font-size: 8px;
@@ -58,6 +71,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.custom-navigation > button.configured span {
+  display: none;
 }
 .custom-navigation > button:not(.configured) span {
   position: absolute;
@@ -67,7 +83,7 @@
 }
 .custom-navigation .custom-navigation-edit {
   grid-column: 1/-1;
-  height: 20px;
+  height: 24px;
   background: transparent;
 }
 .custom-navigation .custom-navigation-edit .ui-icon {
@@ -82,6 +98,9 @@
   padding: 0 0 0 8px;
   border-top: 0;
   border-left: 1px solid var(--home-border, #d6e7e5);
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow-y: hidden;
 }
 .home-layout[data-nav='top'] .custom-navigation > button {
   width: 35px;
@@ -91,6 +110,8 @@
   width: 25px;
 }
 .home-layout[data-nav='top'] .dock:has(.custom-navigation) > nav {
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   overflow-y: hidden;
   overflow-x: auto;
@@ -224,7 +245,7 @@
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(180px, 0.8fr);
   gap: 20px;
-  align-items: center;
+  align-items: start;
 }
 .wheel-preview {
   position: relative;
@@ -232,44 +253,53 @@
   max-width: 370px;
   width: 100%;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    transparent 27%,
-    rgba(222, 246, 240, 0.6) 28%,
-    rgba(255, 255, 255, 0.6) 69%,
-    transparent 70%
-  );
 }
-.wheel-preview-slot {
-  position: absolute;
-  transform: translate(-50%, -50%);
+.wheel-preview-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.wheel-sector {
+  cursor: pointer;
+  outline: none;
+}
+.wheel-sector-shape {
+  fill: rgba(249, 255, 252, 0.85);
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 1.5;
+}
+.wheel-sector:hover .wheel-sector-shape {
+  fill: #d1f7ea;
+}
+.wheel-sector.selected .wheel-sector-shape {
+  fill: #b5f2df;
+  stroke: #59cab1;
+}
+.wheel-sector:focus-visible .wheel-sector-shape {
+  stroke: #13866e;
+  stroke-width: 3;
+}
+.wheel-sector-icon {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 5px;
-  width: 28%;
-  height: 24%;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  background: rgba(249, 255, 252, 0.85);
-  border-radius: 17px;
-  color: inherit;
-  min-width: 0;
-}
-.wheel-preview-slot.selected {
-  border-color: #59cab1;
-  background: #b5f2df;
-}
-.wheel-preview-slot > span {
-  font-size: 10px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.wheel-preview-slot > .ui-icon {
-  font-size: 21px;
+  width: 100%;
+  height: 100%;
   color: #36a990;
+}
+.wheel-sector-icon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+.wheel-sector-icon .ui-icon {
+  width: 26px;
+  height: 26px;
+}
+.wheel-sector-label {
+  font-size: 11px;
+  fill: currentColor;
 }
 .wheel-preview-center {
   display: flex;
@@ -333,12 +363,16 @@
   margin-right: 8px;
 }
 [data-theme='dark'] .quick-slot-picker,
-[data-theme='dark'] .wheel-preview-slot,
 [data-theme='dark'] .navigation-slot-editor > button {
   background: rgba(34, 64, 70, 0.8);
 }
-[data-theme='dark'] .wheel-preview-slot.selected {
-  background: #296e60;
+[data-theme='dark'] .wheel-sector-shape {
+  fill: rgba(34, 64, 70, 0.9);
+  stroke: #526f77;
+}
+[data-theme='dark'] .wheel-sector:is(.selected, :hover) .wheel-sector-shape {
+  fill: #296e60;
+  stroke: #59cab1;
 }
 [data-theme='dark'] .quick-target-picker :is(input, select),
 [data-theme='dark'] .wheel-options select {
@@ -349,7 +383,8 @@
     grid-template-columns: 1fr;
   }
   .wheel-preview {
-    max-width: 330px;
+    /* 紧凑设置面板的可视高度有限，整圈缩放展示，避免底部扇区被裁掉。 */
+    max-width: clamp(220px, calc(100dvh - 340px), 330px);
     margin: auto;
   }
   .wheel-options {
@@ -373,7 +408,30 @@
     max-width: 160px;
     overflow-x: auto;
   }
-  .dock:has(.custom-navigation) > nav {
-    min-height: 90px;
+}
+@media (max-height: 900px) {
+  .home-layout[data-nav='side'] .dock:has(.custom-navigation) .brand {
+    height: 64px;
+    margin-bottom: 8px;
+  }
+  .home-layout[data-nav='side'] .dock:has(.custom-navigation) .brand img {
+    width: 48px;
+    height: 64px;
+    transform: translateX(-50%);
+  }
+  .home-layout[data-nav='side'] .dock:has(.custom-navigation) > nav {
+    gap: 10px;
+  }
+  .home-layout[data-nav='side'] .dock:has(.custom-navigation) .dock-item {
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .home-layout[data-nav='side'] .custom-navigation {
+    grid-auto-rows: 38px;
+    grid-template-rows: repeat(6, 38px) 24px;
+    gap: 9px;
+  }
+  .home-layout[data-nav='side'] .custom-navigation > button:not(.custom-navigation-edit) {
+    height: 38px;
   }
 }

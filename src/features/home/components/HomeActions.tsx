@@ -365,9 +365,9 @@ export function RandomPicture({ notify, busy }: Omit<Props, 'close'>) {
     pending = refresh.isPending || save.isPending || wallpaper.isPending;
   return (
     <div className="home-picture-dialog">
-      {data && <img src={data.data} alt={`随机图片，摄影：${data.author}`} />}
+      {data && <img src={data.data} alt={`随机图片，来源：${data.source}`} />}
       <p className="home-source">
-        {data ? `${data.source} · 摄影：${data.author}` : '正在获取随机图片…'}
+        {data ? `${data.source}${data.author ? ` · ${data.author}` : ''}` : '正在获取随机图片…'}
       </p>
       {query.isError && <p role="alert">{errorMessage(query.error)}</p>}
       <div className="home-button-row">

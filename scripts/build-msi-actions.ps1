@@ -4,7 +4,8 @@ $ErrorActionPreference='Stop'
 $template=[IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri\installer\installer.wxs'))
 $generated=Join-Path $projectRoot '.cache\msi\installer.wxs'
 [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($generated))|Out-Null
-[IO.File]::WriteAllText($generated,$template.Replace('__PROJECT_ROOT__',[Security.SecurityElement]::Escape($projectRoot)),[Text.UTF8Encoding]::new($false))
+& (Join-Path $projectRoot '.tools/node/node.exe') (Join-Path $projectRoot 'scripts/generate-msi-components.ts')
+if($LASTEXITCODE -ne 0){throw 'MSI 显式文件布局生成失败'}
 $directory=Join-Path $env:CARGO_TARGET_DIR $Profile
 [IO.Directory]::CreateDirectory($directory)|Out-Null
 $source=Join-Path $projectRoot 'native\msi-actions\installer.cpp'

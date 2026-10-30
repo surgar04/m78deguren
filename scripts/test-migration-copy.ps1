@@ -3,8 +3,9 @@ $ErrorActionPreference='Stop'
 . "$PSScriptRoot\env.ps1"
 # Get-FileHash is a module-exported function in Windows PowerShell 5.1.
 # Load it before the isolated corruption test shadows that command name.
-Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
-$null=Get-Command 'Microsoft.PowerShell.Utility\Get-FileHash' -ErrorAction Stop
+Import-Module (Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/Modules/Microsoft.PowerShell.Utility/Microsoft.PowerShell.Utility.psd1') -Force -ErrorAction Stop
+$script:OriginalHashCommand=(Get-Command Get-FileHash -ErrorAction Stop).ScriptBlock
+if(-not $script:OriginalHashCommand){throw 'Expected the Windows PowerShell Get-FileHash function'}
 . ([ScriptBlock]::Create([IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/tools/windows/storage-policy.ps1'))))
 $tokens=$null;$parseErrors=$null
 $tree=[Management.Automation.Language.Parser]::ParseInput([IO.File]::ReadAllText((Join-Path $projectRoot 'src-tauri/src/services/onboarding/migration.ps1')),[ref]$tokens,[ref]$parseErrors)
@@ -20,7 +21,7 @@ Copy-Profile
 if($copied.Count -ne 2 -or (Test-Path -LiteralPath (Join-Path $newData 'unrelated'))){throw 'Copy must use the application directory allowlist'}
 foreach($file in $copied){if(-not (Test-Path -LiteralPath $file.source) -or (Get-FileHash -LiteralPath $file.target -Algorithm SHA256).Hash -cne $file.sha256){throw 'Copy changed originals or skipped destination verification'}}
 $newData=Join-Path $fixture 'corruption-target';$copied=[Collections.Generic.List[object]]::new()
-function Get-FileHash {param($LiteralPath,$Algorithm) if($LiteralPath.StartsWith($newData,[StringComparison]::OrdinalIgnoreCase)){return [pscustomobject]@{Hash='corrupted'}};return Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $LiteralPath -Algorithm $Algorithm}
+function Get-FileHash {param($LiteralPath,$Algorithm) if($LiteralPath.StartsWith($newData,[StringComparison]::OrdinalIgnoreCase)){return [pscustomobject]@{Hash='corrupted'}};return & $script:OriginalHashCommand -LiteralPath $LiteralPath -Algorithm $Algorithm}
 $rejected=$false;try{Copy-Profile}catch{$rejected=$true}
 if(-not $rejected -or -not (Test-Path -LiteralPath (Join-Path $oldData 'settings/data.json'))){throw 'Corrupt copies must fail before originals can be removed'}
 Write-Output 'Migration copy: allowlist, original retention, destination hashes and corruption refusal passed. No MSI executed.'

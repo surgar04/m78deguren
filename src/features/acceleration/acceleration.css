@@ -1,0 +1,237 @@
+/* 复用现有工具页的玻璃、强调色与按钮；窄窗口回到单列，不固定内容高度。 */
+.acceleration-panel {
+  gap: 18px;
+}
+.acceleration-intro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.acceleration-intro > div:nth-child(2) {
+  flex: 1;
+  min-width: 220px;
+}
+.acceleration-intro h2 {
+  font-size: clamp(19px, 2vw, 25px);
+  margin: 5px 0 8px;
+}
+.acceleration-intro p,
+.acceleration-card p,
+.acceleration-session p,
+.acceleration-footer p {
+  line-height: 1.75;
+  font-size: 13px;
+  margin: 0;
+}
+.acceleration-symbol {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--home-mint, #74e2c5) 28%, transparent);
+  color: var(--home-accent, #13977e);
+  font-size: 23px;
+}
+.acceleration-eyebrow {
+  color: #367f73;
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  font-weight: 700;
+}
+.acceleration-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.acceleration-card,
+.acceleration-session {
+  border: 1px solid #cfe3eb;
+  border-radius: 18px;
+  background: #f4fbff91;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+.acceleration-card-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  width: 100%;
+}
+.acceleration-card-title h3 {
+  font-size: 16px;
+  margin: 0;
+  flex: 1;
+  min-width: 100px;
+}
+.acceleration-step {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  background: #a8f1de6b;
+  color: #197d6b;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.acceleration-badge {
+  padding: 5px 8px;
+  background: #e1ebf1;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #526c7e;
+}
+.acceleration-badge.ready {
+  color: #087861;
+  background: #aff2dc;
+}
+.acceleration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.acceleration-client {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: #ffffff75;
+  border-radius: 12px;
+}
+.acceleration-client span,
+.acceleration-hint {
+  color: #5b7689;
+  font-size: 12px;
+}
+.acceleration-client code,
+.acceleration-game-path {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.acceleration-candidates {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+}
+.acceleration-candidates button {
+  text-align: left;
+  padding: 10px;
+  border: 1px solid #cfe3eb;
+  border-radius: 10px;
+  background: #ffffff70;
+  display: grid;
+  gap: 5px;
+}
+.acceleration-candidates button span {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.acceleration-game-label {
+  display: grid;
+  gap: 9px;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+}
+.acceleration-game-label select {
+  min-width: 0;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #bfd6e2;
+  border-radius: 10px;
+  background: #f5fcffcc;
+  color: inherit;
+}
+.acceleration-checklist {
+  padding-left: 22px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.acceleration-consent,
+.acceleration-footer label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.acceleration-consent input,
+.acceleration-footer input {
+  accent-color: var(--home-accent, #10ad91);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.acceleration-session {
+  background: #dff9efb3;
+}
+.acceleration-session.phase-failed {
+  background: #fff2e7bc;
+  border-color: #ead2b7;
+}
+.acceleration-footer {
+  display: grid;
+  gap: 12px;
+  padding: 0 4px;
+}
+.acceleration-notice,
+.acceleration-error {
+  border-radius: 10px;
+  padding: 12px;
+  background: #eaf5fc;
+  overflow-wrap: anywhere;
+}
+.acceleration-error {
+  color: #ad4141;
+}
+[data-theme='dark'] .acceleration-card,
+[data-theme='dark'] .acceleration-session {
+  background: #152a37c9;
+  border-color: #375365;
+}
+[data-theme='dark'] .acceleration-client,
+[data-theme='dark'] .acceleration-candidates button,
+[data-theme='dark'] .acceleration-game-label select {
+  background: #263e4dc9;
+  border-color: #375365;
+  color: inherit;
+}
+[data-theme='dark'] .acceleration-panel {
+  color: #d9e6ee;
+}
+[data-theme='dark'] .acceleration-eyebrow {
+  color: #8ee8d0;
+}
+[data-theme='dark'] .acceleration-step {
+  color: #c8fff2;
+  background: #1d5b54;
+}
+[data-theme='dark'] .acceleration-hint,
+[data-theme='dark'] .acceleration-client span {
+  color: #a5becf;
+}
+[data-theme='dark'] .acceleration-notice {
+  color: #d9e6ee;
+  background: #263e4d;
+}
+@media (max-width: 1050px) {
+  .acceleration-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .acceleration-card,
+  .acceleration-session {
+    padding: 14px;
+  }
+  .acceleration-intro > div:nth-child(2) {
+    min-width: 150px;
+  }
+}

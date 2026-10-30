@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { executeSettings } from '@/lib/desktop';
@@ -8,6 +9,7 @@ import { Failure } from './controls';
 import { useText } from './i18n';
 
 export function NetworkPanel() {
+  const navigate = useNavigate();
   const { t, locale } = useText();
   const client = useQueryClient();
   const servers = useSettingsQuery({ operation: 'network-sites' }, z.array(serverSchema).max(40));
@@ -33,6 +35,19 @@ export function NetworkPanel() {
   return (
     <>
       <h2>{t('网络')}</h2>
+      <div className="settings-actions">
+        <button
+          type="button"
+          onClick={() => {
+            void navigate('/tools/game-acceleration');
+          }}
+        >
+          QuickFox · 游戏加速准备
+        </button>
+      </div>
+      <p className="settings-note">
+        海外国服游戏可通过官方客户端准备线路；客户端位置和退出提醒在“游戏加速”中管理。以下站点连通测试不代表游戏延迟。
+      </p>
       <p className="settings-note">
         公网直连 HTTP HEAD 连通耗时，包括 DNS、TLS 和响应头，非 ICMP Ping。HTTP
         拒绝与网络失败分别展示；不访问本地、内网或重定向私有地址。

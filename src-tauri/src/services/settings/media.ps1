@@ -35,7 +35,8 @@ function Snapshot-Media {
 }
 # stdin 仅接收三种固定动作；不生成媒体键输入，避免拦截后再注入同键造成反馈循环。
 # Windows PowerShell 5 的同步 TextReader.ReadLineAsync 可能阻塞调用线程；用 CLR 线程池读取。
-Add-Type -TypeDefinition 'public static class XinjingMediaInput { public static System.Threading.Tasks.Task<string> Next() { return System.Threading.Tasks.Task.Run(() => System.Console.ReadLine()); } }'
+# __MANAGED_BRIDGE__
+Initialize-ZhenjingManaged
 $read=[XinjingMediaInput]::Next();$next=[DateTime]::UtcNow
 while(-not $owner.HasExited){
     if($read.IsCompleted){

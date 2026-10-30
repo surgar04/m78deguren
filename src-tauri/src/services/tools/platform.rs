@@ -73,18 +73,13 @@ pub async fn run_system(
 }
 
 fn system_source() -> String {
-    // 辅助源码同样进入内容哈希与只读锁保护；不从用户可写目录动态加载组件。
+    // 只组合固定脚本；C# 适配器已经编译为安装目录中的受校验 DLL。
     let source = SYSTEM_SCRIPT.replace("# __NATIVE_HELPERS__", include_str!("windows/native.ps1"));
     let source = source.replace("# __FILTER_HELPERS__", include_str!("windows/filter.ps1"));
-    let source = source.replace("// __NATIVE_CS__", include_str!("windows/native.cs"));
-    let source = source.replace("// __NVIDIA_CS__", include_str!("windows/nvidia.cs"));
-    let source = source.replace("// __DRIVER_CS__", include_str!("windows/driver.cs"));
-    let source = source.replace("// __COLOR_CS__", include_str!("windows/color.cs"));
     let source = source.replace(
         "# __OPTIMIZATION_HELPERS__",
         include_str!("windows/optimizer.ps1"),
     );
-    let source = source.replace("// __OPTIMIZER_CS__", include_str!("windows/optimizer.cs"));
     use base64::Engine;
     let source = source.replace(
         "__OPTIMIZER_CATALOG_BASE64__",
@@ -140,6 +135,7 @@ pub(crate) async fn spawn_embedded(
         "# __STORAGE_POLICY__",
         include_str!("windows/storage-policy.ps1"),
     );
+    let source = super::super::components::expand_managed_loader(source).await?;
     let scripts = root.join("scripts");
     super::check_local_path(&scripts).await?;
     tokio::fs::create_dir_all(&scripts)
@@ -188,6 +184,7 @@ pub(crate) async fn spawn_embedded(
     .await
     .map_err(|_| error("工具脚本保护任务失败"))??;
     let mut command = Command::new(powershell_executable()?);
+    super::super::components::configure_child(&mut command);
     configure_modules(&mut command)?;
     command
         .args([

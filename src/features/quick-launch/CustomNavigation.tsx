@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { faSliders } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from '@/features/home/components/Icon';
 import { useQuickLaunch, useQuickAction } from './repository';
-import { targetKey } from '@/lib/launcher-contracts';
+import { CUSTOM_NAVIGATION_SLOTS, targetKey } from '@/lib/launcher-contracts';
 import { LaunchTargetIcon } from './LaunchTargetIcon';
 import { errorMessage } from '@/lib/desktop';
 import './quick-launch.css';
@@ -11,7 +11,8 @@ export function CustomNavigation() {
   const query = useQuickLaunch(),
     action = useQuickAction(z.null()),
     navigate = useNavigate();
-  const slots = query.data?.config.navigation ?? Array.from({ length: 8 }, () => null);
+  const slots =
+    query.data?.config.navigation ?? Array.from({ length: CUSTOM_NAVIGATION_SLOTS }, () => null);
   return (
     <div className="custom-navigation" aria-label="自定义快捷导航">
       {slots.map((target, index) => {

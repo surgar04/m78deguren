@@ -1,4 +1,5 @@
 ﻿# 发行 EXE 的搬迁验收，不生成便携包；全部夹具、模拟用户目录和证据仍位于 D 盘。
+param([string]$InstallRoot)
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'env.ps1')
 $binary=Join-Path $env:CARGO_TARGET_DIR 'release/zhenjing.exe'
@@ -8,7 +9,20 @@ $fixture=Join-Path $projectRoot ('.cache/verification/distribution-machine/独�
 $install=Join-Path $fixture 'Program Files/臻境';$profile=Join-Path $fixture 'Users/测试 用户'
 $local=Join-Path $profile 'AppData/Local';$data=Join-Path $local 'Zhenjing';$temp=Join-Path $local 'Temp'
 foreach($folder in @($install,$local,$temp,(Join-Path $profile 'AppData/Roaming'))){[IO.Directory]::CreateDirectory($folder)|Out-Null}
-$copy=Join-Path $install 'zhenjing.exe';[IO.File]::Copy($binary,$copy,$false)
+$copy=Join-Path $install 'zhenjing.exe'
+# 发布版只从安装目录加载组件；验收完整安装布局，不能再只复制一个 EXE。
+$componentRoot=Join-Path $install 'components'
+[IO.Directory]::CreateDirectory($componentRoot)|Out-Null
+if($InstallRoot){
+    $source=[IO.Path]::GetFullPath($InstallRoot)
+    if(-not $source.StartsWith((Join-Path $projectRoot '.cache/verification/installed-layout-'),[StringComparison]::OrdinalIgnoreCase)){throw '验收来源必须是本机 MSI 解包重建目录'}
+    foreach($entry in Get-ChildItem -LiteralPath $source -Recurse -Force){if(($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw '安装布局不能含链接'}}
+    Copy-Item -Path (Join-Path $source '*') -Destination $install -Recurse -Force
+}else{
+    [IO.File]::Copy($binary,$copy,$false)
+    Copy-Item -LiteralPath (Join-Path $projectRoot 'src-tauri/resources/hardware-monitor/runtime') -Destination (Join-Path $componentRoot 'monitor') -Recurse
+    Copy-Item -LiteralPath (Join-Path $projectRoot 'src-tauri/resources/windows-bridge') -Destination (Join-Path $componentRoot 'windows-bridge') -Recurse
+}
 $start=[Diagnostics.ProcessStartInfo]::new($copy)
 $start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.WindowStyle=[Diagnostics.ProcessWindowStyle]::Hidden
 $start.WorkingDirectory=$fixture
@@ -35,7 +49,7 @@ try{
     while($watch.Elapsed.TotalSeconds -lt 90){
         if($process.HasExited){throw ('Release 提前退出：'+$process.ExitCode)}
         $log=Join-Path $data 'logs/zhenjing.log';$config=Join-Path $data 'settings/config.json'
-        $helper=[bool]@(Get-ChildItem -LiteralPath (Join-Path $data 'hardware') -Filter 'ZhenjingMonitor.exe' -Recurse -File -ErrorAction SilentlyContinue).Count
+        $helper=Test-Path -LiteralPath (Join-Path $componentRoot 'monitor/ZhenjingMonitor.dll')
         $configPresent=Test-Path -LiteralPath $config
         $historyRecorded=[bool]@(Get-ChildItem -LiteralPath (Join-Path $data 'hardware/history') -Filter '*.jsonl' -File -ErrorAction SilentlyContinue | Where-Object {$_.Length -gt 0}).Count
         $progressFile=Join-Path $data 'onboarding/progress.json'

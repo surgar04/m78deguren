@@ -39,6 +39,10 @@ jobs:
             } | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
           if (-not $vc -or -not $sdk) { throw 'Runner 未提供完整的 MSVC/Windows SDK' }
           ./scripts/bootstrap.ps1 -MsvcSource $vc.FullName -SdkSource $sdkRoot -SdkVersion $sdk.Name
+      - name: Prepare portable .NET SDK
+        shell: pwsh
+        working-directory: D:\新境
+        run: ./scripts/prepare-dotnet.ps1
       - name: Quality checks
         shell: pwsh
         working-directory: D:\新境

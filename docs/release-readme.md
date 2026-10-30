@@ -4,6 +4,8 @@
 
 需要 Windows 10/11 x64 和 Microsoft Edge WebView2。双击 MSI，按向导安装；默认按当前用户安装，可选择其他本地磁盘的独立目录。不需要安装 Node、Rust、pnpm、.NET SDK 或 Visual Studio。
 
+安装目录中的 `components/windows-bridge` 为预编译 Windows C# DLL，`components/monitor` 为硬件/HUD DLL、必要的进程宿主及自包含 .NET 运行库。请保留完整安装目录，不单独复制主 EXE；组件损坏时使用 MSI 修复。运行时不再动态编译 C# 或解包程序二进制。
+
 发布者和代码签名主体为 Sur方糖，使用自签名代码签名证书，不是公共 CA 身份认证，Windows 仍可能显示未知发布者或安全提示。安装包不要求用户导入证书，不修改系统证书信任；请从可信发布源获取，并通过 SHA256SUMS.txt 核对文件。
 
 旧 EXE 安装版请先卸载，再安装 MSI，用户数据会保留。0.5.x 更新器不识别新格式，需要手动迁移一次；后续版本继续使用 MSI 更新。
