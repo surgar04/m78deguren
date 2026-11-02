@@ -47,8 +47,10 @@ const run = (file: string, args: string[]) =>
   execFileSync(file, args, {
     encoding: 'utf8',
     windowsHide: true,
-    timeout: 120000,
-    maxBuffer: 2 * 1024 * 1024,
+    // 音乐组件超过一万个文件：Windows Installer 只读表查询和 CAB 清单均明显增大。
+    // 保留明确上限，不因验收机较慢而跳过实际包内校验。
+    timeout: 600000,
+    maxBuffer: 32 * 1024 * 1024,
   });
 async function find(path: string): Promise<string[]> {
   const result: string[] = [];
