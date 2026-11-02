@@ -12,7 +12,9 @@ WiX 3.14.1 使用固定 SHA256 的官方便携工具，全部位于 D 盘。自�
 
 MSI 更新清单固定为 zhenjing-update.json，使用与 Windows 代码签名独立的 Ed25519 私钥；客户端先验证仓库、平台、版本及清单签名，再验证下载长度和 SHA256，空闲时自动退出并以 /passive 调用 msiexec，无需再次确认；开发/本机验收环境不执行安装，失败尝试会持久化以阻止循环安装。MSI 失败由事务回滚，安装后的健康检查异常会保存备份和日志供修复，不仅恢复单个 EXE 而导致版本登记失配。
 
-公开目录仅包含当前版本 MSI、zhenjing-update.json、SHA256SUMS.txt、publisher.json、build-info.json、INSTALL.md。工具链、依赖、私钥、编译缓存与用户数据不作为发布包分发。
+公开目录仅包含当前版本 MSI、zhenjing-update.json、SHA256SUMS.txt、publisher.json、build-info.json、INSTALL.md。工具链、开发依赖、私钥、编译缓存与用户数据不作为发布包分发；音乐组件的锁定生产依赖属于应用运行时，由 MSI 显式安装并逐文件校验。
+
+0.10.0 起实际 MSI 解包验收是构建完成前的必经步骤：验证音乐宿主、硬件/HUD 和 Windows 组件的全部哈希及许可，不能只凭前端构建或 WiX 输出判断可分发。Spotify 原生插件依赖的 VC Runtime 放在音乐宿主及插件私有目录，不读取开发机安装的运行库。
 
 env:check、TypeScript、ESLint、前端测试、Rust fmt/Clippy/tests、installer:check 和真实 Windows Release 链接按适用范围验收。test:installer 只读查询 MSI 数据库、检查签名清单与哈希、核对包内主程序只允许 Tauri 安装类型标记的三个字节变化。test-package-lifecycle.ps1 仅在明确授权并传入 AllowInstall 时执行本机真实安装、维护重装、正常启动退出和卸载，并核验用户数据及文件保留；测试后清理本次应用登记、快捷方式和隔离目录。
 

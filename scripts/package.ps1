@@ -20,6 +20,9 @@ if($LASTEXITCODE -ne 0){throw 'Windows 安装包构建失败'}
 & "$PSScriptRoot\collect-installer.ps1" -Profile release
 & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot 'scripts\sign-release.ts')
 if($LASTEXITCODE -ne 0){throw 'MSI 发布清单生成失败'}
+# 必须解包核对实际 MSI，而不是仅凭 WiX 成功就报告可分发。
+& (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot 'scripts\verify-installer.ts')
+if($LASTEXITCODE -ne 0){throw 'MSI 包内组件、许可、签名清单或程序一致性验收失败；禁止发布。'}
 if($Publish){
     & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot 'scripts\publish-release.ts')
     if($LASTEXITCODE -ne 0){throw 'MSI 已在本地生成，但 GitHub Release 发布未完成；修复权限/网络后运行 release:publish 重试，不要宣称线上更新已生效。'}
