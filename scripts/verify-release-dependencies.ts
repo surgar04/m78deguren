@@ -12,10 +12,15 @@ const targets = [
   '.cache/cargo/target/release/zhenjing.exe.msi-actions.dll',
   'src-tauri/resources/hardware-monitor/runtime/ZhenjingMonitor.exe',
   'native/hardware-monitor/Hud/Collector/ECPFrames-x64.exe',
+  'src-tauri/resources/music-host/node.exe',
+  'src-tauri/resources/music-host/vcruntime140.dll',
+  'src-tauri/resources/music-host/node_modules/@lox-audioserver/node-librespot/prebuilds/win32-x64-msvc/librespot_addon.node',
 ];
 const runtime = 'src-tauri/resources/hardware-monitor/runtime';
 const runtimeFiles = await readdir(runtime);
 const runtimeNames = new Set(runtimeFiles.map((name) => name.toLowerCase()));
+const musicRuntime = 'src-tauri/resources/music-host';
+const musicRuntimeNames = new Set((await readdir(musicRuntime)).map((name) => name.toLowerCase()));
 for (const name of runtimeFiles) {
   if (/\.(?:dll|exe)$/iu.test(name)) {
     // 使用实际大小写，包含 .NET 原生宿主/CLR/本地 CRT；托管 DLL 也校验 PE 表。
@@ -24,6 +29,12 @@ for (const name of runtimeFiles) {
   }
 }
 const results = targets.map((path) => {
+  // 每个子进程只能依赖其安装目录中的运行库，不能用其他组件目录掩盖缺失文件。
+  const availableRuntimeNames = path.startsWith(`${musicRuntime}/`)
+    ? musicRuntimeNames
+    : path.startsWith(`${runtime}/`) || path.endsWith('ECPFrames-x64.exe')
+      ? runtimeNames
+      : new Set<string>();
   const output = execFileSync(
     resolve('.tools/msvc/bin/dumpbin.exe'),
     ['/dependents', resolve(path)],
@@ -62,7 +73,7 @@ const results = targets.map((path) => {
         name !== undefined &&
         // msvcrt.dll / msvcp_win.dll 是 Windows 组件；额外 VC++ 运行库带版本数字。
         (!/^(?:vcruntime|msvcp|msvcr|concrt)\d/iu.test(name) ||
-          runtimeNames.has(name.toLowerCase())),
+          availableRuntimeNames.has(name.toLowerCase())),
     ),
     `发现需要额外 VC++ 安装的直接依赖：${path}`,
   );

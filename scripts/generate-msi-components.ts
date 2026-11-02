@@ -39,6 +39,11 @@ for (const [sourceRoot, destinationRoot, manifestPath] of [
     'components/windows-bridge',
     'src-tauri/resources/windows-bridge/manifest.json',
   ],
+  [
+    'src-tauri/resources/music-host',
+    'components/music-host',
+    'src-tauri/resources/music-host/manifest.json',
+  ],
 ] as const) {
   const manifest = manifestSchema.parse(
     JSON.parse(await readFile(manifestPath, 'utf8')) as unknown,
@@ -51,7 +56,8 @@ for (const [sourceRoot, destinationRoot, manifestPath] of [
         !name.includes('\\') &&
         name
           .split('/')
-          .every((part) => /^[a-zA-Z0-9_.-]+$/u.test(part) && part !== '.' && part !== '..'),
+          // npm scope 仅允许单个前导 @；仍拒绝分隔符、空段及路径回退。
+          .every((part) => /^(?:@?[a-zA-Z0-9_.-]+)$/u.test(part) && part !== '.' && part !== '..'),
     );
     const source = resolve(sourceRoot, name),
       stat = await lstat(source);
@@ -65,7 +71,7 @@ for (const [sourceRoot, destinationRoot, manifestPath] of [
     );
     entries.push({ source, destination: posix.join(destinationRoot, name) });
   }
-  if (destinationRoot.endsWith('windows-bridge'))
+  if (destinationRoot.endsWith('windows-bridge') || destinationRoot.endsWith('music-host'))
     entries.push({
       source: resolve(manifestPath),
       destination: posix.join(destinationRoot, 'manifest.json'),
@@ -81,6 +87,22 @@ for (const name of await readdir('src-tauri/resources/licenses')) {
   });
 }
 const ids: string[] = [];
+// 音乐依赖包含多层 npm 目录。一次建立索引，避免递归时反复全表扫描。
+const filesByDirectory = new Map<string, Entry[]>();
+const childDirectories = new Map<string, Set<string>>();
+for (const entry of entries) {
+  let parent = posix.dirname(entry.destination);
+  const files = filesByDirectory.get(parent) ?? [];
+  files.push(entry);
+  filesByDirectory.set(parent, files);
+  while (parent !== 'components' && parent !== '.') {
+    const ancestor = posix.dirname(parent);
+    const children = childDirectories.get(ancestor) ?? new Set<string>();
+    children.add(parent);
+    childDirectories.set(ancestor, children);
+    parent = ancestor;
+  }
+}
 function component(entry: Entry) {
   const id = `Managed_${key(entry.destination)}`;
   ids.push(id);
@@ -90,22 +112,9 @@ function directory(path: string): string {
   const id = `ManagedDir_${key(path)}`,
     cleanup = `ManagedCleanup_${key(path)}`;
   ids.push(cleanup);
-  const files = entries
-    .filter((entry) => posix.dirname(entry.destination) === path)
-    .map(component)
-    .join('\n');
-  const children = [
-    ...new Set(
-      entries
-        .filter((entry) => entry.destination.startsWith(`${path}/`))
-        .map((entry) => entry.destination.slice(path.length + 1).split('/')[0])
-        .filter((part): part is string => !!part)
-        .filter((part) =>
-          entries.some((entry) => entry.destination.startsWith(`${path}/${part}/`)),
-        ),
-    ),
-  ].sort();
-  return `<Directory Id="${id}" Name="${xml(posix.basename(path))}">${files}${children.map((child) => directory(`${path}/${child}`)).join('\n')}<Component Id="${cleanup}" Guid="${guid(path + '/directory')}" Win64="yes"><RemoveFolder Id="Remove_${key(path)}" On="uninstall" /><RegistryValue Root="HKCU" Key="Software\\SurFangTang\\Zhenjing\\Components" Name="${cleanup}" Type="integer" Value="1" KeyPath="yes" /></Component></Directory>`;
+  const files = (filesByDirectory.get(path) ?? []).map(component).join('\n');
+  const children = [...(childDirectories.get(path) ?? [])].sort();
+  return `<Directory Id="${id}" Name="${xml(posix.basename(path))}">${files}${children.map(directory).join('\n')}<Component Id="${cleanup}" Guid="${guid(path + '/directory')}" Win64="yes"><RemoveFolder Id="Remove_${key(path)}" On="uninstall" /><RegistryValue Root="HKCU" Key="Software\\SurFangTang\\Zhenjing\\Components" Name="${cleanup}" Type="integer" Value="1" KeyPath="yes" /></Component></Directory>`;
 }
 const directories = directory('components');
 const licenses = `<DirectoryRef Id="LicensesDir">${licenseEntries.map(component).join('\n')}</DirectoryRef>`;

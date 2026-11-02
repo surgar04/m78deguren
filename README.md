@@ -12,7 +12,7 @@ Tauri 2 桌面工程，React + TypeScript 前端，Rust 后端，pnpm 管理前�
 
 面向 Windows 10/11 x64 用户分发 MSI 安装包，不需要安装 Node、Rust、pnpm、.NET SDK 或 Visual Studio。0.9.1 起采用显式 DLL 布局，硬件/HUD 引擎和自包含 .NET 运行库安装到 `components/monitor`，预编译 Windows 工具安装到 `components/windows-bridge`；不再运行时编译 C# 或解包程序二进制。部分温度、驱动和系统优化能力仍取决于设备支持和用户授权。
 
-完整目录、组件校验、必要 EXE 宿主与 MSI 文件管理规则见 [安装组件与 DLL 布局](docs/development/安装组件与DLL布局.md)。
+0.10.0 起音乐后端和独立 Node 运行时由 MSI 安装到 `components/music-host`，并携带 Spotify 原生插件需要的私有 VC Runtime；用户不需要自行安装 Node.js。完整目录、组件校验、必要 EXE 宿主与 MSI 文件管理规则见 [安装组件与 DLL 布局](docs/development/安装组件与DLL布局.md)。
 
 0.10.0 新增音乐页面，支持 QQ 音乐、网易云音乐、YouTube Music、Spotify 和本地音乐库，提供封面与歌词匹配、17 种沉浸歌词演绎以及普通模式下的桌面歌词。在线播放与账号能力取决于平台授权、地区和服务状态。Folia 与 AMLL 的来源、许可和改动范围见 [音乐页面与 Folia 接入](docs/development/音乐页面与Folia接入.md) 及 [第三方许可](THIRD_PARTY_NOTICES.md)。本项目源码以 AGPL-3.0 提供，发行包包含相应许可，不附带第三方账号或付费内容权限。
 

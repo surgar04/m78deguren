@@ -62,6 +62,27 @@ for (const name of await readdir(join(root, 'native/music-host'))) {
     await cp(join(root, 'native/music-host', name), join(output, name), { recursive: true });
 }
 if (!process.argv.includes('--refresh-only')) await cp(process.execPath, join(output, 'node.exe'));
+// librespot 的 Windows 原生插件依赖 VC Runtime。仅从已校验的现有应用组件复制，
+// 放在 Node.exe 同目录参与 Windows 私有 DLL 搜索；不要求用户安装全局运行库。
+const crtRoot = join(root, 'src-tauri/resources/hardware-monitor');
+const crtManifest = JSON.parse(await readFile(join(crtRoot, 'manifest.json'), 'utf8')) as {
+  files?: Record<string, unknown>;
+};
+const crtName = 'vcruntime140.dll';
+const crtExpected = crtManifest.files?.[crtName];
+if (typeof crtExpected !== 'string' || !/^[a-f0-9]{64}$/u.test(crtExpected))
+  throw Error('音乐组件缺少可信 VC Runtime 来源摘要');
+const crtSource = join(crtRoot, 'runtime', crtName);
+if (!(await lstat(crtSource)).isFile()) throw Error('VC Runtime 来源文件类型不正确');
+const crtBytes = await readFile(crtSource);
+if (createHash('sha256').update(crtBytes).digest('hex') !== crtExpected)
+  throw Error('VC Runtime 来源摘要不一致');
+await writeFile(join(output, crtName), crtBytes);
+// Node 按原生插件目录执行受限 DLL 搜索；同时就近部署，兼容其加载标志与 PATH 隔离。
+await writeFile(
+  join(output, 'node_modules/@lox-audioserver/node-librespot/prebuilds/win32-x64-msvc', crtName),
+  crtBytes,
+);
 const files: Record<string, string> = {};
 const prebuilds = join(output, 'node_modules/@lox-audioserver/node-librespot/prebuilds');
 for (const name of await readdir(prebuilds))
