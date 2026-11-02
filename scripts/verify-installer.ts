@@ -122,6 +122,24 @@ try {
   }
   const extracted = join(temporary, 'files');
   run(seven, ['x', '-sccUTF-8', installer, `-o${extracted}`, '-y']);
+  // 多 CAB 的 MSI 会被 7-Zip 识别为复合文档，第一层只释放 CAB。
+  // 分别校验、展开每个内嵌 CAB，避免把“没有 MainExe”误判为安装包缺文件。
+  const cabinets = (await readdir(extracted, { withFileTypes: true })).filter(
+    (entry) => entry.isFile() && /^[\w.-]+\.cab$/iu.test(entry.name),
+  );
+  for (const [index, cabinet] of cabinets.entries()) {
+    const cabinetPath = join(extracted, cabinet.name);
+    const cabinetListing = run(seven, ['l', '-slt', '-sccUTF-8', cabinetPath]);
+    for (const match of cabinetListing.matchAll(/^Path = (.+)\r?$/gmu)) {
+      const path = match[1]?.trim();
+      if (!path || path === cabinetPath) continue;
+      assert.ok(
+        !isAbsolute(path) && !path.includes(':') && !path.split(/[\\/]/u).includes('..'),
+        '内嵌 CAB 包含越界路径',
+      );
+    }
+    run(seven, ['x', '-sccUTF-8', cabinetPath, `-o${join(extracted, `payload-${index}`)}`, '-y']);
+  }
   const images = await find(extracted);
   const installedDirectory = resolve('.cache/verification', `installed-layout-${randomUUID()}`);
   const installed = await materializeMsiLayout(table, extracted, installedDirectory);

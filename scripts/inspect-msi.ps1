@@ -1,22 +1,9 @@
 ﻿param([Parameter(Mandatory=$true)][string]$Path,[Parameter(Mandatory=$true)][string]$Output)
 $ErrorActionPreference='Stop'
-# Windows Installer COM 以只读方式打开数据库；不执行安装动作、不创建 MSI 产品登记。
-$installer=New-Object -ComObject WindowsInstaller.Installer
-$database=$installer.OpenDatabase([IO.Path]::GetFullPath($Path),0)
-function Query([string]$sql,[int]$columns){
-    $view=$database.OpenView($sql);$null=$view.Execute()
-    try{while($record=$view.Fetch()){
-        try{$row=@();for($i=1;$i -le $columns;$i++){$row+=,[string]$record.StringData($i)};Write-Output ([pscustomobject]@{cells=$row})}finally{$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($record)}
-    }}finally{$null=$view.Close();$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($view)}
-}
-try{
-    $properties=@{};foreach($row in Query 'SELECT `Property`,`Value` FROM `Property`' 2){$properties[$row.cells[0]]=$row.cells[1]}
-    $files=@(Query 'SELECT `File`,`FileName`,`Version`,`Component_`,`FileSize` FROM `File`' 5)
-    $directories=@(Query 'SELECT `Directory`,`Directory_Parent`,`DefaultDir` FROM `Directory`' 3)
-    $components=@(Query 'SELECT `Component`,`Directory_` FROM `Component`' 2)
-    $registry=@(Query 'SELECT `Root`,`Key`,`Name` FROM `Registry`' 3)
-    $summary=$database.SummaryInformation(0)
-    try{$template=$summary.Property(7)}finally{$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($summary)}
-    $data=@{properties=$properties;files=$files;directories=$directories;components=$components;registry=$registry;template=$template}
-    [IO.File]::WriteAllText([IO.Path]::GetFullPath($Output),($data|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
-}finally{$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($database);$null=[Runtime.InteropServices.Marshal]::ReleaseComObject($installer)}
+$msiInspectionInput=[IO.Path]::GetFullPath($Path)
+$msiInspectionOutput=[IO.Path]::GetFullPath($Output)
+. "$PSScriptRoot\env.ps1"
+# 批量读取相同的只读 MSI 接口，避免万级文件逐字段跨 COM/PowerShell 调度。
+# 编译仅在 D 盘临时目录进行；该构建工具不进入应用安装包。
+Add-Type -ReferencedAssemblies System.Web.Extensions -TypeDefinition ([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'msi-inspector.cs')))
+[Zhenjing.Build.MsiInspector]::ReadToFile($msiInspectionInput,$msiInspectionOutput)
