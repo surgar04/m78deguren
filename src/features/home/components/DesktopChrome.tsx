@@ -1,3 +1,4 @@
+import { requiresConfirmation } from '@/lib/confirmation-policy';
 import { useSettingsUi } from '@/features/settings/ui-store';
 import { useHome } from '../repository';
 import { useHomeAction } from '../repository';
@@ -6,6 +7,7 @@ import { useSettingsSnapshot } from '@/features/settings/repository';
 import { useText } from '@/features/settings/i18n';
 import {
   faHouse,
+  faMusic,
   faGamepad,
   faDisplay,
   faBriefcase,
@@ -24,7 +26,6 @@ import { Icon } from './Icon';
 import type { DialogState } from '../types';
 import { useSetupStatus } from '@/features/onboarding/repository';
 import { useSteamImage } from '@/features/library/repository';
-import { CustomNavigation } from '@/features/quick-launch/CustomNavigation';
 
 interface ChromeProps {
   open: (dialog: DialogState) => void;
@@ -34,7 +35,7 @@ interface ChromeProps {
 export function Dock({
   active = 'home',
 }: {
-  active?: 'home' | 'library' | 'hardware' | 'tools' | 'optimization' | 'settings';
+  active?: 'home' | 'library' | 'hardware' | 'tools' | 'optimization' | 'music' | 'settings';
 }) {
   const navigate = useNavigate();
   const ui = useSettingsUi();
@@ -45,12 +46,19 @@ export function Dock({
     hardware: { label: '硬件', icon: faDisplay, path: '/hardware' },
     tools: { label: '工具', icon: faBriefcase, path: '/tools' },
     optimization: { label: '优化', icon: faRocket, path: '/optimization' },
+    music: { label: '音乐', icon: faMusic, path: '/music' },
     settings: { label: '设置', icon: faGear, path: '/settings' },
   } as const;
   return (
     <aside className="dock glass" aria-label="主导航">
       <button type="button" className="brand" aria-label="臻境" onClick={() => navigate('/')}>
-        <img src="/assets/home/brand.svg" alt="臻境 ZHENJING" width="56" height="78" />
+        <img
+          data-brand-logo
+          src="/assets/home/brand.png"
+          alt="臻境 ZHENJING"
+          width="56"
+          height="78"
+        />
       </button>
       <nav aria-label="主导航">
         {ui.navOrder
@@ -73,7 +81,6 @@ export function Dock({
             );
           })}
       </nav>
-      <CustomNavigation />
     </aside>
   );
 }
@@ -122,7 +129,7 @@ export function TopBar({ open, notify }: ChromeProps) {
               disabled={!home.data || mode.isPending}
               onClick={() => {
                 const enabled = !home.data?.runtime.effective;
-                if (settings.data?.config.confirmActions !== false)
+                if (requiresConfirmation(settings.data?.config.confirmActions, 'game-mode'))
                   open({ kind: 'game-mode', manual: enabled });
                 else
                   mode.mutate(

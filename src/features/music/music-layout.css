@@ -1,0 +1,692 @@
+/* 曲库拥有主要空间；只有列表主体滚动，工具栏与播放条不挤占列表行。 */
+.music-main {
+  padding: 8px 0 10px;
+}
+.music-heading {
+  margin: 10px 0 14px;
+  gap: 12px;
+}
+.music-heading h1 {
+  font-size: 26px;
+  margin: 0 0 3px;
+  font-weight: 650;
+}
+.music-heading p {
+  font-size: 12px;
+}
+.music-eyebrow {
+  display: none;
+}
+.music-heading-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.music-heading-actions > button {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 12px;
+}
+.music-workbench {
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: stretch;
+  height: calc(100dvh - 260px);
+  min-height: 320px;
+  gap: 14px;
+}
+.music-browser {
+  min-height: 0;
+  min-width: 0;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.music-library-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+}
+.music-platforms {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 3px;
+  padding: 3px;
+}
+.music-platforms button {
+  flex: 1;
+  min-width: 0;
+  min-height: 32px;
+  padding-inline: 9px;
+  font-size: 11px;
+}
+.music-account {
+  margin: 0;
+  flex-shrink: 0;
+  gap: 8px;
+  font-size: 11px;
+}
+.music-account > span {
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.music-account button {
+  white-space: nowrap;
+}
+.music-library-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #7696a51a;
+}
+.music-tabs {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.music-tabs button {
+  font-size: 12px;
+  min-height: 34px;
+  padding: 5px 10px;
+}
+.music-search {
+  flex: 1;
+  min-width: 160px;
+  margin: 0;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: 10px;
+}
+.music-search input {
+  height: 34px;
+  font-size: 12px;
+}
+.music-browser-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #89bfb655 transparent;
+  padding-top: 8px;
+}
+.music-track-list {
+  min-height: 0;
+  overflow: visible;
+  flex: none;
+}
+.music-track {
+  min-height: 58px;
+  padding: 6px 8px;
+  gap: 8px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 58px;
+}
+.music-track-start {
+  gap: 10px;
+}
+.music-track-start > span:first-child {
+  width: 22px;
+  flex-shrink: 0;
+}
+.music-track .music-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+.music-track-start b {
+  font-size: 13px;
+}
+.music-track-start small {
+  font-size: 11px;
+}
+.music-load-more {
+  display: block;
+  width: calc(100% - 12px);
+  margin: 10px auto 4px;
+  padding: 10px;
+}
+.music-back {
+  display: block;
+  text-align: left;
+  width: 100%;
+  padding: 4px 8px 9px;
+  font-size: 12px;
+}
+.music-collections {
+  min-height: 0;
+  overflow: visible;
+  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+  gap: 14px;
+}
+.music-collections > button {
+  min-width: 0;
+  text-align: left;
+}
+.music-collections .music-cover {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 14px;
+}
+.music-collections b,
+.music-collections small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-empty {
+  min-height: 180px;
+  padding: 24px 12px;
+}
+.music-now {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  padding: 18px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: #89bfb655 transparent;
+}
+.music-now .music-cover.large {
+  width: min(100%, 148px);
+  max-width: 148px;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 16px auto;
+}
+.music-now h2 {
+  font-size: 18px;
+  margin-top: 8px;
+}
+.music-now > p {
+  font-size: 11px;
+}
+.music-now-top {
+  font-size: 10px;
+}
+.music-lyric-preview {
+  height: 126px;
+  margin: 16px 0;
+}
+.music-match-button,
+.music-now-settings {
+  width: 100%;
+  margin: 5px 0;
+  font-size: 11px;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid #789d9c22;
+  background: #ffffff3b;
+  color: inherit;
+}
+.music-controls {
+  padding: 12px 18px;
+  margin-top: 12px;
+  border-radius: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 1.4fr) 100px;
+  gap: 16px;
+}
+.music-controls .music-cover {
+  width: 42px;
+  height: 42px;
+}
+.music-controls .music-repeat {
+  position: static;
+}
+.music-mini-track b {
+  font-size: 12px;
+}
+.music-mini-track small {
+  font-size: 11px;
+}
+.music-attribution {
+  margin: 9px 0 0;
+  font-size: 9px;
+}
+.music-effects-dialog .music-performance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+.music-effects-dialog .music-performance label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.music-effects-dialog .music-performance select {
+  width: 100%;
+}
+.music-effects-dialog .music-help {
+  display: block;
+  margin-top: 18px;
+}
+.music-cover {
+  position: relative;
+  overflow: hidden;
+}
+.music-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.music-cover .music-cover-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+.music-cover[data-loading='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ffffff20;
+}
+.music-cover[data-failed='true'] .music-cover-fallback {
+  opacity: 0.65;
+}
+@media (min-width: 851px) {
+  .home-layout:has(.music-main) {
+    height: 100dvh;
+  }
+  .home-workspace:has(.music-main) {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .music-main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .music-workbench {
+    flex: 1;
+    height: 0;
+    min-height: 0;
+  }
+  .music-heading,
+  .music-controls,
+  .music-attribution {
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 1150px) {
+  .music-workbench {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+  .music-library-filters {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .music-tabs {
+    flex: 1;
+  }
+  .music-search {
+    min-width: 180px;
+  }
+  .music-platforms button {
+    padding-inline: 6px;
+    font-size: 10px;
+  }
+  .music-account > span {
+    max-width: 85px;
+  }
+}
+/* 矮窗口优先保住曲库操作区，改为整页纵向滚动，避免工具栏再次把列表压成一行。 */
+@media (min-width: 851px) and (max-height: 680px) {
+  .home-layout:has(.music-main),
+  .home-workspace:has(.music-main) {
+    height: auto;
+  }
+  .music-main {
+    display: block;
+  }
+  .music-workbench {
+    height: 360px;
+    min-height: 360px;
+  }
+  .music-controls {
+    position: sticky;
+    bottom: 12px;
+    z-index: 30;
+  }
+}
+@media (max-width: 850px) {
+  .music-workbench {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+  .music-browser {
+    height: min(62dvh, 550px);
+    min-height: 370px;
+  }
+  .music-now {
+    height: auto;
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 4px 15px;
+    text-align: left;
+    overflow: visible;
+    align-items: center;
+    padding: 15px;
+  }
+  .music-now-top {
+    grid-column: 1/-1;
+  }
+  .music-now .music-cover.large {
+    width: 84px;
+    height: 84px;
+    margin: 0;
+    grid-row: 2/5;
+  }
+  .music-now h2,
+  .music-now > p,
+  .music-lyric-preview {
+    grid-column: 2;
+  }
+  .music-now h2 {
+    margin: 0;
+  }
+  .music-lyric-preview {
+    height: 66px;
+    margin: 4px 0;
+  }
+  .music-match-button,
+  .music-now-settings {
+    grid-column: auto;
+  }
+  .music-heading-actions > button {
+    padding: 8px;
+    font-size: 11px;
+  }
+  .music-heading h1 {
+    font-size: 23px;
+  }
+  .music-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 1.2fr);
+  }
+  .music-volume {
+    display: none;
+  }
+  .music-track-duration {
+    display: block;
+  }
+  .music-library-filters {
+    flex-wrap: nowrap;
+  }
+}
+/* 平台授权采用稳定的左右分区：左侧说明和权益，右侧只保留当前授权动作。 */
+.home-modal.music-login-dialog {
+  width: min(760px, calc(100vw - 48px));
+  max-width: 760px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #f5fbfaf2;
+}
+.music-login-dialog .modal-header {
+  padding: 18px 24px;
+  margin: 0;
+  border-bottom: 1px solid #7c9d9d20;
+}
+.music-login-layout {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  min-height: 430px;
+}
+.music-login-intro {
+  padding: 34px 28px;
+  background: linear-gradient(155deg, #c1f5e8, #e2f0f8 85%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  color: #234c4b;
+}
+.music-login-intro.provider-spotify {
+  background: linear-gradient(155deg, #c5f7d5, #edf7ec);
+}
+.music-login-intro.provider-ytm {
+  background: linear-gradient(155deg, #ffe0de, #f3eafa);
+}
+.music-login-intro.provider-netease {
+  background: linear-gradient(155deg, #ffe5e3, #f7f0e5);
+}
+.music-login-brand {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border: 1px solid #ffffffa6;
+  border-radius: 19px;
+  background: #ffffff82;
+  font-size: 30px;
+}
+.music-login-kicker {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+}
+.music-login-intro h3 {
+  font-size: 25px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.music-login-intro p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #537475;
+}
+.music-login-privacy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 25px;
+  font-size: 10px;
+  line-height: 1.8;
+  color: #537475;
+}
+.music-login-privacy > svg {
+  width: 22px;
+  height: 22px;
+}
+.music-login-action {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  min-width: 0;
+  color: #1b3848;
+}
+.music-login-action h3 {
+  font-size: 17px;
+  font-weight: 600;
+}
+.music-login-action > p {
+  font-size: 11px;
+  color: #67828d;
+  line-height: 1.7;
+}
+.music-login-methods {
+  display: flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: #e6efee;
+  gap: 3px;
+  width: 100%;
+}
+.music-login-methods button {
+  flex: 1;
+  padding: 7px 5px;
+  font-size: 11px;
+  border: 0;
+  background: transparent;
+  color: #64818a;
+  border-radius: 8px;
+}
+.music-login-methods button[aria-pressed='true'] {
+  background: #fff;
+  color: #173f46;
+  box-shadow: 0 1px 4px #36635712;
+}
+.music-login-code {
+  width: 176px;
+  height: 176px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #dceae7;
+  color: #6d9b96;
+  padding: 10px;
+}
+.music-login-code > svg {
+  width: 45px;
+  height: 45px;
+}
+.music-login-code > span {
+  font-size: 10px;
+  line-height: 1.7;
+}
+.music-login-code img {
+  display: block;
+  width: 154px;
+  height: 154px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.music-login-code.browser {
+  background: linear-gradient(140deg, #eaf9f5, #f7faff);
+  border-style: dashed;
+}
+.music-login-status {
+  font-size: 12px;
+  color: #66828a;
+  min-height: 19px;
+}
+.music-login-status.connected {
+  color: #159c80;
+}
+.music-login-error {
+  max-height: 72px;
+  overflow: auto;
+  color: #ac5959 !important;
+}
+.music-login-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border-radius: 12px;
+}
+.music-login-action > small {
+  font-size: 10px;
+  line-height: 1.7;
+  color: #7c929a;
+}
+.music-spin {
+  animation: music-spin 1s linear infinite;
+}
+@keyframes music-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.music-desktop-options {
+  display: grid;
+  gap: 18px;
+  margin: 20px 0;
+}
+.music-desktop-options > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 13px;
+}
+.music-desktop-options small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #6e8596;
+}
+.music-desktop-options input[type='range'] {
+  width: 155px;
+}
+.music-desktop-options input {
+  accent-color: #33b89c;
+}
+.music-desktop-options > button {
+  padding: 9px;
+  background: #e5f6f0;
+  border: 1px solid #c7e2dc;
+  border-radius: 10px;
+  color: #2c655d;
+  font: inherit;
+  cursor: pointer;
+}
+@media (max-width: 850px) {
+  .music-library-filters {
+    flex-wrap: wrap;
+  }
+}
+@media (max-height: 650px) {
+  .music-login-dialog {
+    max-height: calc(100dvh - 28px);
+    overflow: auto !important;
+  }
+  .music-login-layout {
+    min-height: 0;
+  }
+  .music-login-intro,
+  .music-login-action {
+    padding: 20px;
+  }
+  .music-login-code {
+    width: 142px;
+    height: 142px;
+  }
+  .music-login-code img {
+    width: 120px;
+    height: 120px;
+  }
+}
+@media (max-width: 560px) {
+  .music-login-layout {
+    grid-template-columns: 1fr;
+  }
+  .music-login-intro {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-spin {
+    animation: none;
+  }
+}

@@ -1,0 +1,116 @@
+.desktop-lyrics-document,
+.desktop-lyrics-document body,
+.desktop-lyrics-document #root {
+  background: transparent !important;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  color: #fff;
+}
+.desktop-lyrics-document .skip-link {
+  display: none;
+}
+.desktop-lyrics-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #132b371e, transparent);
+  border: 1px solid #ffffff20;
+  border-radius: 18px;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  overflow: hidden;
+}
+.desktop-lyrics-overlay.locked {
+  background: transparent;
+  border-color: transparent;
+}
+.desktop-lyrics-toolbar {
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.desktop-lyrics-overlay:hover .desktop-lyrics-toolbar,
+.desktop-lyrics-overlay:focus-within .desktop-lyrics-toolbar {
+  opacity: 1;
+}
+.desktop-lyrics-toolbar button {
+  font: 12px system-ui;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  background: #153b4bc9;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+.desktop-lyrics-drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-align: left;
+  cursor: move !important;
+  min-width: 0;
+  touch-action: none;
+}
+.desktop-lyrics-drag span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.desktop-lyrics-renderer {
+  position: absolute;
+  inset: 30px 14px 4px;
+  --amll-lp-font-size: var(--desktop-lyric-size);
+  --amll-lp-color: #a1ffe8;
+  --amll-lp-hover-bg-color: transparent;
+  --amll-lp-line-padding-x: 8px;
+  text-shadow:
+    0 2px 5px #000,
+    0 0 2px #000,
+    1px 1px 0 #143f46;
+  text-align: center;
+  mask-image: linear-gradient(transparent, #000 8%, #000 86%, transparent);
+}
+.desktop-lyrics-renderer [class*='lyricLine'] {
+  text-align: center;
+}
+.desktop-lyrics-empty {
+  position: absolute;
+  inset: 36px 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-shadow: 0 2px 5px #000;
+  pointer-events: none;
+}
+.desktop-lyrics-empty b {
+  font-size: var(--desktop-lyric-size);
+}
+.desktop-lyrics-empty span {
+  font-size: 14px;
+}
+.desktop-lyrics-error {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  color: #ffdfbb;
+  background: #172e3eb8;
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .desktop-lyrics-toolbar {
+    transition: none;
+  }
+}

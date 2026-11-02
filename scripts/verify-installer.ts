@@ -127,6 +127,8 @@ try {
   for (const [manifestPath, componentRoot] of [
     ['src-tauri/resources/hardware-monitor/manifest.json', 'components/monitor'],
     ['src-tauri/resources/windows-bridge/manifest.json', 'components/windows-bridge'],
+    // 音乐宿主是本版新增的真实运行组件，不能只验证前端页面已被打包。
+    ['src-tauri/resources/music-host/manifest.json', 'components/music-host'],
   ] as const) {
     const manifest = componentManifest.parse(
       JSON.parse(await readFile(manifestPath, 'utf8')) as unknown,
@@ -141,6 +143,10 @@ try {
     'licenses/MiSans-License.pdf',
     'licenses/Sysinfo-MIT.txt',
     'licenses/VC-Redist-License.rtf',
+    'licenses/Folia-AGPL-3.0.txt',
+    'licenses/AMLL-AGPL-3.0.txt',
+    'licenses/Node-LICENSE.txt',
+    'licenses/Noto-Serif-SC-OFL.txt',
   ])
     assert.ok(installed.has(name), `MSI 缺少许可：${name}`);
   await writeFile(

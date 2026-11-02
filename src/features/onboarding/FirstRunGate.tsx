@@ -10,6 +10,7 @@ export function FirstRunGate({ children }: { children: ReactNode }) {
     desktopWindowLabel() !== 'main' &&
     [
       '/hud',
+      '/desktop-lyrics',
       '/desktop-island',
       '/performance-overlay',
       '/tool-overlay',

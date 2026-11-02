@@ -8,7 +8,6 @@ import {
 } from '@/lib/launcher-contracts';
 describe('原生快捷入口边界', () => {
   const config = {
-    navigation: Array.from({ length: 6 }, () => null),
     wheel: {
       enabled: false,
       holdMs: 350,
@@ -19,7 +18,7 @@ describe('原生快捷入口边界', () => {
       slots: Array.from({ length: 8 }, () => null),
     },
   };
-  it('导航固定六项、轮盘固定八向，拒绝脚本和自由路径', () => {
+  it('仅保留八向轮盘，拒绝退役导航、脚本和自由路径', () => {
     expect(quickConfigSchema.safeParse(config).success).toBe(true);
     expect(quickConfigSchema.safeParse({ ...config, navigation: [null] }).success).toBe(false);
     expect(
@@ -36,7 +35,7 @@ describe('原生快捷入口边界', () => {
       false,
     );
     expect(launchTargetSchema.safeParse({ kind: 'tool', id: 'powershell' }).success).toBe(false);
-    expect(quickRequestSchema.safeParse({ operation: 'navigation', index: 5 }).success).toBe(true);
+    expect(quickRequestSchema.safeParse({ operation: 'navigation', index: 5 }).success).toBe(false);
     expect(quickRequestSchema.safeParse({ operation: 'navigation', index: 6 }).success).toBe(false);
   });
   it('限制原生样式范围并拒绝命令注入字段', () => {

@@ -1,9 +1,8 @@
 import { bytes } from './format';
-import { useState } from 'react';
 import { z } from 'zod';
 import { updateStatusSchema } from '@/lib/settings-contracts';
 import { useSettingsSnapshot, useSettingsQuery, useSettingsAction } from './repository';
-import { Failure, Review } from './controls';
+import { Failure } from './controls';
 import { useText } from './i18n';
 
 export function AboutPanel() {
@@ -12,13 +11,12 @@ export function AboutPanel() {
   const status = useSettingsQuery({ operation: 'update-status' }, updateStatusSchema, 1_000);
   const action = useSettingsAction(updateStatusSchema);
   const apply = useSettingsAction(z.null());
-  const [review, setReview] = useState(false);
   const data = status.data;
   return (
     <>
       <h2>{t('关于臻境')}</h2>
       <div className="preferences-about">
-        <img src="/assets/home/brand.svg" alt="臻境" width="80" height="110" />
+        <img data-brand-logo src="/assets/home/brand.png" alt="臻境" width="80" height="110" />
         <div>
           <h3>臻境 · Zhenjing</h3>
           <p>
@@ -33,13 +31,21 @@ export function AboutPanel() {
         </div>
       </div>
       <Failure error={snapshot.error ?? status.error ?? action.error ?? apply.error} />
+      <p className="settings-note">
+        下载完成并通过签名与哈希校验后将自动安装并重启。游戏或工具忙碌时等待空闲；失败时保留安装日志，不会循环重装。
+      </p>
       <div className="settings-actions">
+        <button type="button" onClick={() => apply.mutate({ operation: 'update-open-logs' })}>
+          安装日志
+        </button>
         <button type="button" onClick={() => apply.mutate({ operation: 'update-open-release' })}>
           查看发布页面
         </button>
         <button
           type="button"
-          disabled={action.isPending || data?.phase === 'downloading'}
+          disabled={
+            action.isPending || data?.phase === 'downloading' || data?.phase === 'installing'
+          }
           onClick={() => action.mutate({ operation: 'update-check' })}
         >
           {action.isPending && action.variables?.operation === 'update-check'
@@ -56,8 +62,14 @@ export function AboutPanel() {
           </button>
         )}
         {data?.phase === 'ready' && (
-          <button type="button" onClick={() => setReview(true)}>
-            {t('重启并更新')}
+          <button
+            type="button"
+            disabled={apply.isPending || !data.token}
+            onClick={() => {
+              if (data.token) apply.mutate({ operation: 'update-apply', token: data.token });
+            }}
+          >
+            立即安装 / 重试
           </button>
         )}
       </div>
@@ -78,23 +90,6 @@ export function AboutPanel() {
           {data.checkedAt && <small>{new Date(data.checkedAt).toLocaleString()}</small>}
           {data.sha256 && <code className="settings-path">SHA256 {data.sha256}</code>}
         </div>
-      )}
-      {review && data?.token && (
-        <Review
-          title={t('重启并更新')}
-          busy={apply.isPending}
-          onCancel={() => setReview(false)}
-          onConfirm={() => {
-            if (data.token)
-              apply.mutate({ operation: 'update-apply', token: data.token, consent: true });
-          }}
-        >
-          <p>
-            将安装 v{data.latestVersion}。发布清单已通过 Ed25519 验证，MSI 文件已校验哈希与长度。
-            安装失败由 Windows Installer 回滚事务，启动异常会保留维护记录以便修复。
-            请先结束工具会话与下载。
-          </p>
-        </Review>
       )}
       <h3>{t('更新日志')}</h3>
       {data?.changelog && <pre className="settings-changelog">{data.changelog}</pre>}

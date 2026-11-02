@@ -6,6 +6,7 @@ pub mod hardware;
 pub mod home;
 pub mod hud;
 pub mod launchers;
+pub mod music;
 pub mod onboarding;
 pub mod optimizer;
 pub mod settings;

@@ -49,7 +49,11 @@ describe('设置边界与唯一偏好来源', () => {
       shortcutFromEvent(new KeyboardEvent('keydown', { code: 'F8', repeat: true })),
     ).toBeNull();
   });
-  it('重置、驱动与更新 IPC 必须明确确认且不接受任意路径', () => {
+  it('重置与驱动保持确认，更新仅接受已验证包的原生凭据', () => {
+    expect(
+      settingsRequestSchema.safeParse({ operation: 'update-apply', token: crypto.randomUUID() })
+        .success,
+    ).toBe(true);
     expect(
       settingsRequestSchema.safeParse({
         operation: 'pawn-apply',

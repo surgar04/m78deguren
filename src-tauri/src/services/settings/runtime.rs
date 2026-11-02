@@ -13,6 +13,7 @@ use tauri::{
 
 pub struct Critical<'a>(&'a AtomicBool);
 impl<'a> Critical<'a> {
+    /// 跨设置/工具/更新共用的单写入门闩，guard 覆盖 await；所有错误和提前返回都通过 Drop 释放。
     pub fn acquire(state: &'a SettingsState) -> Result<Self> {
         state
             .critical
@@ -176,6 +177,8 @@ pub async fn patch(app: &tauri::AppHandle, patch: Patch) -> Result<NativeConfig>
     Ok(next)
 }
 pub fn boot(app: &tauri::AppHandle) -> Result<()> {
+    // 更新完成监控独立于 UI 与四小时检查周期，收至托盘后也能继续安装。
+    super::update_runtime::boot(app);
     let state = app.state::<SettingsState>();
     let config = state
         .config
@@ -237,6 +240,15 @@ pub fn boot(app: &tauri::AppHandle) -> Result<()> {
 }
 pub async fn ensure_quiet(app: &tauri::AppHandle) -> Result<()> {
     let tools = app.state::<ToolsState>();
+    if matches!(
+        tools.runtimes.job.lock().await.phase.as_str(),
+        "installing" | "verifying" | "unknown"
+    ) || matches!(
+        tools.display.snapshot.lock().await.phase.as_str(),
+        "preparing" | "confirming"
+    ) {
+        return Err(error("请先完成运行库安装或显示模式确认，再执行程序替换"));
+    }
     if tools.filters.snapshot.lock().await.enabled
         || tools.clicker.snapshot.lock().await.armed
         || tools.audio.snapshot().await?.running

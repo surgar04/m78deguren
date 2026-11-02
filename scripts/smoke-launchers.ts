@@ -45,10 +45,7 @@ try {
     '禁止修改普通用户档案',
   );
   await page.locator('.dock').waitFor();
-  assert.equal(
-    await page.locator('.custom-navigation>button:not(.custom-navigation-edit)').count(),
-    6,
-  );
+  assert.equal(await page.locator('.custom-navigation').count(), 0);
   original = quickSnapshotSchema.parse(
     await invoke('quick_launch_execute', { operation: 'snapshot' }),
   );
@@ -96,23 +93,17 @@ try {
   await page.screenshot({ path: resolve(output, 'other-games.png') });
   await page.goto('http://127.0.0.1:1420/#/settings?tab=shortcuts');
   await page.locator('#quick-launch-settings').scrollIntoViewIfNeeded();
-  await page.getByLabel('快捷启动目标', { exact: true }).selectOption('page:hardware');
-  await page.getByRole('button', { name: '桌面八向轮盘', exact: true }).click();
   await page.getByLabel('快捷启动目标', { exact: true }).selectOption('page:other-games');
   await page.getByRole('button', { name: '保存快捷配置', exact: true }).click();
-  await page.waitForFunction(
-    () =>
-      document.querySelector('.custom-navigation button')?.getAttribute('title') === '系统与硬件',
-  );
+  await page.waitForTimeout(300);
   const saved = quickSnapshotSchema.parse(
     await invoke('quick_launch_execute', { operation: 'snapshot' }),
   );
-  assert.deepEqual(saved.config.navigation[0], { kind: 'page', id: 'hardware' });
   assert.deepEqual(saved.config.wheel.slots[0], { kind: 'page', id: 'other-games' });
   await page.getByRole('group', { name: '轮盘方向配置' }).waitFor();
   await page.getByRole('group', { name: '轮盘方向配置' }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: resolve(output, 'wheel-settings.png') });
-  await page.getByRole('button', { name: '系统与硬件', exact: true }).click();
+  await page.getByRole('button', { name: '硬件', exact: true }).click();
   await page.waitForURL(/#\/hardware$/u);
   await page.getByRole('heading', { name: '系统与硬件', exact: true }).waitFor();
   await page.setViewportSize({ width: 840, height: 640 });

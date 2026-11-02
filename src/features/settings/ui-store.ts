@@ -8,6 +8,7 @@ export const NAV_IDS = [
   'hardware',
   'tools',
   'optimization',
+  'music',
   'settings',
 ] as const;
 export const CARD_IDS = [
@@ -31,8 +32,8 @@ const hex = z.string().regex(/^#[a-f0-9]{6}$/iu);
 const digest = z.string().regex(/^[a-f0-9]{64}$/u);
 const navIds = z
   .array(z.enum(NAV_IDS))
-  .length(6)
-  .refine((rows) => new Set(rows).size === 6);
+  .length(7)
+  .refine((rows) => new Set(rows).size === 7);
 export const uiSettingsSchema = z
   .object({
     language: localeSchema,
@@ -68,7 +69,7 @@ export const uiSettingsSchema = z
     navVisible: z
       .array(z.enum(NAV_IDS))
       .min(2)
-      .max(6)
+      .max(7)
       .refine(
         (rows) =>
           new Set(rows).size === rows.length && rows.includes('home') && rows.includes('settings'),
@@ -162,6 +163,16 @@ export const useSettingsUi = create<UiPreferences>()(
         ),
       merge: (persisted, current) => {
         const input = z.record(z.string(), z.unknown()).catch({}).parse(persisted);
+        // 六项旧导航只补入音乐，保留用户排序与隐藏偏好，不重置其他设置。
+        for (const key of ['navOrder', 'navVisible']) {
+          const old = z.array(z.enum(NAV_IDS)).safeParse(input[key]);
+          if (old.success && !old.data.includes('music')) {
+            const index = old.data.indexOf('settings');
+            const rows = [...old.data];
+            rows.splice(index < 0 ? rows.length : index, 0, 'music');
+            input[key] = rows;
+          }
+        }
         const recovered: Record<string, unknown> = { ...DEFAULT_UI_SETTINGS };
         // 逐字段恢复；单个损坏值不会抹掉其他有效偏好，动作字段永远不从存储恢复。
         for (const [key, schema] of Object.entries(uiSettingsSchema.shape)) {

@@ -1,3 +1,4 @@
+import { useConfirmationPolicy } from '@/features/settings/use-confirmation-policy';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
@@ -97,7 +98,16 @@ export default function SteamPage() {
   const visible = games.slice(pageIndex * PAGE_SIZE, count);
   const current = data?.accounts.find((account) => account.id === data.currentAccount);
   const fail = (cause: unknown) => setNotice(errorMessage(cause));
+  const needsConfirmation = useConfirmationPolicy();
   const openConfirmation = (value: Confirmation) => {
+    // 这里只省略臻境的重复对话框；Steam 客户端仍处理实际安装/卸载及路径选择。
+    if (
+      (value.kind === 'install' || value.kind === 'uninstall') &&
+      !needsConfirmation(`steam-${value.kind}`)
+    ) {
+      execute({ operation: 'launch', kind: value.kind, appId: value.game.appId, consent: true });
+      return;
+    }
     setConfirmedRevision(data?.revision ?? '');
     setApiKey('');
     setConsent(false);

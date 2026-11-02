@@ -1,4 +1,4 @@
-//! 自定义导航与八向轮盘共用目标白名单。持久化只保存目标 ID，从不接受命令行、脚本或 URL。
+//! 八向轮盘使用封闭目标白名单。持久化只保存目标 ID，从不接受命令行、脚本或 URL。
 use crate::services::{
     home::HomeState,
     tools::{Result, ensure_local_path, error, io_error, save_json},
@@ -11,7 +11,6 @@ use std::{
 };
 use tauri::{Emitter, Manager};
 use tokio::sync::{Mutex, RwLock};
-pub const NAVIGATION_SLOTS: usize = 6;
 pub const TOOL_IDS: &[&str] = &[
     "crosshair",
     "overlay",
@@ -28,6 +27,7 @@ pub const PAGE_IDS: &[&str] = &[
     "hardware",
     "tools",
     "optimization",
+    "music",
     "settings",
 ];
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -102,19 +102,16 @@ impl Default for Wheel {
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Config {
-    pub navigation: [Option<Target>; NAVIGATION_SLOTS],
     pub wheel: Wheel,
 }
 impl Config {
     fn initial() -> Self {
         Self {
-            navigation: std::array::from_fn(|_| None),
             wheel: Wheel::default(),
         }
     }
     pub fn validate(&self) -> Result<()> {
-        if self.navigation.len() != NAVIGATION_SLOTS
-            || self.wheel.slots.len() != 8
+        if self.wheel.slots.len() != 8
             || !(200..=1500).contains(&self.wheel.hold_ms)
             || self.wheel.trigger_key.len() != 1
             || !self
@@ -129,7 +126,7 @@ impl Config {
         {
             return Err(error("导航与轮盘配置范围无效"));
         }
-        for target in self.navigation.iter().chain(&self.wheel.slots).flatten() {
+        for target in self.wheel.slots.iter().flatten() {
             target.validate()?
         }
         Ok(())
@@ -174,41 +171,41 @@ fn revision(config: &Config) -> Result<String> {
         Sha256::digest(serde_json::to_vec(config).map_err(|_| error("快捷配置编码失败"))?)
     ))
 }
-/// 只对磁盘旧配置执行迁移；IPC 仍严格要求六项，不能把多余输入悄悄截断。
+/// 兼容磁盘中已退役的六/八项导航；IPC 仍拒绝 navigation，避免保留隐藏执行入口。
+/// 迁移前验证全部旧目标并备份，轮盘目标与首页快捷记录均不受影响。
 fn decode_saved_config(text: &str) -> Result<(Config, bool)> {
     let mut value: serde_json::Value =
         serde_json::from_str(text).map_err(|_| error("快捷启动配置损坏，原件已保留"))?;
-    let migrated = if let Some(slots) = value
-        .get_mut("navigation")
-        .and_then(serde_json::Value::as_array_mut)
-        && slots.len() == 8
-    {
-        // 缩减前验证全部八项；无效目标不能借助迁移绕过白名单检查。
-        for target in slots.iter() {
+    let object = value
+        .as_object_mut()
+        .ok_or_else(|| error("快捷配置不是对象"))?;
+    let legacy = object.remove("navigation");
+    if let Some(legacy) = &legacy {
+        let slots = legacy.as_array().ok_or_else(|| error("旧导航格式无效"))?;
+        if !matches!(slots.len(), 6 | 8) {
+            return Err(error("旧导航数量无效"));
+        }
+        for value in slots {
             let target: Option<Target> =
-                serde_json::from_value(target.clone()).map_err(|_| error("旧导航包含无效目标"))?;
+                serde_json::from_value(value.clone()).map_err(|_| error("旧导航包含无效目标"))?;
             if let Some(target) = target {
                 target.validate()?;
             }
         }
-        slots.truncate(NAVIGATION_SLOTS);
-        true
-    } else {
-        false
-    };
+    }
     let config: Config =
         serde_json::from_value(value).map_err(|_| error("快捷启动配置格式无效，原件已保留"))?;
     config.validate()?;
-    Ok((config, migrated))
+    Ok((config, legacy.is_some()))
 }
 
-/// 内容寻址备份仅写入本应用目录，保留原第七、八项与完整轮盘配置。
+/// 内容寻址备份只写本应用目录，保留退役导航和完整轮盘配置，备份失败不覆盖原件。
 /// 重启反复读取旧配置不会重复生成备份；备份失败时不覆盖原配置。
 fn archive_navigation(root: &Path, text: &str) -> Result<()> {
     use sha2::{Digest, Sha256};
     use std::io::Write;
     let backup = root.join(format!(
-        "navigation-eight-{:x}.json",
+        "navigation-retired-{:x}.json",
         Sha256::digest(text.as_bytes())
     ));
     ensure_local_path(&backup)?;
@@ -258,9 +255,20 @@ impl QuickLaunchState {
             Ok((value, legacy)) => {
                 if let Some(text) = legacy {
                     archive_navigation(&root, &text)?;
-                    warning =
-                        "自定义导航已缩减为六项；原第七、八项已随完整旧配置备份，轮盘保持八向。"
-                            .into();
+                    // 原子替换已验证的新格式；异常或断电不会留下半份配置。
+                    use std::io::Write;
+                    let mut staged = tempfile::NamedTempFile::new_in(&root).map_err(io_error)?;
+                    staged
+                        .write_all(
+                            &serde_json::to_vec_pretty(&value)
+                                .map_err(|_| error("轮盘配置编码失败"))?,
+                        )
+                        .map_err(io_error)?;
+                    staged.as_file().sync_all().map_err(io_error)?;
+                    staged
+                        .persist(root.join("config.json"))
+                        .map_err(|cause| io_error(cause.error))?;
+                    warning = "自定义导航已移除，旧配置已备份；首页快捷启动和八向轮盘保留。".into();
                 }
                 value
             }
@@ -344,6 +352,7 @@ impl QuickLaunchState {
             ("hardware", "系统与硬件"),
             ("tools", "工具箱"),
             ("optimization", "系统优化"),
+            ("music", "音乐"),
             ("settings", "设置"),
         ] {
             result.push(OptionItem {
@@ -387,14 +396,9 @@ impl QuickLaunchState {
             return Err(error("快捷配置已变化，请刷新后重新保存"));
         }
         let options = self.options(app).await;
-        for target in next.navigation.iter().chain(&next.wheel.slots).flatten() {
+        for target in next.wheel.slots.iter().flatten() {
             if !options.iter().any(|item| &item.target == target)
-                && !old
-                    .navigation
-                    .iter()
-                    .chain(&old.wheel.slots)
-                    .flatten()
-                    .any(|item| item == target)
+                && !old.wheel.slots.iter().flatten().any(|item| item == target)
             {
                 return Err(error("目标已移除或尚未检测，请重新选择"));
             }
@@ -437,17 +441,6 @@ impl QuickLaunchState {
             .get(index)
             .and_then(Clone::clone)
             .ok_or_else(|| error("该方向未配置"))?;
-        self.dispatch(app, &target).await
-    }
-    pub async fn navigation_dispatch(&self, app: &tauri::AppHandle, index: usize) -> Result<()> {
-        let target = self
-            .config
-            .lock()
-            .await
-            .navigation
-            .get(index)
-            .and_then(Clone::clone)
-            .ok_or_else(|| error("导航槽位未配置"))?;
         self.dispatch(app, &target).await
     }
     pub async fn dispatch(&self, app: &tauri::AppHandle, target: &Target) -> Result<()> {
@@ -523,7 +516,41 @@ fn open_page(app: &tauri::AppHandle, path: &str) -> Result<()> {
 mod tests {
     use super::*;
     #[test]
-    fn old_eight_navigation_preserves_six_and_entire_wheel() -> Result<()> {
+    fn six_slot_file_migrates_once_and_keeps_wheel() -> Result<()> {
+        let root = crate::services::tools::test_root("retired-navigation-restart")?;
+        let directory = root.join("home/quick-launch");
+        std::fs::create_dir_all(&directory).map_err(io_error)?;
+        let mut old = serde_json::to_value(Config::initial()).map_err(|_| error("测试配置失败"))?;
+        old["navigation"] = serde_json::json!([null, null, null, null, null, null]);
+        old["wheel"]["slots"][3] = serde_json::json!({"kind":"page","id":"hardware"});
+        std::fs::write(directory.join("config.json"), old.to_string()).map_err(io_error)?;
+        let _first = QuickLaunchState::new(&root)?;
+        let text = std::fs::read_to_string(directory.join("config.json")).map_err(io_error)?;
+        let (value, migrated) = decode_saved_config(&text)?;
+        assert!(!migrated);
+        assert!(!text.contains("navigation"));
+        assert_eq!(
+            value.wheel.slots[3],
+            Some(Target::Page {
+                id: "hardware".into()
+            })
+        );
+        let _second = QuickLaunchState::new(&root)?;
+        let backups = std::fs::read_dir(&directory)
+            .map_err(io_error)?
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| {
+                entry
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with("navigation-retired-")
+            })
+            .count();
+        assert_eq!(backups, 1);
+        Ok(())
+    }
+    #[test]
+    fn retired_navigation_is_archived_without_changing_wheel() -> Result<()> {
         let mut old = serde_json::to_value(Config::initial()).map_err(|_| error("测试编码失败"))?;
         old["navigation"] = serde_json::json!([
             {"kind":"page","id":"home"},null,null,null,null,
@@ -536,13 +563,6 @@ mod tests {
         let text = serde_json::to_string_pretty(&old).map_err(|_| error("测试编码失败"))?;
         let (migrated, changed) = decode_saved_config(&text)?;
         assert!(changed);
-        assert_eq!(migrated.navigation.len(), 6);
-        assert_eq!(
-            migrated.navigation[5],
-            Some(Target::Page {
-                id: "hardware".into()
-            })
-        );
         assert!(migrated.wheel.enabled);
         assert_eq!(
             migrated.wheel.slots[7],
@@ -550,9 +570,9 @@ mod tests {
                 id: "other-games".into()
             })
         );
-        // 迁移只存在于磁盘读取路径；直接 IPC 反序列化八项必须失败。
+        // 迁移只存在于磁盘读取路径；直接 IPC 反序列化旧导航必须失败。
         assert!(serde_json::from_str::<Config>(&text).is_err());
-        let root = crate::services::tools::test_root("navigation-six")?;
+        let root = crate::services::tools::test_root("navigation-retired")?;
         archive_navigation(&root, &text)?;
         archive_navigation(&root, &text)?;
         let files: Vec<_> = std::fs::read_dir(&root).map_err(io_error)?.collect();

@@ -75,6 +75,7 @@ const pageId = z.enum([
   'hardware',
   'tools',
   'optimization',
+  'music',
   'settings',
 ]);
 export const launchTargetSchema = z.discriminatedUnion('kind', [
@@ -89,10 +90,8 @@ export const launchTargetSchema = z.discriminatedUnion('kind', [
     .strict(),
 ]);
 export type LaunchTarget = z.infer<typeof launchTargetSchema>;
-export const CUSTOM_NAVIGATION_SLOTS = 6;
 export const quickConfigSchema = z
   .object({
-    navigation: z.array(launchTargetSchema.nullable()).length(CUSTOM_NAVIGATION_SLOTS),
     wheel: z
       .object({
         enabled: z.boolean(),
@@ -138,16 +137,6 @@ export const quickRequestSchema = z.discriminatedUnion('operation', [
       operation: z.literal('save'),
       config: quickConfigSchema,
       revision: z.string().regex(/^[a-f0-9]{64}$/u),
-    })
-    .strict(),
-  z
-    .object({
-      operation: z.literal('navigation'),
-      index: z
-        .number()
-        .int()
-        .min(0)
-        .max(CUSTOM_NAVIGATION_SLOTS - 1),
     })
     .strict(),
   z.object({ operation: z.literal('preview') }).strict(),

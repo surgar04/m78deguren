@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
     time::{Duration, Instant},
 };
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Notify};
 
 pub const FEED: &str =
     "https://github.com/surgar04/m78deguren/releases/latest/download/zhenjing-update.json";
@@ -267,6 +267,9 @@ pub struct UpdateService {
     pending: Mutex<Option<Pending>>,
     lease: Mutex<Option<Lease>>,
     serial: Mutex<()>,
+    /// 只保存安装阶段提示；下载/签名状态仍由同一 UpdateService 计算。
+    install_note: Mutex<Option<String>>,
+    pub wake: Notify,
 }
 impl UpdateService {
     /// 所有待更新指针变更都在 serial 内执行；旧任务仍留在下载列表，不删除用户已下载文件。
@@ -281,6 +284,7 @@ impl UpdateService {
         if old.is_some_and(|version| version < *latest) {
             *self.pending.lock().await = None;
             *self.lease.lock().await = None;
+            *self.install_note.lock().await = None;
             let _ = tokio::fs::remove_file(self.directory.join("update-pending.json")).await;
         }
     }
@@ -310,6 +314,8 @@ impl UpdateService {
             pending: Mutex::new(pending),
             lease: Mutex::new(None),
             serial: Mutex::new(()),
+            install_note: Mutex::new(None),
+            wake: Notify::new(),
         })
     }
     pub async fn check(&self, http: &reqwest::Client) -> Result<Status> {
@@ -317,7 +323,12 @@ impl UpdateService {
             .serial
             .try_lock()
             .map_err(|_| error("更新任务正在处理，请稍后再试"))?;
-        let busy = { self.status.lock().await.phase == "downloading" };
+        let busy = {
+            matches!(
+                self.status.lock().await.phase.as_str(),
+                "downloading" | "installing"
+            )
+        };
         if busy {
             return Ok(self.status.lock().await.clone());
         }
@@ -383,7 +394,7 @@ impl UpdateService {
                 }
                 .into();
                 status.message = if latest > current {
-                    "发现可信的新版本；下载后仍需确认重启替换"
+                    "发现可信的新版本；下载并验证后将在空闲时自动安装重启"
                 } else if latest < current {
                     "本机版本领先发布源，不会降级安装"
                 } else {
@@ -442,6 +453,9 @@ impl UpdateService {
         self.current_status(manager).await
     }
     async fn current_status(&self, manager: &DownloadManager) -> Result<Status> {
+        if self.status.lock().await.phase == "installing" {
+            return Ok(self.status.lock().await.clone());
+        }
         let pending = self.pending.lock().await.clone();
         if let Some(pending) = pending {
             let release = verify(&pending.envelope)?;
@@ -494,7 +508,12 @@ impl UpdateService {
                         });
                     }
                     status.phase = "ready".into();
-                    status.message = "更新包哈希和发布签名已验证，等待你确认重启".into();
+                    status.message = self
+                        .install_note
+                        .lock()
+                        .await
+                        .clone()
+                        .unwrap_or_else(|| "更新包和发布签名已验证，正在准备自动安装".into());
                     status.token = lease.as_ref().map(|value| value.token.clone());
                 } else if matches!(
                     task.status.as_str(),
@@ -530,6 +549,9 @@ impl UpdateService {
             .serial
             .try_lock()
             .map_err(|_| error("更新任务正在处理"))?;
+        if self.status.lock().await.phase == "installing" {
+            return Err(error("更新正在安装，不能创建另一项下载"));
+        }
         let (envelope, release) = self
             .release
             .lock()
@@ -586,25 +608,50 @@ impl UpdateService {
         };
         save_json(&self.directory.join("update-pending.json"), &pending).await?;
         *self.pending.lock().await = Some(pending);
+        self.wake.notify_one();
         self.current_status(&tools.downloads).await
     }
-    pub async fn consume(&self, token: &str, consent: bool) -> Result<(PathBuf, Release)> {
+    /// 单次租约只指向已经验签、核对版本和文件哈希的包；取消应用确认不等于取消原生边界。
+    pub async fn consume(&self, token: &str) -> Result<(PathBuf, Release)> {
         let _guard = self
             .serial
             .try_lock()
             .map_err(|_| error("更新检查或下载任务正在处理，请稍后安装"))?;
-        if !consent {
-            return Err(error("必须确认重启并替换应用"));
-        }
-        uuid::Uuid::parse_str(token).map_err(|_| error("更新确认凭据无效"))?;
+        uuid::Uuid::parse_str(token).map_err(|_| error("更新安装凭据无效"))?;
         let mut lease = self.lease.lock().await;
         if !lease.as_ref().is_some_and(|lease| {
             lease.token == token && lease.created.elapsed() < Duration::from_secs(600)
         }) {
-            return Err(error("更新确认已过期，请刷新待更新状态"));
+            return Err(error("安装凭据已过期，请刷新待更新状态"));
         }
         let lease = lease.take().ok_or_else(|| error("更新凭据已使用"))?;
         Ok((lease.path, lease.release))
+    }
+    pub async fn has_pending(&self) -> bool {
+        self.pending.lock().await.is_some()
+    }
+    /// 相同的延后/失败原因不反复广播，避免后台每轮轮询都使页面重新渲染。
+    pub async fn install_message(&self, message: &str) -> bool {
+        let message: String = message.chars().take(4096).collect();
+        let changed = {
+            let mut note = self.install_note.lock().await;
+            let changed = note.as_deref() != Some(message.as_str());
+            *note = Some(message.clone());
+            changed
+        };
+        self.status.lock().await.message = message;
+        changed
+    }
+    pub async fn installing(&self) {
+        let mut status = self.status.lock().await;
+        status.phase = "installing".into();
+        status.message = "正在自动安装更新，完成后将重新启动臻境".into();
+        status.token = None;
+    }
+    pub async fn install_failed(&self, message: &str) {
+        self.status.lock().await.phase = "ready".into();
+        self.install_message(&format!("自动安装未完成：{message}；可查看维护日志后重试"))
+            .await;
     }
 }
 

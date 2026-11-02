@@ -53,7 +53,7 @@ export function SettingsRuntime({ notify }: { notify: (message: string) => void 
           .string()
           .max(128)
           .regex(
-            /^\/(?:library(?:\/other)?|hardware|tools(?:\/[a-z0-9-]+)?|optimization|settings)?$/u,
+            /^\/(?:library(?:\/other)?|hardware|tools(?:\/[a-z0-9-]+)?|optimization|music|settings)?$/u,
           )
           .safeParse(event.payload);
         if (path.success) void navigate(path.data);
@@ -172,9 +172,11 @@ export function StartupLogo() {
     <div className="settings-startup-logo" aria-hidden="true">
       <img
         alt=""
-        src={logo ? settingsAssetUrl(logo) : '/assets/home/brand.svg'}
+        data-brand-logo={logo ? undefined : true}
+        src={logo ? settingsAssetUrl(logo) : '/assets/home/brand.png'}
         onError={(event) => {
-          event.currentTarget.src = '/assets/home/brand.svg';
+          event.currentTarget.dataset.brandLogo = 'true';
+          event.currentTarget.src = '/assets/home/brand.png';
         }}
       />
     </div>

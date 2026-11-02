@@ -15,3 +15,7 @@ src-tauri/gen/schemas/
 *.log
 native/**/obj/
 native/**/bin/
+
+# 可复现生成的音乐引擎及独立 Node 组件
+public/music-engine/
+src-tauri/resources/music-host/

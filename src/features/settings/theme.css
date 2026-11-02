@@ -176,6 +176,10 @@
 .home-layout[data-theme='dark'] .settings-startup-logo {
   background: #111d2ee8;
 }
+/* 默认品牌图在深色表面使用浅色字标；用户自定义的启动 Logo 保持原样。 */
+.home-layout[data-theme='dark'] img[data-brand-logo] {
+  content: url('/assets/home/brand-light.png');
+}
 /* 顶部导航和无文字导航仍保留完整可访问名称，窄窗口允许横向滚动。 */
 .home-layout[data-nav='top'] {
   padding-top: 102px;

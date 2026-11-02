@@ -9,6 +9,7 @@ import {
   faHouse,
   faDesktop,
   faPlay,
+  faMusic,
   faPlus,
   faSliders,
   faToolbox,
@@ -29,6 +30,7 @@ const PAGE_ICONS: Record<string, IconDefinition> = {
   hardware: faDesktop,
   tools: faToolbox,
   optimization: faBolt,
+  music: faMusic,
   settings: faGear,
 };
 const TOOL_ICONS: Record<string, IconDefinition> = {

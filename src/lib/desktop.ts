@@ -1,5 +1,6 @@
 import { convertFileSrc, invoke, isTauri } from '@tauri-apps/api/core';
 import { z } from 'zod';
+import { musicRequestSchema, type MusicRequest } from './music-contracts';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { toolRequestSchema, type ToolRequest } from './tool-contracts';
 import { builtinRequestSchema, type BuiltinRequest } from './builtin-contracts';
@@ -18,6 +19,13 @@ import {
   type QuickRequest,
 } from './launcher-contracts';
 
+/** 音乐 IPC 与其他领域保持同样的双端校验；路径只通过原生文件选择器登记。 */
+export async function executeMusic<T>(request: MusicRequest, response: z.ZodType<T>): Promise<T> {
+  requireDesktop();
+  return response.parse(
+    await invoke<unknown>('music_execute', { request: musicRequestSchema.parse(request) }),
+  );
+}
 /** 加速准备仅开放固定官方页面、登记客户端及单次游戏会话。 */
 export async function executeAcceleration<T>(
   request: AccelerationRequest,

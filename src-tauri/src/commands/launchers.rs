@@ -75,9 +75,6 @@ pub enum QuickRequest {
         config: Box<Config>,
         revision: String,
     },
-    Navigation {
-        index: usize,
-    },
     Preview {},
 }
 #[tauri::command]
@@ -95,18 +92,27 @@ pub async fn quick_launch_execute(
         QuickRequest::Save { config, revision } => {
             value(state.save(&app, *config, &revision).await?)
         }
-        QuickRequest::Navigation { index } => {
-            if index >= crate::services::quick_launch::NAVIGATION_SLOTS {
-                return Err(error("导航槽位无效"));
-            }
-            state.navigation_dispatch(&app, index).await?;
-            value(())
-        }
         QuickRequest::Preview {} => {
             app.state::<crate::services::home::HomeState>()
                 .preview_wheel(&app)
                 .await?;
             value(())
         }
+    }
+}
+
+#[cfg(test)]
+mod quick_tests {
+    use super::*;
+    #[test]
+    fn retired_navigation_operation_is_not_a_hidden_entry() {
+        assert!(
+            serde_json::from_str::<QuickRequest>(r#"{"operation":"navigation","index":0}"#)
+                .is_err()
+        );
+        assert!(
+            serde_json::from_str::<QuickRequest>(r#"{"operation":"preview","index":0}"#).is_err()
+        );
+        assert!(serde_json::from_str::<QuickRequest>(r#"{"operation":"preview"}"#).is_ok());
     }
 }

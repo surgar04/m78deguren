@@ -13,7 +13,13 @@ export default defineConfig({
     strictPort: true,
     host: '127.0.0.1',
     watch: {
-      ignored: ['**/src-tauri/**', '**/.tools/**', '**/.cache/**', '**/.local/**'],
+      ignored: [
+        '**/src-tauri/**',
+        '**/.tools/**',
+        '**/.cache/**',
+        '**/.local/**',
+        '**/public/music-engine/**',
+      ],
     },
   },
   build: { target: 'es2022', sourcemap: false },

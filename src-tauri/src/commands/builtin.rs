@@ -125,6 +125,31 @@ pub async fn builtin_execute(
     if !allowed_window(window.label(), &request) {
         return Err(tools::error("辅助窗口不能读取或操作系统工具"));
     }
+    // 安装更新、显示调整、驱动与输入控制不能并发提交；新操作默认按修改处理，失败会自动释放锁。
+    let preferences = window
+        .app_handle()
+        .state::<crate::services::settings::SettingsState>();
+    let _maintenance = if matches!(
+        &request,
+        Request::Query { .. }
+            | Request::ClickStatus {}
+            | Request::ChangeHistory {}
+            | Request::ChangeDiscard { .. }
+            | Request::DisplayStatus {}
+            | Request::DisplayHistory {}
+            | Request::DisplayDecide { .. }
+            | Request::FilterStatus {}
+            | Request::AudioStatus {}
+            | Request::AudioStop {}
+            | Request::AudioPresets {}
+            | Request::DeltaPasswords {}
+    ) {
+        None
+    } else {
+        Some(crate::services::settings::runtime::Critical::acquire(
+            &preferences,
+        )?)
+    };
     match request {
         Request::FilterStatus {} => serde_json::to_value(state.filters.status(&state.root).await?)
             .map_err(|_| tools::error("滤镜状态无效")),

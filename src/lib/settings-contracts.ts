@@ -89,6 +89,7 @@ export const settingsRequestSchema = z.discriminatedUnion('operation', [
         'update-check',
         'update-download',
         'update-open-release',
+        'update-open-logs',
         'pawn-status',
         'pawn-prepare',
         'reset-prepare',
@@ -151,9 +152,7 @@ export const settingsRequestSchema = z.discriminatedUnion('operation', [
       consent: z.literal(true),
     })
     .strict(),
-  z
-    .object({ operation: z.literal('update-apply'), token: z.uuid(), consent: z.literal(true) })
-    .strict(),
+  z.object({ operation: z.literal('update-apply'), token: z.uuid() }).strict(),
   z
     .object({
       operation: z.literal('pawn-apply'),
@@ -279,6 +278,7 @@ export const updateStatusSchema = z
       'unverified',
       'downloading',
       'ready',
+      'installing',
       'error',
     ]),
     currentVersion: z.string(),

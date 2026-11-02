@@ -1,7 +1,7 @@
 {
   "name": "zhenjing",
   "private": true,
-  "version": "0.9.1",
+  "version": "0.10.0",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -10,9 +10,9 @@
   },
   "scripts": {
     "preinstall": "node scripts/check-environment.ts",
-    "dev": "node scripts/check-environment.ts && vite",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "build": "pnpm typecheck && node scripts/build-hardware-web.ts && vite build",
+    "dev": "node scripts/check-environment.ts && pnpm music:prepare && vite",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit && pnpm --filter @zhenjing/folia-engine typecheck && tsc -p native/music-host/tsconfig.json",
+    "build": "pnpm typecheck && pnpm music:prepare && node scripts/build-hardware-web.ts && vite build",
     "build:empty": "pnpm typecheck && vite build --outDir .cache/build-empty",
     "preview": "vite preview",
     "tauri": "node scripts/check-environment.ts && tauri",
@@ -40,9 +40,10 @@
     "rust:check": "cargo check --manifest-path src-tauri/Cargo.toml --locked",
     "rust:clippy": "cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings",
     "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --locked",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm test:hud:native && pnpm test:onboarding:native && pnpm test:launchers:native && pnpm rust:fmt && pnpm rust:clippy && pnpm rust:test && pnpm installer:check && pnpm test:distribution:native",
+    "check": "pnpm music:prepare && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm test:hud:native && pnpm test:onboarding:native && pnpm test:launchers:native && pnpm rust:fmt && pnpm rust:clippy && pnpm rust:test && pnpm installer:check && pnpm test:distribution:native",
     "installer:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-installer.ps1",
     "env:check": "node scripts/doctor.ts",
+    "brand:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-brand-assets.ps1",
     "test:desktop": "node scripts/smoke-home.ts",
     "test:home:desktop": "node scripts/smoke-home.ts",
     "test:home:native": "node scripts/verify-home-native.ts",
@@ -62,9 +63,14 @@
     "test:distribution:native": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-distribution-native.ps1",
     "test:distribution:startup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-distribution-startup.ps1",
     "desktop:test:dev": "pnpm tauri dev --config src-tauri/tauri.test.conf.json --no-watch",
-    "desktop:first-run:dev": "pnpm tauri dev --config src-tauri/tauri.test.conf.json --no-watch"
+    "desktop:first-run:dev": "pnpm tauri dev --config src-tauri/tauri.test.conf.json --no-watch",
+    "music:build": "pnpm --filter @zhenjing/folia-engine build",
+    "music:host:build": "node scripts/build-music-host.ts",
+    "music:prepare": "node scripts/prepare-music.ts",
+    "test:music:host": "node scripts/verify-music-host.ts"
   },
   "dependencies": {
+    "@applemusic-like-lyrics/core": "0.6.0",
     "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-brands-svg-icons": "7.3.1",
     "@fortawesome/free-regular-svg-icons": "7.3.1",

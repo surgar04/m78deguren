@@ -8,11 +8,13 @@ export function Modal({
   onClose,
   children,
   wide = false,
+  className = '',
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   wide?: boolean;
+  className?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -31,7 +33,7 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={`home-modal ${wide ? 'modal-wide' : ''}`}
+      className={`home-modal ${wide ? 'modal-wide' : ''} ${className}`}
       aria-labelledby={titleId}
       onCancel={(event) => {
         // 关闭由 React 状态统一驱动，避免原生默认关闭与卸载/下一个弹窗发生竞争。

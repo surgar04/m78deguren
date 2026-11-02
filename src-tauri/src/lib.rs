@@ -195,6 +195,17 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         .manage(services::acceleration::AccelerationState::new(&root)?)
         .manage(services::quick_launch::QuickLaunchState::new(&root)?)
         .manage(services::tools::ToolsState::new(&root)?)
+        .manage(services::music::MusicState::new(&root)?)
+        .register_asynchronous_uri_scheme_protocol(
+            "zhenjing-music",
+            |context, request, responder| {
+                let app = context.app_handle().clone();
+                let label = context.webview_label().to_owned();
+                tauri::async_runtime::spawn(async move {
+                    responder.respond(services::music::respond(&app, &label, request).await);
+                });
+            },
+        )
         .register_asynchronous_uri_scheme_protocol(
             "zhenjing-asset",
             |context, request, responder| {
@@ -431,6 +442,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
             commands::settings::settings_execute,
             commands::hardware::hardware_execute,
             commands::hud::hud_execute,
+            commands::music::music_execute,
             commands::onboarding::onboarding_execute,
             commands::steam::steam_execute,
             commands::home::home_execute,
@@ -450,6 +462,11 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                     app.state::<services::hud::HudState>().cancellation.cancel();
                     let hardware = app.state::<services::hardware::Hardware>().inner().clone();
                     tauri::async_runtime::spawn(async move {
+                        let _ = tokio::time::timeout(
+                            std::time::Duration::from_secs(6),
+                            app.state::<services::music::MusicState>().shutdown(),
+                        )
+                        .await;
                         let home = app.state::<services::home::HomeState>();
                         if !matches!(
                             tokio::time::timeout(

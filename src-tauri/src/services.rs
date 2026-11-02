@@ -4,6 +4,7 @@ pub mod components;
 pub mod hardware;
 pub mod home;
 pub mod hud;
+pub mod music;
 pub mod onboarding;
 pub mod other_games;
 pub mod quick_launch;

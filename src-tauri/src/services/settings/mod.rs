@@ -10,6 +10,7 @@ pub mod pawnio;
 pub mod runtime;
 pub mod storage;
 pub mod update;
+pub mod update_runtime;
 pub mod video;
 
 use crate::services::tools::{Result, downloads, ensure_local_path, io_error};

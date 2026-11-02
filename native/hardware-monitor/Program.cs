@@ -301,6 +301,9 @@ internal static class Program
             { Send(Hud.HudEngine.Catalog()); return 0; }
             if (args.Length == 1 && args[0] == "--hud-protect")
                 return Hud.HudEngine.ProtectInput();
+        if (args.Length == 1 && args[0] == "--music-proxy") return MusicCrypt.Proxy();
+        if (args.Length == 2 && args[0] == "--music-crypt")
+                return MusicCrypt.Run(args[1]);
             if (args.Length != 2 || !int.TryParse(args[0], out var parentId))
                 return 2;
             using var parent = Process.GetProcessById(parentId);

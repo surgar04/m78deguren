@@ -12,7 +12,6 @@ import {
 } from '@/lib/launcher-contracts';
 import { isDesktop } from '@/lib/desktop';
 import { useQuickLaunch, useQuickAction } from './repository';
-import { LaunchTargetIcon } from './LaunchTargetIcon';
 import { WheelPreview } from './WheelPreview';
 import { WHEEL_DIRECTIONS as DIRECTIONS } from './wheel-layout';
 import './quick-launch.css';
@@ -81,190 +80,130 @@ function TargetPicker({
 }
 function Editor({
   snapshot,
-  section,
-  setSection,
   index,
   setIndex,
 }: {
   snapshot: QuickSnapshot;
-  section: 'navigation' | 'wheel';
-  setSection: (value: 'navigation' | 'wheel') => void;
   index: number;
   setIndex: (value: number) => void;
 }) {
   const [draft, setDraft] = useState<QuickConfig>(snapshot.config);
   const save = useQuickAction(quickSnapshotSchema),
     preview = useQuickAction(z.null());
-  const slots = section === 'navigation' ? draft.navigation : draft.wheel.slots;
+  const slots = draft.wheel.slots;
   const update = (target: LaunchTarget | null) =>
-    setDraft((current) =>
-      section === 'navigation'
-        ? {
-            ...current,
-            navigation: current.navigation.map((value, i) => (i === index ? target : value)),
-          }
-        : {
-            ...current,
-            wheel: {
-              ...current.wheel,
-              slots: current.wheel.slots.map((value, i) => (i === index ? target : value)),
-            },
-          },
-    );
+    setDraft((current) => ({
+      ...current,
+      wheel: {
+        ...current.wheel,
+        slots: current.wheel.slots.map((value, i) => (i === index ? target : value)),
+      },
+    }));
   const wheelPatch = (patch: Partial<QuickConfig['wheel']>) =>
     setDraft((current) => ({ ...current, wheel: { ...current.wheel, ...patch } }));
-  const option = (target: LaunchTarget | null) =>
-    snapshot.options.find((item) => targetKey(item.target) === targetKey(target));
   return (
     <div className="quick-settings-editor">
-      <div className="quick-settings-tabs">
-        <button
-          type="button"
-          className={section === 'navigation' ? 'active' : ''}
-          onClick={() => {
-            setSection('navigation');
-            setIndex(0);
-          }}
-        >
-          六个自定义导航
-        </button>
-        <button
-          type="button"
-          className={section === 'wheel' ? 'active' : ''}
-          onClick={() => {
-            setSection('wheel');
-            setIndex(0);
-          }}
-        >
-          桌面八向轮盘
-        </button>
-      </div>
-      {section === 'navigation' ? (
-        <>
-          <p className="settings-note">
-            将常用工具、游戏或页面固定到导航栏。选择位置后，在下方选择目标；清空位置不会删除游戏。
-          </p>
-          <div className="navigation-slot-editor">
-            {draft.navigation.map((target, i) => (
-              <button
-                key={i}
-                type="button"
-                className={index === i ? 'selected' : ''}
-                onClick={() => setIndex(i)}
-              >
-                <span>{String(i + 1).padStart(2, '0')}</span>
-                <LaunchTargetIcon option={option(target)} />
-                <strong>{option(target)?.label ?? (target ? '目标已移除' : '添加常用项目')}</strong>
-              </button>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <label className="quick-setting-toggle">
-            <span>
-              <strong>启用桌面轮盘</strong>
-              <small>
-                长按 {draft.wheel.triggerKey} 唤醒，移动鼠标选择，松开按键启动。中心区域或 Esc
-                取消。
-              </small>
-            </span>
+      <label className="quick-setting-toggle">
+        <span>
+          <strong>启用桌面轮盘</strong>
+          <small>
+            长按 {draft.wheel.triggerKey} 唤醒，移动鼠标选择，松开按键启动。中心区域或 Esc 取消。
+          </small>
+        </span>
+        <input
+          type="checkbox"
+          checked={draft.wheel.enabled}
+          onChange={(e) => wheelPatch({ enabled: e.target.checked })}
+        />
+      </label>
+      <div className="wheel-settings-layout">
+        <WheelPreview
+          slots={draft.wheel.slots}
+          options={snapshot.options}
+          selected={index}
+          onSelect={setIndex}
+          triggerKey={draft.wheel.triggerKey}
+        />
+        <div className="wheel-options">
+          <label>
+            轮盘触发字母
+            <select
+              value={draft.wheel.triggerKey}
+              onChange={(event) => wheelPatch({ triggerKey: event.target.value })}
+            >
+              {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ', (key) => (
+                <option key={key} value={key}>
+                  {key}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            长按阈值 <strong>{draft.wheel.holdMs} ms</strong>
             <input
-              type="checkbox"
-              checked={draft.wheel.enabled}
-              onChange={(e) => wheelPatch({ enabled: e.target.checked })}
+              type="range"
+              min="200"
+              max="1500"
+              step="50"
+              value={draft.wheel.holdMs}
+              onChange={(e) => wheelPatch({ holdMs: Number(e.target.value) })}
             />
           </label>
-          <div className="wheel-settings-layout">
-            <WheelPreview
-              slots={draft.wheel.slots}
-              options={snapshot.options}
-              selected={index}
-              onSelect={setIndex}
-              triggerKey={draft.wheel.triggerKey}
+          <label>
+            轮盘大小 <strong>{draft.wheel.size} px</strong>
+            <input
+              type="range"
+              min="300"
+              max="640"
+              step="10"
+              value={draft.wheel.size}
+              onChange={(e) => wheelPatch({ size: Number(e.target.value) })}
             />
-            <div className="wheel-options">
-              <label>
-                轮盘触发字母
-                <select
-                  value={draft.wheel.triggerKey}
-                  onChange={(event) => wheelPatch({ triggerKey: event.target.value })}
-                >
-                  {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ', (key) => (
-                    <option key={key} value={key}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                长按阈值 <strong>{draft.wheel.holdMs} ms</strong>
-                <input
-                  type="range"
-                  min="200"
-                  max="1500"
-                  step="50"
-                  value={draft.wheel.holdMs}
-                  onChange={(e) => wheelPatch({ holdMs: Number(e.target.value) })}
-                />
-              </label>
-              <label>
-                轮盘大小 <strong>{draft.wheel.size} px</strong>
-                <input
-                  type="range"
-                  min="300"
-                  max="640"
-                  step="10"
-                  value={draft.wheel.size}
-                  onChange={(e) => wheelPatch({ size: Number(e.target.value) })}
-                />
-              </label>
-              <label>
-                不透明度 <strong>{Math.round(draft.wheel.opacity * 100)}%</strong>
-                <input
-                  type="range"
-                  min="35"
-                  max="100"
-                  value={Math.round(draft.wheel.opacity * 100)}
-                  onChange={(e) => wheelPatch({ opacity: Number(e.target.value) / 100 })}
-                />
-              </label>
-              <label>
-                出现位置
-                <select
-                  value={draft.wheel.position}
-                  onChange={(e) =>
-                    wheelPatch({ position: e.target.value === 'center' ? 'center' : 'cursor' })
-                  }
-                >
-                  <option value="cursor">鼠标所在位置</option>
-                  <option value="center">当前屏幕中央</option>
-                </select>
-              </label>
-              <label className="quick-check">
-                <input
-                  type="checkbox"
-                  checked={draft.wheel.desktopOnly}
-                  onChange={(e) => wheelPatch({ desktopOnly: e.target.checked })}
-                />
-                仅在 Windows 桌面响应
-              </label>
-              <p className="settings-note">
-                Tab 始终保持 Windows
-                原有行为。建议仅在桌面响应，避免与其他应用的字母输入冲突；短按当前字母及 Ctrl / Alt
-                / Shift / Win 组合仍透传。
-              </p>
-            </div>
-          </div>
+          </label>
+          <label>
+            不透明度 <strong>{Math.round(draft.wheel.opacity * 100)}%</strong>
+            <input
+              type="range"
+              min="35"
+              max="100"
+              value={Math.round(draft.wheel.opacity * 100)}
+              onChange={(e) => wheelPatch({ opacity: Number(e.target.value) / 100 })}
+            />
+          </label>
+          <label>
+            出现位置
+            <select
+              value={draft.wheel.position}
+              onChange={(e) =>
+                wheelPatch({ position: e.target.value === 'center' ? 'center' : 'cursor' })
+              }
+            >
+              <option value="cursor">鼠标所在位置</option>
+              <option value="center">当前屏幕中央</option>
+            </select>
+          </label>
+          <label className="quick-check">
+            <input
+              type="checkbox"
+              checked={draft.wheel.desktopOnly}
+              onChange={(e) => wheelPatch({ desktopOnly: e.target.checked })}
+            />
+            仅在 Windows 桌面响应
+          </label>
           <p className="settings-note">
-            轮盘由托盘后台提供，启用后关闭主窗口将收至托盘；从托盘退出臻境后停止工作。总热键开关同样控制轮盘。滤镜和连点器仍须先在工具页授权。
+            Tab 始终保持 Windows
+            原有行为。建议仅在桌面响应，避免与其他应用的字母输入冲突；短按当前字母及 Ctrl / Alt /
+            Shift / Win 组合仍透传。
           </p>
-        </>
-      )}
+        </div>
+      </div>
+      <p className="settings-note">
+        轮盘由托盘后台提供，启用后关闭主窗口将收至托盘；从托盘退出臻境后停止工作。总热键开关同样控制轮盘。滤镜和连点器仍须先在工具页授权。
+      </p>
       <div className="quick-slot-picker">
-        <h4>{section === 'navigation' ? `导航位置 ${index + 1}` : `${DIRECTIONS[index]}方向`}</h4>
+        <h4>{`${DIRECTIONS[index]}方向`}</h4>
         <TargetPicker
-          key={`${section}-${index}`}
+          key={index}
           options={snapshot.options}
           value={slots[index] ?? null}
           onChange={update}
@@ -282,16 +221,14 @@ function Editor({
         >
           保存快捷配置
         </button>
-        {section === 'wheel' && (
-          <button
-            type="button"
-            disabled={preview.isPending || save.isPending}
-            onClick={() => preview.mutate({ operation: 'preview' })}
-          >
-            <Icon icon={faWandMagicSparkles} />
-            预览已保存轮盘
-          </button>
-        )}
+        <button
+          type="button"
+          disabled={preview.isPending || save.isPending}
+          onClick={() => preview.mutate({ operation: 'preview' })}
+        >
+          <Icon icon={faWandMagicSparkles} />
+          预览已保存轮盘
+        </button>
         <span role="status">
           {snapshot.runtime.message ||
             (snapshot.config.wheel.enabled
@@ -306,24 +243,16 @@ function Editor({
 }
 export function QuickLaunchPanel() {
   const query = useQuickLaunch();
-  // 服务版本更新只重建表单草稿；当前标签和选中方向保持，避免保存后跳回导航页。
-  const [section, setSection] = useState<'navigation' | 'wheel'>('navigation');
+  // 服务版本变化只重建草稿，选中方向留在父组件，保存后保持编辑位置。
   const [index, setIndex] = useState(0);
   return (
     <section className="quick-launch-settings" id="quick-launch-settings">
-      <h3>自定义导航与桌面轮盘</h3>
+      <h3>桌面八向轮盘</h3>
       <Failure error={query.error} />
       {query.isPending && isDesktop() ? (
         <p className="settings-note">正在读取快捷配置…</p>
       ) : query.data ? (
-        <Editor
-          key={query.data.revision}
-          snapshot={query.data}
-          section={section}
-          setSection={setSection}
-          index={index}
-          setIndex={setIndex}
-        />
+        <Editor key={query.data.revision} snapshot={query.data} index={index} setIndex={setIndex} />
       ) : (
         <p className="settings-note">需要在桌面端管理真实快捷目标。</p>
       )}

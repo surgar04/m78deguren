@@ -30,7 +30,7 @@ export function WorkspaceLayout({
   children,
 }: {
   workspace: GameWorkspaceController;
-  active: 'home' | 'library' | 'hardware' | 'tools' | 'optimization' | 'settings';
+  active: 'home' | 'library' | 'hardware' | 'tools' | 'optimization' | 'music' | 'settings';
   children?: ReactNode;
 }) {
   const container = useRef<HTMLDivElement>(null);

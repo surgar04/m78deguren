@@ -1,4 +1,4 @@
-//! 设置命令只负责边界、窗口能力和编排；重启、驱动、启动项均要求独立运行时确认。
+//! 设置命令只负责输入边界、窗口能力和编排；驱动/重置保持确认，可信更新交由统一安装编排。
 use crate::{
     error::AppError,
     services::{
@@ -76,9 +76,9 @@ pub enum Request {
     UpdateCheck {},
     UpdateDownload {},
     UpdateOpenRelease {},
+    UpdateOpenLogs {},
     UpdateApply {
         token: String,
-        consent: bool,
     },
     RestoreMain {},
     MediaControl {
@@ -327,26 +327,16 @@ pub async fn settings_execute(
                 .map_err(|_| error("无法打开发布页面"))?;
             json(())
         }
-        Request::UpdateApply { token, consent } => {
-            let _guard = settings::runtime::Critical::acquire(&state)?;
-            settings::runtime::ensure_quiet(&app).await?;
-            let (source, release) = state.update.consume(&token, consent).await?;
-            let plan = settings::maintenance::Plan {
-                ticket: uuid::Uuid::new_v4().to_string(),
-                kind: "update".into(),
-                owner: std::process::id(),
-                exe: std::env::current_exe().map_err(tools::io_error)?,
-                data_root: state.root.clone(),
-                control: control_directory(&state.root).await?,
-                restore_id: None,
-                source: Some(source),
-                sha256: Some(release.sha256),
-                bytes: Some(release.bytes),
-                version: Some(release.version),
-                lock_file: settings::storage::ownership_path(&state.root)?,
-                launch_environment: settings::maintenance::launch_environment(),
-            };
-            settings::maintenance::launch(&app, plan).await?;
+        Request::UpdateOpenLogs {} => {
+            use tauri_plugin_opener::OpenerExt;
+            let directory = control_directory(&state.root).await?;
+            app.opener()
+                .open_path(directory.to_string_lossy().into_owned(), None::<&str>)
+                .map_err(|_| error("无法打开更新维护日志目录"))?;
+            json(())
+        }
+        Request::UpdateApply { token } => {
+            settings::update_runtime::apply(&app, &token, true).await?;
             json(())
         }
         Request::RestoreMain {} => {

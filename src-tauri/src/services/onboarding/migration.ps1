@@ -14,7 +14,7 @@ if([IO.Path]::GetFileName($oldExe) -cne 'zhenjing.exe' -or [IO.Path]::GetFileNam
 if([IO.Path]::GetDirectoryName($newData) -cne [IO.Path]::GetDirectoryName($newApp) -or $control -cne (Join-Path ([IO.Path]::GetDirectoryName($newData)) '.xinjing-maintenance')){throw '迁移目标不在同一受控范围'}
 if((Test-Path -LiteralPath $newApp) -and @(Get-ChildItem -LiteralPath $newApp -Force).Count){throw '目标安装目录非空，拒绝覆盖'}
 if((Test-Path -LiteralPath $newData) -and @(Get-ChildItem -LiteralPath $newData -Force).Count){throw '目标档案目录非空，请先查看上次恢复记录'}
-$owned=@('settings','tools','webview','logs','reports','profile','tmp','hardware','steam','home','onboarding')
+$owned=@('settings','tools','webview','logs','reports','profile','tmp','hardware','steam','home','onboarding','music')
 if(@($plan.owned|Sort-Object) -join '|' -cne (@($owned|Sort-Object) -join '|')){throw '用户目录白名单无效'}
 $sourceGuard=[IO.File]::Open($PSCommandPath,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
 $packageGuard=[IO.File]::Open($package,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)

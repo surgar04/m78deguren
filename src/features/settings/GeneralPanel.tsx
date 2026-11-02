@@ -17,6 +17,7 @@ const NAV_LABELS = {
   hardware: '硬件',
   tools: '工具',
   optimization: '优化',
+  music: '音乐',
   settings: '设置',
 } as const satisfies Record<string, TextKey>;
 const CARDS = {
@@ -101,8 +102,8 @@ export function GeneralPanel() {
           }
         >
           <p>
-            将{start ? '创建' : '移除'} Windows 当前用户的臻境启动项。修改前会备份到 D
-            盘，可在下方恢复。
+            将{start ? '创建' : '移除'} Windows
+            当前用户的臻境启动项。修改前会备份到应用数据目录，可在下方恢复。
           </p>
         </Review>
       )}
@@ -116,28 +117,28 @@ export function GeneralPanel() {
           />
           <SettingToggle
             label="二次确认"
-            description="默认开启。关闭后，游戏模式、自动启用、游戏 Win 键控制与进程恢复直接执行；安装、账号移除及高风险系统操作仍需单独确认。"
+            description="默认开启。关闭后，游戏模式与 Win 键控制、移除快捷入口、清理缓存和硬件记录、Steam 安装/卸载请求直接执行。系统修改、驱动、账号操作及数据重置仍需确认。"
             checked={config.confirmActions}
             disabled={native.isPending}
             onChange={(value) => native.patch({ kind: 'confirm-actions', value })}
           />
           <SettingToggle
             label="自动检查更新"
-            description="启动后检查新版本，并每 4 小时复查；检查不会自动安装更新。"
+            description="启动后检查新版本，并每 4 小时复查；是否自动下载由下方偏好控制。"
             checked={config.checkUpdates}
             disabled={native.isPending}
             onChange={(value) => native.patch({ kind: 'check-updates', value })}
           />
           <SettingToggle
             label="更新提醒"
-            description="发现新版本或下载完成后，在软件内提醒；可稍后处理。"
+            description="发现新版本时在软件内提醒；下载完成并通过校验后自动安装，无需再次确认。"
             checked={config.updateReminders}
             disabled={native.isPending}
             onChange={(value) => native.patch({ kind: 'update-reminders', value })}
           />
           <SettingToggle
             label={t('自动更新偏好')}
-            description="自动下载检测到的可信新版本；安装更新前始终需要单独确认。"
+            description="自动下载可信新版本，校验完成后自动安装并重启。游戏或关键任务运行时延后，空闲后继续；关闭此项后仍可手动下载并自动安装。"
             checked={config.autoUpdate}
             disabled={native.isPending}
             onChange={(value) => native.patch({ kind: 'auto-update', value })}

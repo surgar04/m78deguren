@@ -15,6 +15,11 @@ export default tseslint.config(
       'node_modules/**',
       'src-tauri/gen/**',
       'src-tauri/resources/hardware-web/**',
+      'src-tauri/resources/music-host/**',
+      // 上游快照保持原样并单独校验摘要；本项目新写的接入层仍执行完整类型规则。
+      'integrations/folia-engine/upstream/**',
+      'native/music-host/upstream/**',
+      'public/music-engine/**',
     ],
   },
   js.configs.recommended,
@@ -24,7 +29,12 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.node.json'],
+        project: [
+          './tsconfig.json',
+          './tsconfig.node.json',
+          './integrations/folia-engine/tsconfig.json',
+          './native/music-host/tsconfig.json',
+        ],
         tsconfigRootDir: import.meta.dirname,
       },
     },

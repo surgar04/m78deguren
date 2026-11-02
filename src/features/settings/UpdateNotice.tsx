@@ -60,7 +60,7 @@ export function UpdateNotice() {
           {data.phase === 'unverified'
             ? '该发布缺少可信签名清单，暂不能自动下载或安装。'
             : data.phase === 'ready'
-              ? '已完成安全校验，安装前仍需你的确认。'
+              ? '已完成安全校验，将在游戏和工具空闲后自动安装；可在关于页面查看状态和安装日志。'
               : '可以查看更新内容，选择下载或稍后处理。'}
         </p>
         <button

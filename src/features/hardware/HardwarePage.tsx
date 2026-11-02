@@ -1,3 +1,4 @@
+import { useConfirmationPolicy } from '@/features/settings/use-confirmation-policy';
 import { useState } from 'react';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
@@ -46,6 +47,7 @@ const STATUS = {
 
 /** 硬件页只查询真实服务；网页没有演示设备、模拟时间或随机曲线。 */
 export default function Hardware() {
+  const needsConfirmation = useConfirmationPolicy();
   const workspace = useGameWorkspace(),
     query = useHardwareSnapshot();
   const [tab, setTab] = useState<'overview' | 'devices' | 'monitor'>('overview'),
@@ -207,7 +209,18 @@ export default function Hardware() {
           <button type="button" disabled={!live} onClick={() => open('privileged')}>
             底层传感器
           </button>
-          <button type="button" disabled={!live} onClick={() => open('clear')}>
+          <button
+            type="button"
+            disabled={!live}
+            onClick={() => {
+              if (needsConfirmation('hardware-history-clear')) open('clear');
+              else
+                action.mutate(
+                  { operation: 'clear', consent: true },
+                  { onError: fail, onSuccess: () => setNotice('已清除本应用的硬件时序记录。') },
+                );
+            }}
+          >
             <Icon icon={faTrashCan} />
             清除记录
           </button>

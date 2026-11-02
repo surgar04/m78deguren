@@ -3,6 +3,7 @@ import { useSettingsUi } from './ui-store';
 
 // 固定顺序为繁中、英语、日语、德语、法语；中文键作为简体正文，编译期约束所有语言列。
 const messages = {
+  音乐: ['音樂', 'Music', '音楽', 'Musik', 'Musique'],
   'HUD 开关': ['HUD 開關', 'Toggle HUD', 'HUD の切り替え', 'HUD umschalten', 'Activer le HUD'],
   软件背景: [
     '軟體背景',

@@ -11,6 +11,11 @@ src-tauri/resources/hardware-web
 src-tauri/resources/hardware-monitor/licenses
 # 由 .NET SDK 发布、逐字节校验的运行库布局，不改写运行时配置。
 src-tauri/resources/hardware-monitor/runtime
+src-tauri/resources/music-host
+# 固定摘要校验的第三方原始快照，保持字节与版权注释，不由本项目格式化。
+integrations/folia-engine/upstream
+native/music-host/upstream
+public/music-engine
 native/hardware-monitor/obj
 # 原样迁入的上游语言包与节假日数据保留来源字节；不属于本项目手写 JSON。
 native/hardware-monitor/Hud/Locales

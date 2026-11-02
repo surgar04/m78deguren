@@ -132,3 +132,11 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+## Folia 音乐与歌词演绎
+
+桌面歌词使用 Apple Music-like Lyrics (AMLL) 的 `@applemusic-like-lyrics/core` 0.6.0 DOM 渲染器，AGPL-3.0-only。来源：https://github.com/amll-dev/applemusic-like-lyrics 。歌词来自臻境播放器；透明窗口、时钟桥接和配置由臻境实现，未引入 AMLL Player 应用或背景渲染器。完整许可随应用分发于 `licenses/AMLL-AGPL-3.0.txt`。
+
+来源：https://github.com/chthollyphile/folia-major ，固定提交 `42ff951c9106d0b59a7683ca6dceea019760b339`，AGPL-3.0。原始文件及摘要在 `integrations/folia-source.json`；修改的传输、原生隔离、性能策略和宿主界面在快照之外。应用采用仓库根目录的 AGPL-3.0 许可证。发布对应版本时须同时提供完整可构建源码及锁文件，不能只链接上游。
+
+Node.js 按其随附 LICENSE 分发；Noto Serif SC 按 OFL-1.1 分发。雾笺使用 AnimCJK 固定来源数据及 Arphic Public License，构建产物附带原始许可、修改说明及来源提交。Node 依赖各自的许可证保留在组件目录。

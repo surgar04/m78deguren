@@ -14,6 +14,8 @@ Tauri 2 桌面工程，React + TypeScript 前端，Rust 后端，pnpm 管理前�
 
 完整目录、组件校验、必要 EXE 宿主与 MSI 文件管理规则见 [安装组件与 DLL 布局](docs/development/安装组件与DLL布局.md)。
 
+0.10.0 新增音乐页面，支持 QQ 音乐、网易云音乐、YouTube Music、Spotify 和本地音乐库，提供封面与歌词匹配、17 种沉浸歌词演绎以及普通模式下的桌面歌词。在线播放与账号能力取决于平台授权、地区和服务状态。Folia 与 AMLL 的来源、许可和改动范围见 [音乐页面与 Folia 接入](docs/development/音乐页面与Folia接入.md) 及 [第三方许可](THIRD_PARTY_NOTICES.md)。本项目源码以 AGPL-3.0 提供，发行包包含相应许可，不附带第三方账号或付费内容权限。
+
 0.5.1 起默认按当前用户安装到 %LOCALAPPDATA%\\Programs\\Zhenjing，可在向导中选择其他本地磁盘的独立空目录，不再要求存在 D 盘。默认配置、壁纸、WebView 缓存、下载、日志和备份保存在当前用户的 %LOCALAPPDATA%\\Zhenjing，不再读取开发机工作区。可使用 --data-dir 或 ZHENJING_DATA_DIR 显式沿用原有档案；兼容旧变量 XINJING_DATA_DIR，不会自动移动或清空旧数据。卸载保留用户数据。
 
 需要 Microsoft Edge WebView2 运行时。安装器检测缺失时提供微软官方下载入口，由用户自行安装后重新运行；不会静默安装系统组件。主程序与安装引导不直接依赖额外的 VC++ Redistributable；打包会检查实际二进制导入表。
@@ -48,7 +50,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:bundle
 
 独立游戏库位于 `/#/library`，使用真实 Steam 客户端、账号、目录、安装清单和当前账号缓存，提供搜索、筛选、分页、启动、安装/卸载请求及账号备份恢复。需要完整可见库存时可临时提供官方 Web API Key；密钥不落盘，私密或不可见数据不伪造。见 [Steam 游戏库与安装包说明](docs/development/Steam游戏库与安装包实现.md)。
 
-0.9.0 新增 `/#/library/other`，识别八款游戏及其对应区服、提取本机图标并同步首页快捷启动。设置 → 快捷键可配置六个单列自定义导航和桌面八向轮盘；轮盘默认长按 G，支持 A–Z 字母选择、八等分扇区、鼠标选择、大小、位置及透明度，主窗口收至托盘后仍可运行。识别证据、搜索边界和验收范围见 [其他游戏与桌面轮盘](docs/development/其他游戏与快捷轮盘.md)。
+0.9.0 新增 `/#/library/other`，识别八款游戏及其对应区服、提取本机图标并同步首页快捷启动。设置 → 快捷键可配置桌面八向轮盘；侧栏自定义快捷导航已移除，首页快捷启动继续保留。轮盘默认长按 G，支持 A–Z 字母选择、八等分扇区、鼠标选择、大小、位置及透明度，主窗口收至托盘后仍可运行。识别证据、搜索边界和验收范围见 [其他游戏与桌面轮盘](docs/development/其他游戏与快捷轮盘.md)。
 
 系统与硬件位于 `/#/hardware`，使用真实硬件服务，包含设备详情、实时传感器、趋势图、独立传感器窗口与远程监测入口。HTML 硬件报告包含时序图表及时间范围筛选，保存到应用数据目录，详见[硬件页面实现说明](docs/development/硬件页面实现说明.md)。
 
@@ -161,3 +163,11 @@ GitHub Actions 配置在 `.github/workflows/check.yml`，执行相同质量检�
 统一入口 `dev.ps1 desktop:build` 自动执行质量检查、清理旧产物、构建、MSI 签名和更新清单生成。输出位于 `dist/desktop`，包含 MSI、`zhenjing-update.json`、`SHA256SUMS.txt`、`publisher.json`、`build-info.json`、`INSTALL.md` 六个文件。上传到 GitHub Release 时必须使用 `v` 加版本号的标签，例如 `v0.9.0`，并将稳定版本标记为 Latest；详情见 [GitHub 手动发布](docs/development/GitHub手动发布.md)。
 
 仓库不包含依赖目录、开发工具链、缓存、用户档案或签名私钥。硬件助手的可校验发布件及来源清单随源码保留，修改该助手源码后需通过 `scripts/build-hardware-monitor.ps1` 重新生成，不能仅修改清单绕过校验。第三方组件及字体许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+### 音乐页面
+
+新增 `/music`，接入 QQ 音乐、网易云音乐、YouTube Music、Spotify 与本地音乐。普通播放器默认不启用 GPU 演绎，手动进入“沉浸演绎”才全屏加载 Folia 的 17 种歌词样式。保留原画策略，并提供面向软件显卡的低开销预算。
+
+首次开发前通过 `dev.ps1 music:prepare` 准备独立音乐组件；`desktop:dev` 的前置命令会检查并补齐。接入结构、验证边界和许可证说明见 [音乐页面与 Folia 接入](docs/development/音乐页面与Folia接入.md)。
+
+应用包含 AGPL-3.0 的 Folia 组合代码，以根目录 [LICENSE](LICENSE) 许可分发；向用户分发构建时须同时提供该版本的完整源码及锁文件。

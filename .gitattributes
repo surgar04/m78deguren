@@ -17,3 +17,6 @@ src-tauri/src/services/home/*.cs -text
 src-tauri/src/services/tools/windows/*.cs -text
 native/windows-bridge/** -text
 scripts/build-windows-bridge.ps1 -text
+# 冻结的上游音乐源码按逐字节摘要验收，签入和签出均不得改变行尾。
+integrations/folia-engine/upstream/** -text
+native/music-host/upstream/** -text

@@ -175,6 +175,32 @@ pub async fn tools_execute(
     if !allowed_window(window.label(), &request) {
         return Err(error("此窗口没有调用该工具的权限"));
     }
+    // 维护锁覆盖整个异步修改，避免更新在工具启动/文件提交期间退出宿主；纯状态查询不抢锁。
+    // 独立持有 manager 句柄，使后续分支可把 app 移入阻塞任务，维护 guard 仍覆盖完整任务。
+    let maintenance_app = app.clone();
+    let preferences = maintenance_app.state::<crate::services::settings::SettingsState>();
+    let _maintenance = if matches!(
+        &request,
+        Request::Catalog {}
+            | Request::Displays {}
+            | Request::CrosshairStatus {}
+            | Request::CrosshairReady {}
+            | Request::ScreenStatus {}
+            | Request::ScreenClose {}
+            | Request::DownloadsList {}
+            | Request::DownloadsSettings {}
+            | Request::SpeedStatus {}
+            | Request::SpeedStop {}
+            | Request::NtpServers {}
+            | Request::RuntimeStatus {}
+            | Request::ExternalCatalog {}
+    ) {
+        None
+    } else {
+        Some(crate::services::settings::runtime::Critical::acquire(
+            &preferences,
+        )?)
+    };
     match request {
         Request::Catalog {} => json(tools::catalog::catalog()),
         Request::Displays {} => json(crosshair::displays(&app)?),

@@ -110,7 +110,7 @@ export default function SetupPage() {
       </header>
       <main className="setup-card glass" id="main-content">
         <aside className="setup-navigation">
-          <img src="/assets/home/brand.svg" alt="臻境" width={52} height={72} />
+          <img data-brand-logo src="/assets/home/brand.png" alt="臻境" width={52} height={72} />
           <h1>
             准备好，
             <br />

@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { faMagnifyingGlass, faPlay, faGamepad, faGear } from '@fortawesome/free-solid-svg-icons';
+import {
+  faMagnifyingGlass,
+  faPlay,
+  faGamepad,
+  faGear,
+  faMusic,
+} from '@fortawesome/free-solid-svg-icons';
 import { Modal } from './Modal';
 import { Icon } from './Icon';
 import {
@@ -92,6 +98,16 @@ function GlobalSearch({ open, close }: { open: (dialog: DialogState) => void; cl
         <button type="button" onClick={() => open({ kind: 'game-mode' })}>
           <Icon icon={faGamepad} />
           游戏模式与 Win 键控制
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            close();
+            void navigate('/music');
+          }}
+        >
+          <Icon icon={faMusic} />
+          音乐播放器与沉浸演绎
         </button>
         <button
           type="button"

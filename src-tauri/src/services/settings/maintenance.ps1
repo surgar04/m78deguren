@@ -8,7 +8,7 @@ $data=Assert-LocalPath ([string]$plan.dataRoot);$control=Assert-LocalPath ([stri
 if($data.TrimEnd('\').Length -lt 4 -or [IO.Path]::GetDirectoryName($data) -cne [IO.Path]::GetDirectoryName($control)){throw '维护目录不在数据目录的同级受限范围'}
 $sourceGuard=[IO.File]::Open($PSCommandPath,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
 $owner=[Diagnostics.Process]::GetProcessById([int]$plan.owner)
-$owned=@('settings','tools','webview','logs','reports','profile','tmp','hardware','steam','home','onboarding')
+$owned=@('settings','tools','webview','logs','reports','profile','tmp','hardware','steam','home','onboarding','music')
 $backup=Assert-LocalPath (Join-Path $control ('backup-'+$plan.ticket));$moved=@();$newProcess=$null;$archived=$false
 $lockPath=Assert-LocalPath ([string]$plan.lockFile);$rootLock=$null
 if([IO.Path]::GetDirectoryName($lockPath) -cne $control -or [IO.Path]::GetFileName($lockPath) -notmatch '^data-[a-f0-9]{64}\.lock$'){throw '数据独占锁范围无效'}
@@ -57,6 +57,8 @@ function Launch-App([bool]$health){
 }
 try{
     if($plan.kind -notin @('reset','restore','update')){throw '不支持的维护类型'}
+    # 即使绕过 Rust 调用入口，本机 D 盘保护验收也不启动真实更新安装器。
+    if($plan.kind -eq 'update' -and $env:ZHENJING_RESTRICT_WRITES_TO_D -eq '1'){throw '开发验收环境不执行真实 MSI 更新'}
     if($plan.kind -eq 'restore'){
         $null=[Guid]::Parse([string]$plan.restoreId)
         $restore=Assert-LocalPath (Join-Path $control ('backup-'+$plan.restoreId))
@@ -89,7 +91,8 @@ try{
             # MSI 参数必须逐项正确引用；日志仍在应用控制目录，不交由系统默认临时路径。
             $msiLog=Assert-LocalPath (Join-Path $control ($plan.ticket+'.msi.log'))
             $msiexec=Join-Path $env:SystemRoot 'System32/msiexec.exe'
-            $arguments='/i "'+$package+'" /norestart INSTALLDIR="'+$installDirectory+'" /L*v "'+$msiLog+'"'
+            # /passive 显示安装进度而不再次询问；事务回滚及 Windows 的权限策略保持生效。
+            $arguments='/i "'+$package+'" /passive /norestart INSTALLDIR="'+$installDirectory+'" /L*v "'+$msiLog+'"'
             $installer=Start-Process -FilePath $msiexec -ArgumentList $arguments -WindowStyle Normal -PassThru
             $installer.WaitForExit()
             if($installer.ExitCode -notin @(0,3010)){throw ('MSI 被取消或安装失败（'+$installer.ExitCode+'），安装事务已回滚')}
@@ -106,6 +109,10 @@ try{
     }
     if(-not (Test-Path -LiteralPath $ready)){throw '新进程未通过界面就绪检查，执行恢复'}
     Save-Json $receipt @{state='completed';message='维护完成，应用已重新启动';backup=$backup;kind=[string]$plan.kind}
+    # MSI 已提交且新程序健康后才清理本次旧 EXE 诊断副本；清理失败不得杀掉健康的新实例。
+    if($plan.kind -eq 'update' -and $oldExe -and (Test-Path -LiteralPath $oldExe)){
+        try{Remove-Item -LiteralPath $oldExe -Force}catch{Save-Json $receipt @{state='completed';message='更新成功，旧诊断副本暂未清理';backup=$backup;kind=[string]$plan.kind}}
+    }
 }catch{
     $message=[string]$_.Exception.Message
     # 只关闭本助手创建的进程；从不按名称杀掉用户的其他应用。

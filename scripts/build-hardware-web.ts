@@ -6,6 +6,8 @@ import { resolve } from 'node:path';
 for (const name of ['report', 'mobile']) {
   await build({
     configFile: false,
+    // 离线报告只需要本次 IIFE；不要顺带复制音乐引擎和整套 public 素材。
+    publicDir: false,
     cacheDir: '.cache/vite-hardware',
     build: {
       target: 'es2022',

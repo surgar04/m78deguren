@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { GameModeControls } from './HomeActions';
+import { GameModeControls, ShortcutDetails } from './HomeActions';
 import { TopBar } from './DesktopChrome';
 import type * as HomeRepository from '../repository';
 
@@ -13,6 +13,16 @@ vi.mock('../repository', async (original) => ({
   ...(await original<typeof HomeRepository>()),
   useHome: () => ({
     data: {
+      revision: 'a'.repeat(64),
+      shortcuts: [
+        {
+          id: 'c09a81c0-7491-4505-91cf-70690fe39f2a',
+          name: '测试入口',
+          path: 'D:/Games/test.exe',
+          isGame: true,
+          lastLaunched: null,
+        },
+      ],
       runtime: {
         ready: true,
         effective: false,
@@ -33,6 +43,28 @@ beforeEach(() => {
   state.mutate.mockClear();
 });
 describe('游戏控制的可配置二次确认', () => {
+  it('关闭确认后只移除快捷记录，保留原生 revision 边界', async () => {
+    state.confirm = false;
+    render(
+      <ShortcutDetails
+        id="c09a81c0-7491-4505-91cf-70690fe39f2a"
+        notify={vi.fn()}
+        busy={vi.fn()}
+        close={vi.fn()}
+      />,
+    );
+    await userEvent.setup().click(screen.getByRole('button', { name: '移除快捷入口' }));
+    expect(state.mutate).toHaveBeenCalledWith(
+      {
+        operation: 'remove',
+        id: 'c09a81c0-7491-4505-91cf-70690fe39f2a',
+        revision: 'a'.repeat(64),
+        consent: true,
+      },
+      expect.any(Object),
+    );
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
   it('默认先审阅，明确勾选后才发送原生请求', async () => {
     const user = userEvent.setup();
     render(<GameModeControls notify={vi.fn()} busy={vi.fn()} />);

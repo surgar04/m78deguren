@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import { FirstRunGate } from '@/features/onboarding/FirstRunGate';
+import DesktopLyricsBridge from '@/features/music/desktop-lyrics/DesktopLyricsBridge';
+import MusicMiniPlayer from '@/features/music/MusicMiniPlayer';
 const Setup = lazy(() => import('@/features/onboarding/SetupPage'));
 const Overview = lazy(() => import('@/pages/Overview'));
 const Settings = lazy(() => import('@/pages/Settings'));
@@ -9,6 +11,10 @@ const OtherGames = lazy(() => import('@/features/library/OtherGamesPage'));
 const Hardware = lazy(() => import('@/pages/Hardware'));
 const SensorMonitor = lazy(() => import('@/pages/SensorMonitor'));
 const Tools = lazy(() => import('@/pages/Tools'));
+const DesktopLyricsWindow = lazy(
+  () => import('@/features/music/desktop-lyrics/DesktopLyricsWindow'),
+);
+const Music = lazy(() => import('@/features/music/MusicPage'));
 const Optimization = lazy(() => import('@/pages/Optimization'));
 const HudWindow = lazy(() => import('@/features/hud/HudWindow'));
 const CrosshairOverlay = lazy(() =>
@@ -43,7 +49,10 @@ export function App() {
         }
       >
         <FirstRunGate>
+          <MusicMiniPlayer />
+          <DesktopLyricsBridge />
           <Routes>
+            <Route path="/desktop-lyrics" element={<DesktopLyricsWindow />} />
             <Route path="/setup" element={<Setup />} />
             <Route path="/hud" element={<HudWindow />} />
             <Route path="/desktop-island" element={<Navigate to="/hud" replace />} />
@@ -53,6 +62,7 @@ export function App() {
             <Route path="/" element={<Overview />} />
             <Route path="/library" element={<Library />} />
             <Route path="/library/other" element={<OtherGames />} />
+            <Route path="/music" element={<Music />} />
             <Route path="/hardware" element={<Hardware />} />
             <Route path="/sensor-monitor" element={<SensorMonitor />} />
             <Route path="/tools/:toolId?" element={<Tools />} />

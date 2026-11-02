@@ -1,3 +1,4 @@
+import { requiresConfirmation } from '@/lib/confirmation-policy';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -171,7 +172,7 @@ export function GameModeControls({
     });
   };
   const request = (next: NonNullable<typeof review>) => {
-    if (settings.data?.config.confirmActions === false) {
+    if (!requiresConfirmation(settings.data?.config.confirmActions, 'game-mode')) {
       execute(next);
       return;
     }
@@ -445,10 +446,27 @@ export function RandomPicture({ notify, busy }: Omit<Props, 'close'>) {
   );
 }
 export function ShortcutDetails({ id, notify, busy, close }: Props & { id: string }) {
+  const settings = useSettingsSnapshot();
   const home = useHome(),
     action = useHomeAction(homeSnapshotSchema),
     [remove, setRemove] = useState(false),
     [consent, setConsent] = useState(false);
+  // 只移除本应用记录，仍绑定最新 revision，防止旧弹窗覆盖并发修改。
+  const removeEntry = () => {
+    if (!home.data) return;
+    busy(true);
+    action.mutate(
+      { operation: 'remove', id, revision: home.data.revision, consent: true },
+      {
+        onSuccess: () => {
+          notify('已移除快捷入口，原程序未删除。');
+          close();
+        },
+        onError: (cause) => notify(errorMessage(cause)),
+        onSettled: () => busy(false),
+      },
+    );
+  };
   const row = home.data?.shortcuts.find((row) => row.id === id);
   if (!row) return <p className="modal-description">该快捷启动已被移除，请关闭并刷新。</p>;
   return (
@@ -484,7 +502,11 @@ export function ShortcutDetails({ id, notify, busy, close }: Props & { id: strin
         type="button"
         className="text-button"
         disabled={action.isPending}
-        onClick={() => setRemove(true)}
+        onClick={() => {
+          if (requiresConfirmation(settings.data?.config.confirmActions, 'shortcut-remove'))
+            setRemove(true);
+          else removeEntry();
+        }}
       >
         移除快捷入口
       </button>
@@ -503,21 +525,7 @@ export function ShortcutDetails({ id, notify, busy, close }: Props & { id: strin
             type="button"
             className="mint-button"
             disabled={!consent || action.isPending}
-            onClick={() => {
-              if (!home.data) return;
-              busy(true);
-              action.mutate(
-                { operation: 'remove', id, revision: home.data.revision, consent: true },
-                {
-                  onSuccess: () => {
-                    notify('已移除快捷入口，原程序未删除。');
-                    close();
-                  },
-                  onError: (cause) => notify(errorMessage(cause)),
-                  onSettled: () => busy(false),
-                },
-              );
-            }}
+            onClick={removeEntry}
           >
             确认移除
           </button>

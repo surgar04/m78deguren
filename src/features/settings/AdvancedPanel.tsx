@@ -1,3 +1,4 @@
+import { useConfirmationPolicy } from './use-confirmation-policy';
 import { bytes } from './format';
 import { HudToggle } from '@/features/hud/HudPanel';
 import { useState } from 'react';
@@ -139,6 +140,7 @@ function FilterRules() {
 }
 /** 重置和恢复先取得带时限的原生预览；JS 不负责删除路径或替换可执行文件。 */
 export function AdvancedPanel() {
+  const needsConfirmation = useConfirmationPolicy();
   const { t } = useText();
   const snapshot = useSettingsSnapshot();
   const patch = useNativePatch();
@@ -192,7 +194,14 @@ export function AdvancedPanel() {
         >
           {t('刷新')}
         </button>
-        <button type="button" disabled={clear.isPending} onClick={() => setCacheReview(true)}>
+        <button
+          type="button"
+          disabled={clear.isPending}
+          onClick={() => {
+            if (needsConfirmation('cache-clear')) setCacheReview(true);
+            else clear.mutate({ operation: 'cache-clear', consent: true });
+          }}
+        >
           {t('清理缓存')}
         </button>
         <button

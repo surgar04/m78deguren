@@ -50,6 +50,7 @@ fn root(component: &str) -> Result<PathBuf> {
         let development = match component {
             "monitor" => resources.join("hardware-monitor/runtime"),
             "windows-bridge" => resources.join("windows-bridge"),
+            "music-host" => resources.join("music-host"),
             _ => return Err(error("未知组件")),
         };
         Ok(development)
@@ -59,16 +60,17 @@ fn root(component: &str) -> Result<PathBuf> {
 }
 fn validate_name(name: &str) -> Result<()> {
     if name.is_empty()
-        || name.len() > 240
+        || name.len() > 512
         || name.contains(['\\', ':'])
         || name.starts_with('/')
         || name.split('/').any(|part| {
             part.is_empty()
                 || part == "."
                 || part == ".."
-                || !part
-                    .bytes()
-                    .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'-' | b'_'))
+                || !part.bytes().all(|b| {
+                    b.is_ascii_alphanumeric()
+                        || matches!(b, b'.' | b'-' | b'_' | b'@' | b'+' | b'(' | b')')
+                })
         })
     {
         return Err(error("组件清单包含无效文件名"));
@@ -128,6 +130,48 @@ pub async fn monitor() -> Result<Bundle> {
     })
     .await
     .map_err(|_| error("硬件组件校验任务失败"))?
+}
+/// Node 与生产依赖来自 MSI 组件目录；摘要核验后锁定至音乐子进程结束。
+pub async fn music() -> Result<Bundle> {
+    tauri::async_runtime::spawn_blocking(|| {
+        let directory = root("music-host")?;
+        let manifest: Manifest =
+            serde_json::from_str(include_str!("../../resources/music-host/manifest.json"))
+                .map_err(|_| error("音乐组件清单无效"))?;
+        if manifest.files.is_empty() || manifest.files.len() > 60000 {
+            return Err(error("音乐组件清单范围无效"));
+        }
+        let entries: Vec<_> = manifest.files.into_iter().collect();
+        // 小文件多，单线程逐个打开会放大防病毒扫描和磁盘等待；八个有界工作线程仍逐文件验签并持锁。
+        let guards = std::thread::scope(|scope| -> Result<Vec<std::fs::File>> {
+            let tasks: Vec<_> = entries
+                .chunks(entries.len().div_ceil(8))
+                .map(|chunk| {
+                    let directory = &directory;
+                    scope.spawn(move || -> Result<Vec<std::fs::File>> {
+                        chunk
+                            .iter()
+                            .map(|(name, hash)| {
+                                validate_name(name)?;
+                                protect(&directory.join(name), hash)
+                            })
+                            .collect()
+                    })
+                })
+                .collect();
+            let mut guards = Vec::with_capacity(entries.len());
+            for task in tasks {
+                guards.extend(task.join().map_err(|_| error("音乐组件校验线程异常"))??);
+            }
+            Ok(guards)
+        })?;
+        Ok(Bundle {
+            executable: directory.join("node.exe"),
+            _guards: guards,
+        })
+    })
+    .await
+    .map_err(|_| error("音乐组件校验任务失败"))?
 }
 pub async fn expand_managed_loader(source: String) -> Result<String> {
     if !source.contains("# __MANAGED_BRIDGE__") {

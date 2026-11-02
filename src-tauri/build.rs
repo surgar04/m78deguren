@@ -92,6 +92,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "cargo:rerun-if-changed={}",
         bridge.join("manifest.json").display()
     );
+    // 音乐 sidecar 和主程序必须来自同一份工作树，禁止“前端更新、旧后端仍被打包”。
+    let music = base.join("resources/music-host");
+    let manifest: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(music.join("manifest.json"))?)?;
+    for (name, expected) in manifest["sources"]
+        .as_object()
+        .ok_or("音乐组件缺少来源清单，请运行 music:host:build")?
+    {
+        let path = base.join("..").join(name);
+        println!("cargo:rerun-if-changed={}", path.display());
+        let actual = format!("{:x}", Sha256::digest(std::fs::read(path)?));
+        if expected.as_str() != Some(actual.as_str()) {
+            return Err(
+                format!("音乐组件来源与发布件不一致：{name}，请运行 music:host:build").into(),
+            );
+        }
+    }
+    println!(
+        "cargo:rerun-if-changed={}",
+        music.join("manifest.json").display()
+    );
     tauri_build::build();
     Ok(())
 }

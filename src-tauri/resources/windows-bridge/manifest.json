@@ -13,9 +13,9 @@
     "native/windows-bridge/Clicker.cs": "dd570a7575e3378f28cee57771200ed5c6b250047fa777b56ec79c78a4e3fd56"
   },
   "files": {
-    "Zhenjing.Windows.dll": "8640ac4b1ed292d9ede3753a3728b3272e7b4ecec48656ca04e88e4b56b29094"
+    "Zhenjing.Windows.dll": "1a1025afe20015b11318bf39ef11f0b318d1a682d8448c4f06b55ca5fcea8be7"
   },
   "schema": 1,
-  "version": "0.9.1",
+  "version": "0.10.0",
   "targetFramework": "net48"
 }
