@@ -26,6 +26,7 @@ export async function musicFrontendSources(root: string): Promise<Record<string,
     'pnpm-lock.yaml',
     'integrations/folia-source.json',
     'src/lib/music-contracts.ts',
+    'src/lib/music-auth.ts',
     'scripts/music-inputs.ts',
   ];
   for (const entry of await readdir(resolve(root, 'integrations/folia-engine'), {

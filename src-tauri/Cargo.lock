@@ -6226,7 +6226,7 @@ dependencies = [
 
 [[package]]
 name = "zhenjing"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "arc-swap",
  "base64 0.22.1",

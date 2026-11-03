@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { MusicRequest } from '../../src/lib/music-contracts';
 import { providerPayload } from './provider-payload';
+import { musicAuthFailure, musicHostFailure } from '../../src/lib/music-auth';
 
 export type NativeMusicBridge = (request: MusicRequest) => Promise<unknown>;
 let desktopRequest: NativeMusicBridge | null = null;
@@ -12,15 +13,72 @@ export async function requestProvider(
   action: string,
   params: Record<string, unknown> = {},
 ): Promise<unknown> {
-  const payload = providerPayload(params);
+  let payload: Record<string, unknown>;
   try {
-    return await request({ operation: 'provider', provider, action, params: payload });
+    payload = providerPayload(params);
   } catch {
     return {
       ok: false,
       error: {
+        code: 'invalid-response',
+        reason: 'invalid-request',
+        message: '音乐请求参数无效，请关闭弹窗后重试',
+      },
+    };
+  }
+  try {
+    const result = await request({ operation: 'provider', provider, action, params: payload });
+    const envelope = z
+      .discriminatedUnion('ok', [
+        z.object({ ok: z.literal(true), data: z.unknown() }).passthrough(),
+        z
+          .object({
+            ok: z.literal(false),
+            error: z
+              .object({
+                code: z.string().max(64),
+                message: z.string().max(16384),
+                reason: z.string().max(64).optional(),
+              })
+              .passthrough(),
+          })
+          .passthrough(),
+      ])
+      .safeParse(result);
+    if (!envelope.success)
+      return {
+        ok: false,
+        error: {
+          code: 'invalid-response',
+          reason: 'protocol',
+          message: '音乐组件返回了不兼容的结果，请使用 MSI 修复安装后重试。',
+        },
+      };
+    if (provider === 'ytm') {
+      const failed = z
+        .object({
+          ok: z.literal(false),
+          error: z.object({ code: z.string(), reason: z.string().optional() }).passthrough(),
+        })
+        .safeParse(result);
+      if (failed.success) {
+        const failure = musicAuthFailure(failed.data.error.reason || failed.data.error.code);
+        return {
+          ...failed.data,
+          error: { ...failed.data.error, message: `${failure.title}。${failure.hint}` },
+        };
+      }
+    }
+    return result;
+  } catch (cause) {
+    const reason = musicHostFailure(cause);
+    const failure = musicAuthFailure(reason);
+    return {
+      ok: false,
+      error: {
         code: 'network',
-        message: `${provider === 'ytm' ? 'YouTube Music' : 'Spotify'} 音乐服务连接未完成，请重试；如持续失败，请检查网络代理和音乐组件完整性。无需安装该平台的桌面客户端。`,
+        reason,
+        message: `${provider === 'ytm' ? 'YouTube Music' : 'Spotify'}：${failure.title}。${failure.hint}`,
       },
     };
   }

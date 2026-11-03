@@ -13,6 +13,7 @@ import {
 import type { SongResult } from './upstream/src/types';
 import type { ProviderCollection } from './upstream/src/types/onlineMusic';
 import { createLoginAttempts } from './login-attempts';
+import { musicAuthFailure } from '../../src/lib/music-auth';
 
 // Folia 的歌词解码器使用 Buffer；仅安装浏览器 Buffer，不引入 Node 的进程或文件能力。
 Object.assign(globalThis, { Buffer });
@@ -223,6 +224,41 @@ export async function createMusicEngine(request: NativeMusicBridge) {
     },
     async loginCheck(provider: OnlineMusicProvider, key: string) {
       const result = await omni.checkLogin(provider, attempts.resolve(provider, key));
+      // 原始 provider 负责账号状态；额外读取只含固定阶段/代码的轻量诊断，不接触登录凭据。
+      const progress =
+        provider === 'ytm'
+          ? z
+              .object({
+                ok: z.literal(true),
+                data: z
+                  .object({
+                    phase: z.enum([
+                      'idle',
+                      'opening',
+                      'browser',
+                      'reading',
+                      'verifying',
+                      'confirmed',
+                      'error',
+                      'cancelled',
+                    ]),
+                    code: z.string().max(64),
+                    diagnostics: z.string().max(8192),
+                  })
+                  .strict(),
+              })
+              .parse(
+                await request({
+                  operation: 'provider',
+                  provider,
+                  action: 'auth_progress',
+                  params: {},
+                }),
+              ).data
+          : undefined;
+      const code =
+        progress?.code || (result.state === 'error' ? result.failure?.mainCode : '') || '';
+      const failure = musicAuthFailure(code);
       if (result.state === 'confirmed') {
         attempts.complete(key);
         // 必须使用上游的 sign-in 语义递增账号代次：sync 会加入登录前仍在运行的访客读取，
@@ -231,7 +267,13 @@ export async function createMusicEngine(request: NativeMusicBridge) {
       }
       return {
         state: result.state,
-        message: result.state === 'error' ? (result.message ?? '登录未完成') : '',
+        message:
+          result.state === 'error'
+            ? provider === 'ytm'
+              ? `${failure.title}。${failure.hint}`
+              : (result.message ?? '登录未完成')
+            : '',
+        ...(progress ? { ...progress, code } : {}),
       };
     },
     async loginMethods(provider: OnlineMusicProvider) {

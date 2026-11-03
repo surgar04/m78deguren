@@ -328,6 +328,9 @@ importers:
       music-metadata:
         specifier: 11.16.1
         version: 11.16.1
+      undici:
+        specifier: 8.12.3
+        version: 8.12.3
       ws:
         specifier: 8.21.3
         version: 8.21.3

@@ -1,6 +1,6 @@
 [package]
 name = "zhenjing"
-version = "0.10.1"
+version = "0.10.2"
 description = "臻境桌面应用"
 publish = false
 rust-version = "1.96"

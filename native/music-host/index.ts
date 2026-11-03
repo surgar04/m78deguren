@@ -8,6 +8,7 @@ import { createPlatforms, type HostCall } from './providers.ts';
 import { createProviderApi } from './provider-api.ts';
 import { createAssets } from './assets.ts';
 import { inspectLocalFile } from './local-metadata.ts';
+import { closeMusicNetwork } from './network-route.ts';
 
 // 标准输出只承载有界协议帧。第三方库的控制台输出不混入 RPC，也不记录 Cookie 或令牌。
 for (const key of ['log', 'debug', 'info', 'warn', 'error'] as const) console[key] = () => {};
@@ -172,6 +173,7 @@ async function shutdown() {
   }
   pending.clear();
   await Promise.race([platforms.shutdown(), new Promise((resolve) => setTimeout(resolve, 3000))]);
+  await closeMusicNetwork();
   process.exit();
 }
 lines.on('close', () => {

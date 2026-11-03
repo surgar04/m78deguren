@@ -302,6 +302,8 @@ internal static class Program
             if (args.Length == 1 && args[0] == "--hud-protect")
                 return Hud.HudEngine.ProtectInput();
         if (args.Length == 1 && args[0] == "--music-proxy") return MusicCrypt.Proxy();
+        if (args.Length == 1 && args[0] == "--music-route") return MusicCrypt.Route();
+        if (args.Length == 1 && args[0] == "--music-browser-version") return MusicCrypt.BrowserVersion();
         if (args.Length == 2 && args[0] == "--music-crypt")
                 return MusicCrypt.Run(args[1]);
             if (args.Length != 2 || !int.TryParse(args[0], out var parentId))

@@ -1,5 +1,11 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
+import {
+  musicRoute,
+  proxyDispatcher,
+  directDispatcher,
+  MusicNetworkError,
+} from './network-route.ts';
 
 // 音乐进程只访问选定平台及其媒体 CDN；请求不能变成通用下载器或内网探测代理。
 const HOSTS = [
@@ -79,6 +85,7 @@ export async function platformFetch(
       method: original.method,
       headers: original.headers,
       signal: original.signal,
+      redirect: original.redirect,
       ...(!['GET', 'HEAD'].includes(original.method) ? { body: await original.arrayBuffer() } : {}),
       ...init,
     };
@@ -88,12 +95,50 @@ export async function platformFetch(
   );
   const deadline = AbortSignal.timeout(45000);
   const signal = init.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
+  const redirectPolicy = init.redirect ?? 'follow';
   for (let redirects = 0; redirects < 8; redirects++) {
-    const addresses = await lookup(url.hostname, { all: true });
-    if (!addresses.length || addresses.some((item) => !publicAddress(item.address)))
-      throw Error('音乐资源不能指向本地或内网');
-    const response = await fetch(url, { ...init, signal, redirect: 'manual' });
+    signal.throwIfAborted();
+    const google = [
+      'youtube.com',
+      'google.com',
+      'googleapis.com',
+      'googlevideo.com',
+      'ytimg.com',
+      'ggpht.com',
+      'googleusercontent.com',
+      'gstatic.com',
+    ].some((host) => url.hostname === host || url.hostname.endsWith(`.${host}`));
+    const route = google ? await musicRoute(url) : { mode: 'direct' as const };
+    signal.throwIfAborted();
+    // 使用显式代理时由该可信代理解析固定白名单域名；不先强制走本机 DNS，避免代理可用却卡在本机解析。
+    if (route.mode === 'direct') {
+      const addresses = await resolveAddresses(url.hostname, signal);
+      if (!addresses.length || addresses.some((item) => !publicAddress(item.address)))
+        throw new MusicNetworkError(
+          'dns',
+          '音乐平台域名解析到本地或内网地址，请检查 DNS 或代理设置',
+        );
+    }
+    const options = {
+      ...init,
+      signal,
+      redirect: 'manual' as const,
+      ...(route.mode === 'proxy'
+        ? { dispatcher: proxyDispatcher(route.proxy) }
+        : google
+          ? { dispatcher: directDispatcher() }
+          : {}),
+    };
+    const response = await fetch(url, options);
     if (![301, 302, 303, 307, 308].includes(response.status)) return response;
+    if (redirectPolicy === 'manual') return response;
+    if (redirectPolicy === 'error') {
+      await response.body?.cancel();
+      throw new MusicNetworkError(
+        'network',
+        '平台鉴权请求发生重定向，已阻止转发登录信息，请重新授权',
+      );
+    }
     const next = response.headers.get('location');
     await response.body?.cancel();
     if (!next) throw Error('平台返回无效重定向');
@@ -103,6 +148,8 @@ export async function platformFetch(
       const headers = new Headers(init.headers);
       headers.delete('authorization');
       headers.delete('cookie');
+      headers.delete('x-goog-authuser');
+      headers.delete('x-goog-pageid');
       init = { ...init, headers };
     }
     if (response.status === 303) {
@@ -112,6 +159,33 @@ export async function platformFetch(
     url = target;
   }
   throw Error('音乐资源重定向次数过多');
+}
+async function resolveAddresses(host: string, signal: AbortSignal) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let abort: () => void = () => {};
+  try {
+    signal.throwIfAborted();
+    return await Promise.race([
+      lookup(host, { all: true }),
+      new Promise<never>((_, reject) => {
+        abort = () =>
+          reject(signal.reason instanceof Error ? signal.reason : new Error('音乐请求已取消'));
+        signal.addEventListener('abort', abort, { once: true });
+        timer = setTimeout(
+          () => reject(new MusicNetworkError('dns', '音乐平台域名解析超时，请检查 DNS 或系统代理')),
+          8000,
+        );
+        timer.unref();
+      }),
+    ]);
+  } catch (cause) {
+    throw cause instanceof MusicNetworkError
+      ? cause
+      : new MusicNetworkError('dns', '无法解析音乐平台域名，请检查 DNS 或系统代理');
+  } finally {
+    clearTimeout(timer);
+    signal.removeEventListener('abort', abort);
+  }
 }
 export async function boundedBody(
   response: Response,

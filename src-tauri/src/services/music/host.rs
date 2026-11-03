@@ -81,7 +81,8 @@ impl Host {
             {
                 command
                     .env("HTTPS_PROXY", proxy.as_str())
-                    .env("HTTP_PROXY", proxy.as_str());
+                    .env("HTTP_PROXY", proxy.as_str())
+                    .env("ZHENJING_MUSIC_SYSTEM_PROXY", "1");
             }
         }
         command

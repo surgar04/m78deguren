@@ -114,6 +114,20 @@ export const musicLoginStateSchema = z
   .object({
     state: z.enum(['waiting', 'scanned', 'confirmed', 'expired', 'error']),
     message: text,
+    phase: z
+      .enum([
+        'idle',
+        'opening',
+        'browser',
+        'reading',
+        'verifying',
+        'confirmed',
+        'error',
+        'cancelled',
+      ])
+      .optional(),
+    code: z.string().max(64).optional(),
+    diagnostics: z.string().max(8192).optional(),
   })
   .strict();
 export const desktopLyricsConfigSchema = z

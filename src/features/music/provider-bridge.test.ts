@@ -60,4 +60,24 @@ describe('Folia 到原生 JSON 的兼容边界', () => {
     expect(JSON.stringify(result)).toContain('无需安装');
     expect(JSON.stringify(result)).not.toContain('secret-not-for-display');
   });
+  it('损坏协议和 JSON 参数错误都产生结构化提示，未知异常不透出到界面', async () => {
+    await expect(
+      requestProvider(() => Promise.resolve(null), 'ytm', 'web_login_start'),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'invalid-response', reason: 'protocol' },
+    });
+    await expect(
+      requestProvider(
+        () => Promise.reject(Error('音乐平台请求超时 secret-value')),
+        'ytm',
+        'web_login_check',
+      ),
+    ).resolves.toMatchObject({ ok: false, error: { reason: 'host-timeout' } });
+    const result = await requestProvider(() => Promise.resolve({}), 'ytm', 'web_login_start', {
+      value: BigInt(1),
+    });
+    expect(result).toMatchObject({ ok: false, error: { reason: 'invalid-request' } });
+    expect(JSON.stringify(result)).not.toContain('BigInt');
+  });
 });

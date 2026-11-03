@@ -4,6 +4,8 @@
 
 ## 界面基础与图标
 
+音乐宿主使用 [Undici](https://github.com/nodejs/undici) 8.12.3（MIT）连接 Windows 系统代理解析出的 HTTP/HTTPS 路由，并通过其兼容 dispatcher 接入 Node 24。许可随组件依赖分发，不关闭 TLS 验证。
+
 开发工作区按需从 [Git for Windows](https://github.com/git-for-windows/git/releases) 获取官方 MinGit ZIP，用于固定开发分支的源码管理。工具不随 MSI 分发，下载时核对官方资产摘要，保留其随附许可；其他便携工具同样从各自官方来源准备。
 
 React、Tailwind CSS、TanStack Query、Zustand 和 Zod 采用各自 MIT 许可；Tauri 采用 MIT / Apache-2.0 双许可。实际版本由锁文件固定，原许可随依赖保留。

@@ -28,7 +28,13 @@ vi.mock('../upstream/src/stores/useOnlineProviderAccountStore', () => ({
 }));
 
 it('浏览器确认授权后切换上游账号代次，后续账户读取加入新查询而不复用访客查询', async () => {
-  const engine = await createMusicEngine(() => Promise.resolve({ available: true }));
+  const engine = await createMusicEngine((request) =>
+    Promise.resolve(
+      request.operation === 'provider' && request.action === 'auth_progress'
+        ? { ok: true, data: { phase: 'confirmed', code: '', diagnostics: 'fixture confirmed' } }
+        : { available: true },
+    ),
+  );
   const attempt = await engine.loginStart('ytm');
   expect(attempt.key).not.toBe('owned-browser-attempt');
   await expect(engine.loginCheck('ytm', attempt.key)).resolves.toMatchObject({

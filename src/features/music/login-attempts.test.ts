@@ -27,3 +27,15 @@ it('过期和多次尝试保持有界，并回收旧平台尝试', () => {
   clock = 600001;
   expect(() => registry.resolve('qq', timed)).toThrow('过期');
 });
+it('YouTube 读取和验证阶段拥有完整十二分钟，不被十分钟票据提前取消', () => {
+  let clock = 0;
+  const cancel = vi.fn<(_provider: string, _key: string) => Promise<void>>().mockResolvedValue();
+  const registry = createLoginAttempts(cancel, () => clock);
+  const id = registry.register('ytm', 'web-fixture');
+  clock = 600001;
+  expect(registry.resolve('ytm', id)).toBe('web-fixture');
+  expect(cancel).not.toHaveBeenCalled();
+  clock = 720001;
+  expect(() => registry.resolve('ytm', id)).toThrow('过期');
+  expect(cancel).toHaveBeenCalledOnce();
+});

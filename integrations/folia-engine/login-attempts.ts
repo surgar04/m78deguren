@@ -25,7 +25,8 @@ export function createLoginAttempts(
         discard(first);
       }
       const id = crypto.randomUUID();
-      entries.set(id, { provider, key, expires: now() + 10 * 60_000 });
+      // YouTube 浏览器最多等待十分钟，之后仍需读取档案并验证账号，不能在此抢先取消。
+      entries.set(id, { provider, key, expires: now() + (provider === 'ytm' ? 12 : 10) * 60_000 });
       return id;
     },
     resolve(provider: OnlineMusicProvider, id: string) {
