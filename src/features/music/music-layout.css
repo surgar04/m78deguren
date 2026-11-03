@@ -690,3 +690,26 @@
     animation: none;
   }
 }
+.music-playback-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgb(255 235 222 / 75%);
+  color: #813c28;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.music-playback-error button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid currentcolor;
+  background: transparent;
+  color: inherit;
+}

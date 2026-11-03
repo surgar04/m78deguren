@@ -205,8 +205,8 @@ export function MusicControls() {
           <button
             className="music-play"
             type="button"
-            aria-label={playback.playing ? '暂停' : '播放'}
-            disabled={!playback.track || playback.loading}
+            aria-label={playback.loading ? '取消加载' : playback.playing ? '暂停' : '播放'}
+            disabled={!playback.track}
             onClick={() => {
               void musicPlayer.toggle();
             }}
@@ -267,6 +267,21 @@ export function MusicControls() {
           onChange={(event) => musicPlayer.volume(Number(event.target.value))}
         />
       </div>
+      {playback.error && (
+        <div className="music-playback-error" role="alert">
+          <span>{playback.error}</span>
+          {playback.track && (
+            <button
+              type="button"
+              onClick={() => {
+                if (playback.track) void musicPlayer.play(playback.track, playback.queue);
+              }}
+            >
+              重试播放
+            </button>
+          )}
+        </div>
+      )}
     </section>
   );
 }

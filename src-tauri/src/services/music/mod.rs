@@ -4,6 +4,8 @@ pub mod desktop;
 mod host;
 mod protocol;
 mod sandbox;
+#[cfg(debug_assertions)]
+pub mod verification;
 use crate::services::tools::{Result, error, io_error};
 pub use protocol::respond;
 use serde_json::Value;
@@ -13,7 +15,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-use tokio::sync::{Mutex, Notify, Semaphore, oneshot};
+use tokio::sync::{Mutex, Semaphore, oneshot, watch};
 
 pub struct MusicState {
     pub root: PathBuf,
@@ -23,7 +25,8 @@ pub struct MusicState {
     endpoint: Mutex<Option<(u16, String)>>,
     pub catalog: Mutex<catalog::Catalog>,
     pub slots: Semaphore,
-    pub sandbox_ready: Notify,
+    pub sandbox_gate: Mutex<()>,
+    pub sandbox_ready: watch::Sender<(String, bool)>,
     pub sandbox_results: Mutex<HashMap<String, oneshot::Sender<Value>>>,
     pub embeds: Mutex<HashMap<String, String>>,
     pub http: reqwest::Client,
@@ -55,7 +58,8 @@ impl MusicState {
             requests: Semaphore::new(16),
             endpoint: Mutex::new(None),
             slots: Semaphore::new(4),
-            sandbox_ready: Notify::new(),
+            sandbox_gate: Mutex::new(()),
+            sandbox_ready: watch::channel((String::new(), false)).0,
             sandbox_results: Mutex::new(HashMap::new()),
             embeds: Mutex::new(HashMap::new()),
             http: reqwest::Client::builder()

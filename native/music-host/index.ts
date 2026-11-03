@@ -41,10 +41,15 @@ const call: HostCall = (action, payload) =>
       return;
     }
     const id = randomUUID(),
-      timer = setTimeout(() => {
-        pending.delete(id);
-        reject(Error('音乐桌面请求超时'));
-      }, 30000);
+      timer = setTimeout(
+        () => {
+          pending.delete(id);
+          reject(Error('音乐桌面请求超时'));
+          // 冷启动隔离 WebView2 需要创建独立档案，预算应覆盖原生就绪等待与脚本执行。
+          // 打开授权网页仍沿用较短时限；外层原生 RPC 继续保留 90 秒总上限。
+        },
+        action === 'sandbox' ? 60000 : 30000,
+      );
     pending.set(id, { resolve, reject, timer });
     emit({ type: 'host-call', id, action, payload });
   });

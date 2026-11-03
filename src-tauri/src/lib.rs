@@ -8,6 +8,12 @@ use std::path::PathBuf;
 use tauri::Manager;
 use tauri_plugin_log::{Target, TargetKind};
 
+/// 发布版不包含此入口；只接受固定测试，不允许外部传入任意待执行脚本。
+#[cfg(debug_assertions)]
+pub fn verify_music_sandbox() -> Result<(), Box<dyn std::error::Error>> {
+    services::music::verification::run()
+}
+
 /// Windows 卸载入口先设置经校验的临时目录，再退出本启动器。
 /// MSI 负责产品登记与事务卸载；主程序只打开属于本安装标记的卸载向导。
 pub fn handle_uninstall() -> Result<bool, Box<dyn std::error::Error>> {

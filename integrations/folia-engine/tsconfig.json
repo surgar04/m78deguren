@@ -20,6 +20,7 @@
     "stage.tsx",
     "vite.config.ts",
     "vite-env.d.ts",
+    "tests/**/*.ts",
     "upstream/src/vite-env.d.ts",
     "upstream/src/components/visualizer/**/tuning.ts",
     "upstream/src/components/visualizer/**/settings.ts"

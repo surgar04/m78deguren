@@ -89,8 +89,15 @@ export function MusicLogin({
   useEffect(() => {
     if (poll.data?.state !== 'confirmed') return;
     attempt.current = null;
-    void cache.invalidateQueries({ queryKey: ['music', 'account', provider] });
-    void cache.invalidateQueries({ queryKey: ['music', 'collections', provider] });
+    // 等账户读取完成后再刷新歌单，避免两者并行时把访客的空歌单缓存到新账号。
+    void cache
+      .invalidateQueries({ queryKey: ['music', 'account', provider] })
+      .then(() =>
+        Promise.all([
+          cache.invalidateQueries({ queryKey: ['music', 'collections', provider] }),
+          cache.invalidateQueries({ queryKey: ['music', 'songs', provider] }),
+        ]),
+      );
   }, [poll.data?.state, provider, cache]);
   const browser = provider === 'ytm' || provider === 'spotify';
   const confirmed = poll.data?.state === 'confirmed';
@@ -127,6 +134,10 @@ export function MusicLogin({
             在这里相遇。
           </h3>
           <p>连接后读取你的歌单与收藏，使用平台提供的播放权益。</p>
+          {provider === 'spotify' && (
+            <p>Spotify 播放需要 Premium；平台拒绝音频密钥或地区版权限制时仍可能无法播放。</p>
+          )}
+          {provider === 'ytm' && <p>通过 YouTube Music 网页授权，无需安装桌面客户端或 PWA。</p>}
           <div className="music-login-privacy">
             <Icon icon={faShieldHalved} />
             <span>

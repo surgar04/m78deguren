@@ -99,6 +99,23 @@ namespace Zhenjing.Build
             finally { MsiCloseHandle(summary); }
         }
 
+        // PID_WORDCOUNT 的 bit 3 表示“不需要提升权限”；这是包的实际标记，不能只检查 XML 文本。
+        private static int WordCount(uint database)
+        {
+            uint summary;
+            Check(MsiGetSummaryInformationW(database, null, 0, out summary));
+            try
+            {
+                uint type, length = 0;
+                int integer;
+                System.Runtime.InteropServices.ComTypes.FILETIME time;
+                Check(MsiSummaryInfoGetPropertyW(summary, 15, out type, out integer, out time, null, ref length));
+                if (type != 3) throw new InvalidDataException("Invalid MSI privilege summary");
+                return integer;
+            }
+            finally { MsiCloseHandle(summary); }
+        }
+
         public static void ReadToFile(string input, string output)
         {
             uint database;
@@ -115,7 +132,9 @@ namespace Zhenjing.Build
                     { "directories", Query(database, "SELECT `Directory`,`Directory_Parent`,`DefaultDir` FROM `Directory`", 3) },
                     { "components", Query(database, "SELECT `Component`,`Directory_` FROM `Component`", 2) },
                     { "registry", Query(database, "SELECT `Root`,`Key`,`Name` FROM `Registry`", 3) },
-                    { "template", Template(database) }
+                    { "template", Template(database) },
+                    { "wordCount", WordCount(database) },
+                    { "conditions", Query(database, "SELECT `Condition`,`Description` FROM `LaunchCondition`", 2) }
                 };
                 var serializer = new JavaScriptSerializer { MaxJsonLength = 64 * 1024 * 1024, RecursionLimit = 32 };
                 File.WriteAllText(Path.GetFullPath(output), serializer.Serialize(data), new UTF8Encoding(false));

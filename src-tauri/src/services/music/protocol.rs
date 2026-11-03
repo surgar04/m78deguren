@@ -44,11 +44,19 @@ pub async fn respond(
         let path = request.uri().path();
         if label == "music-sandbox" {
             if path == "/sandbox" && request.method() == Method::GET {
-                let mut response = reply(200, "text/html;charset=utf-8", b"<!doctype html><html><head><meta charset=utf-8></head><body><script nonce=zj-owned>fetch('/sandbox-ready',{method:'POST'});</script></body></html>".to_vec())?;
+                let url = reqwest::Url::parse(&request.uri().to_string()).map_err(|_| error("沙箱地址无效"))?;
+                let generation = url.query_pairs().find(|(key, _)| key == "generation")
+                    .and_then(|(_, value)| uuid::Uuid::parse_str(&value).ok())
+                    .ok_or_else(|| error("沙箱实例身份无效"))?;
+                let html = format!("<!doctype html><html><head><meta charset=utf-8></head><body><script nonce=zj-owned>fetch('/sandbox-ready/{generation}',{{method:'POST'}});</script></body></html>");
+                let mut response = reply(200, "text/html;charset=utf-8", html.into_bytes())?;
                 response.headers_mut().insert("Content-Security-Policy", tauri::http::HeaderValue::from_static("default-src 'none'; script-src 'nonce-zj-owned' 'unsafe-eval'; connect-src http://zhenjing-music.localhost; frame-src 'none'; base-uri 'none'; form-action 'none'"));
                 return Ok(response);
             }
-            if path == "/sandbox-ready" && request.method() == Method::POST { state.sandbox_ready.notify_one(); return reply(204, "text/plain", vec![]); }
+            if let Some(ticket) = path.strip_prefix("/sandbox-ready/") && request.method() == Method::POST && uuid::Uuid::parse_str(ticket).is_ok() {
+                super::sandbox::ready(&state.sandbox_ready, ticket);
+                return reply(204, "text/plain", vec![]);
+            }
             if let Some(ticket) = path.strip_prefix("/sandbox-result/") && request.method() == Method::POST && request.body().len() <= 5 * 1024 * 1024 {
                 let value = serde_json::from_slice(request.body()).map_err(|_| error("脚本结果无效"))?;
                 if let Some(sender) = state.sandbox_results.lock().await.remove(ticket) { let _ = sender.send(value); return reply(204, "text/plain", vec![]); }

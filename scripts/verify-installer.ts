@@ -85,11 +85,16 @@ try {
       components: z.array(row),
       registry: z.array(row),
       template: z.string(),
+      wordCount: z.number().int(),
+      conditions: z.array(row),
     })
     .parse(JSON.parse(await readFile(metadata, 'utf8')) as unknown);
   assert.equal(table.properties['ProductVersion'], pkg.version);
   assert.equal(table.properties['Manufacturer'], 'Sur方糖');
   assert.equal(table.properties['ALLUSERS'], undefined);
+  assert.equal(table.wordCount & 8, 0, 'MSI 不得再声明无需提权，否则数据盘回滚可能报 1926');
+  assert.ok(table.conditions.some((value) => value[0] === 'NOT ALLUSERS'));
+  assert.equal(table.properties['DISABLEROLLBACK'], undefined, '不得通过关闭事务回滚绕过权限问题');
   assert.match(table.template, /x64/u);
   assert.ok(table.registry.every((value) => value[0] === '1'));
   assert.ok(

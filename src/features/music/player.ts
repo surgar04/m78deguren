@@ -9,6 +9,7 @@ import {
 } from '@/lib/music-contracts';
 import { musicEngine } from './engine';
 import { useMusicPreferences } from './preferences';
+import { playbackMessage, playbackStep } from './playback-guard';
 
 const EMPTY: MusicLyrics = { lines: [], source: '', wordTimed: false, isPureMusic: false };
 interface Playback {
@@ -25,7 +26,7 @@ interface Playback {
   clipStart: number;
 }
 /** 单一音频时钟跨页面存活；高频 FFT 不放 React 或 Query，退出演绎即断开分析节点。 */
-class Player {
+export class MusicPlayer {
   private value: Playback = {
     track: null,
     queue: [],
@@ -43,6 +44,10 @@ class Player {
   private audio: HTMLAudioElement | null = null;
   private epoch = 0;
   private wantPlay = false;
+  private attempt: AbortController | null = null;
+  // 表示本次选曲的 URL 已交给 audio，不代表浏览器已完成缓冲或解码。
+  private sourceReady = false;
+  private stallTimer: ReturnType<typeof setTimeout> | undefined;
   private context: AudioContext | null = null;
   private source: MediaElementAudioSourceNode | null = null;
   private analyser: AnalyserNode | null = null;
@@ -70,23 +75,58 @@ class Player {
       this.mediaState();
     });
     audio.addEventListener('pause', () => {
+      clearTimeout(this.stallTimer);
       this.update({ playing: false });
       this.mediaState();
     });
     audio.addEventListener('timeupdate', () => {
+      clearTimeout(this.stallTimer);
       this.update({ position: audio.currentTime });
       this.mediaState();
     });
     audio.addEventListener('durationchange', () => {
       if (Number.isFinite(audio.duration)) this.update({ duration: audio.duration });
     });
-    audio.addEventListener('error', () =>
+    audio.addEventListener('error', () => {
+      // 切歌解析期间，旧音源迟到的事件不得取消新请求。
+      if (!this.sourceReady || !audio.error || (audio.currentSrc && audio.currentSrc !== audio.src))
+        return;
+      clearTimeout(this.stallTimer);
+      this.wantPlay = false;
+      this.attempt?.abort();
+      this.sourceReady = false;
       this.update({
-        error: '音源无法播放或已失效，请重新播放；部分格式需系统解码器支持。',
+        error:
+          audio.error?.code === 2
+            ? '音频传输失败，请重试或检查网络。'
+            : audio.error?.code === 3
+              ? '音频解码失败，平台返回的音源可能无效或系统不支持此格式。'
+              : '音源无法播放或已失效，请重新播放；部分格式需系统解码器支持。',
         loading: false,
         playing: false,
-      }),
-    );
+      });
+    });
+    const stalled = () => {
+      clearTimeout(this.stallTimer);
+      if (!this.wantPlay || !this.sourceReady) return;
+      this.stallTimer = setTimeout(() => {
+        if (!this.wantPlay) return;
+        this.wantPlay = false;
+        this.attempt?.abort();
+        this.sourceReady = false;
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        this.update({
+          loading: false,
+          playing: false,
+          error: '音频缓冲超过 20 秒，已停止等待。请点击播放重试或检查平台网络。',
+        });
+      }, 20000);
+    };
+    audio.addEventListener('waiting', stalled);
+    audio.addEventListener('stalled', stalled);
+    audio.addEventListener('playing', () => clearTimeout(this.stallTimer));
     audio.addEventListener('ended', () => {
       void this.next(1, true);
     });
@@ -126,10 +166,18 @@ class Player {
     }
   }
   async play(track: MusicTrack, queue: MusicTrack[] = [track]) {
+    this.attempt?.abort();
+    const attempt = new AbortController();
+    this.attempt = attempt;
+    this.sourceReady = false;
     this.wantPlay = true;
     const epoch = ++this.epoch,
       audio = this.element();
     audio.pause();
+    // 恢复 WebAudio 必须在点击调用栈内发起，不能等远端音源解析后才请求用户激活。
+    // 普通模式没有 AudioContext；演绎留下的 context 也不得无限阻塞后续平台播放。
+    const output = this.resumeOutput(attempt.signal);
+    void output.catch(() => {});
     this.update({
       track,
       queue,
@@ -146,18 +194,28 @@ class Player {
       clipStart: 0,
     });
     try {
-      const source = await musicEngine(
-        'resolve',
-        [track, useMusicPreferences.getState().quality],
-        musicAudioSchema,
-      );
+      const [source] = await Promise.all([
+        playbackStep(
+          musicEngine('resolve', [track, useMusicPreferences.getState().quality], musicAudioSchema),
+          attempt.signal,
+          60000,
+          '平台音源解析超过 60 秒，请点击播放重试。',
+        ),
+        output,
+      ]);
       if (epoch !== this.epoch) return;
       audio.src = source.url;
       audio.load();
+      this.sourceReady = true;
       this.update({ preview: source.preview, clipStart: source.clipStartMs / 1000 });
-      if (this.context?.state === 'suspended') await this.context.resume();
       if (epoch !== this.epoch) return;
-      if (this.wantPlay) await audio.play();
+      if (this.wantPlay)
+        await playbackStep(
+          audio.play(),
+          attempt.signal,
+          20000,
+          '音频未能开始播放，已停止等待。请点击播放重试。',
+        );
       // 切歌可能发生在解码器准备期间，迟到的播放 Promise 不得覆盖新歌曲的元数据。
       if (epoch !== this.epoch) return;
       if (!this.wantPlay) audio.pause();
@@ -171,7 +229,15 @@ class Player {
       this.update({ loading: false });
       void this.loadLyrics(track, epoch);
     } catch (cause) {
-      if (epoch === this.epoch) this.update({ error: errorMessage(cause), loading: false });
+      if (epoch === this.epoch && !attempt.signal.aborted) {
+        this.wantPlay = false;
+        attempt.abort();
+        this.sourceReady = false;
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        this.update({ error: playbackMessage(cause), loading: false, playing: false });
+      }
     }
   }
   async loadLyrics(track = this.value.track, epoch = this.epoch, choose = false) {
@@ -183,7 +249,7 @@ class Player {
           : await musicEngine('lyrics', [track], musicLyricsSchema);
       if (epoch === this.epoch && this.value.track?.key === track.key) this.update({ lyrics });
     } catch (cause) {
-      if (epoch === this.epoch && this.value.track?.key === track.key)
+      if (epoch === this.epoch && this.value.track?.key === track.key && !this.value.error)
         this.update({ error: `歌词：${errorMessage(cause)}` });
     }
   }
@@ -213,19 +279,60 @@ class Player {
       result = await musicEngine('lyrics', [track], musicLyricsSchema);
     if (epoch === this.epoch) this.update({ lyrics: result });
   }
-  async toggle(play = !this.value.playing) {
+  private resumeOutput(signal: AbortSignal): Promise<void> {
+    return this.context?.state === 'suspended'
+      ? playbackStep(
+          this.context.resume(),
+          signal,
+          5000,
+          '音频输出未能恢复，请再次点击播放；如仍失败请退出沉浸演绎重试。',
+        )
+      : Promise.resolve();
+  }
+  async toggle(play = !(this.value.playing || this.value.loading)) {
     this.wantPlay = play;
     if (this.value.loading) {
-      if (!play) this.audio?.pause();
+      if (!play) {
+        ++this.epoch;
+        this.attempt?.abort();
+        this.audio?.pause();
+        this.audio?.removeAttribute('src');
+        this.audio?.load();
+        this.sourceReady = false;
+        this.update({ loading: false, playing: false, error: '' });
+      }
       return;
     }
     try {
       if (play) {
-        if (this.context?.state === 'suspended') await this.context.resume();
-        await this.element().play();
-      } else this.audio?.pause();
+        if (!this.sourceReady && this.value.track)
+          return this.play(this.value.track, this.value.queue);
+        this.attempt?.abort();
+        const attempt = new AbortController();
+        this.attempt = attempt;
+        await this.resumeOutput(attempt.signal);
+        if (!this.wantPlay || attempt.signal.aborted) return;
+        await playbackStep(
+          this.element().play(),
+          attempt.signal,
+          20000,
+          '音频未能开始播放，请重试。',
+        );
+        if (!this.wantPlay || attempt.signal.aborted) {
+          this.audio?.pause();
+          return;
+        }
+        this.update({ error: '' });
+      } else {
+        this.attempt?.abort();
+        this.audio?.pause();
+      }
     } catch (cause) {
-      this.update({ error: errorMessage(cause) });
+      if (!(cause instanceof DOMException && cause.name === 'AbortError')) {
+        this.wantPlay = false;
+        this.audio?.pause();
+        this.update({ error: playbackMessage(cause), playing: false });
+      }
     }
   }
   async next(direction: number, ended = false) {
@@ -289,7 +396,7 @@ class Player {
         this.source.connect(this.analyser);
         this.analyser.connect(this.context.destination);
       } else this.source.connect(this.context.destination);
-      if (this.context.state === 'suspended') await this.context.resume();
+      if (this.context.state === 'suspended') await this.resumeOutput(new AbortController().signal);
     }
   }
   /** 仅时间投影，不运行 FFT；供低频桌面歌词 IPC 使用。 */
@@ -338,7 +445,7 @@ class Player {
     };
   }
 }
-export const musicPlayer = new Player();
+export const musicPlayer = new MusicPlayer();
 export function useMusicPlayer() {
   return useSyncExternalStore(musicPlayer.subscribe, musicPlayer.snapshot);
 }

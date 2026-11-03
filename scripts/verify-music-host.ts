@@ -5,6 +5,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
+import { createRequire } from 'node:module';
 import { z } from 'zod';
 
 // 合成音频仅存在独立验收目录，不会混入用户曲库或生产数据。
@@ -46,7 +47,7 @@ const child = spawn(
 const messages = createInterface({ input: child.stdout });
 const waiting = new Map<
   string,
-  { resolve: (value: unknown) => void; reject: (cause: Error) => void }
+  { resolve: (value: unknown) => void; reject: (cause: Error) => void; label: string }
 >();
 let readyResolve: ((value: unknown) => void) | undefined;
 const ready = new Promise<unknown>((resolve) => {
@@ -59,13 +60,19 @@ messages.on('line', (line) => {
     const item = waiting.get(message.id);
     waiting.delete(message.id);
     if (message.ok === true) item?.resolve(message.value);
-    else item?.reject(Error('音乐子进程拒绝请求'));
+    else item?.reject(Error(`音乐子进程拒绝验收请求：${item.label}`));
   } else if (message.type === 'host-call')
     child.stdin.write(JSON.stringify({ type: 'host-reply', id: message.id, ok: false }) + '\n');
 });
 async function request(operation: Record<string, unknown>) {
   const id = randomUUID();
-  const value = new Promise<unknown>((resolve, reject) => waiting.set(id, { resolve, reject }));
+  // 只记录操作名称，不输出请求载荷、地址、授权回复或原生宿主的任意错误文本。
+  const label = [operation.operation, operation.provider, operation.action]
+    .filter((value) => typeof value === 'string' && /^[a-z_-]{1,80}$/u.test(value))
+    .join('/');
+  const value = new Promise<unknown>((resolve, reject) =>
+    waiting.set(id, { resolve, reject, label }),
+  );
   child.stdin.write(JSON.stringify({ ...operation, id }) + '\n');
   return Promise.race([
     value,
@@ -76,6 +83,14 @@ async function request(operation: Record<string, unknown>) {
   ]);
 }
 try {
+  // 在真实发布目录加载原生插件，验证 ABI 与私有 CRT；不创建会话、不读取账户或连接 Spotify。
+  const nativeRequire = createRequire(resolve('src-tauri/resources/music-host/index.ts'));
+  z.object({
+    createSession: z.custom<(...args: unknown[]) => unknown>(
+      (value) => typeof value === 'function',
+    ),
+  }).parse(nativeRequire('@lox-audioserver/node-librespot') as unknown);
+  console.log('Spotify native playback module loaded; no account/session was opened.');
   const state = z.object({ port: z.number(), secret: z.string() }).parse(await ready);
   assert.equal(
     (await fetch(`http://127.0.0.1:${state.port}/media/${randomUUID()}`)).status,
@@ -170,6 +185,7 @@ try {
         passed: true,
         checks: [
           'private-stream-auth',
+          'spotify-native-addon-load',
           'four-platform-runtime',
           'qq-large-cover-resize-and-real-netease-cover',
           'relay-private-rejection',

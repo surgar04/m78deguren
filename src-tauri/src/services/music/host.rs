@@ -148,7 +148,15 @@ impl Host {
         let writer = input.clone();
         // 持续处理音频流期间发起的反向调用，不依赖前端恰好还有其他 RPC 请求。
         let reader = tokio::spawn(async move {
-            while let Ok(response) = frame(&mut output).await {
+            // 反向浏览器操作不能阻塞标准输出读泵，否则登录/歌单结果要等沙箱超时才会分发。
+            // JoinSet 在宿主退出或读任务取消时中止所属工作，最多允许八个反向操作。
+            let mut calls = tokio::task::JoinSet::new();
+            'read: while let Ok(response) = frame(&mut output).await {
+                while let Some(result) = calls.try_join_next() {
+                    if !matches!(result, Ok(Ok(()))) {
+                        break 'read;
+                    }
+                }
                 if response["type"] == "result" {
                     if let Some(id) = response["id"].as_str()
                         && let Some(sender) = replies.lock().await.remove(id)
@@ -156,10 +164,15 @@ impl Host {
                         let _ = sender.send(response);
                     }
                 } else if response["type"] == "host-call" {
-                    let state = app.state::<MusicState>();
-                    if host_call(&app, &state, &writer, &response).await.is_err() {
+                    if calls.len() >= 8 {
                         break;
                     }
+                    let app = app.clone();
+                    let writer = writer.clone();
+                    calls.spawn(async move {
+                        let state = app.state::<MusicState>();
+                        host_call(&app, &state, &writer, &response).await
+                    });
                 }
             }
             replies.lock().await.clear();

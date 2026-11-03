@@ -1,8 +1,30 @@
 import { z } from 'zod';
 import type { MusicRequest } from '../../src/lib/music-contracts';
+import { providerPayload } from './provider-payload';
 
 export type NativeMusicBridge = (request: MusicRequest) => Promise<unknown>;
 let desktopRequest: NativeMusicBridge | null = null;
+
+/** 原生宿主故障采用 Folia 的结构化错误返回，避免被误报为“需要桌面版 YouTube”。 */
+export async function requestProvider(
+  request: NativeMusicBridge,
+  provider: 'ytm' | 'spotify',
+  action: string,
+  params: Record<string, unknown> = {},
+): Promise<unknown> {
+  const payload = providerPayload(params);
+  try {
+    return await request({ operation: 'provider', provider, action, params: payload });
+  } catch {
+    return {
+      ok: false,
+      error: {
+        code: 'network',
+        message: `${provider === 'ytm' ? 'YouTube Music' : 'Spotify'} 音乐服务连接未完成，请重试；如持续失败，请检查网络代理和音乐组件完整性。无需安装该平台的桌面客户端。`,
+      },
+    };
+  }
+}
 const relay = z.object({
   ok: z.boolean(),
   status: z.number(),
@@ -18,7 +40,7 @@ export function installDesktopBridge(request: NativeMusicBridge): void {
     provider: 'ytm' | 'spotify',
     action: string,
     params: Record<string, unknown> = {},
-  ) => request({ operation: 'provider', provider, action, params });
+  ) => requestProvider(request, provider, action, params);
   Object.assign(window, {
     electron: {
       platform: 'win32',

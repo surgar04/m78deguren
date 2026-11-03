@@ -13,7 +13,11 @@ export default defineConfig({
     fileParallelism: false,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: [
+      'src/**/*.test.{ts,tsx}',
+      'native/music-host/tests/**/*.test.ts',
+      'integrations/folia-engine/tests/**/*.test.ts',
+    ],
     clearMocks: true,
     coverage: {
       provider: 'v8',

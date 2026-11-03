@@ -6,7 +6,7 @@ export async function musicHostSources(root: string): Promise<Record<string, str
   const names = ['pnpm-lock.yaml', 'scripts/build-music-host.ts', 'scripts/music-inputs.ts'];
   async function walk(folder: string): Promise<void> {
     for (const entry of await readdir(resolve(root, folder), { withFileTypes: true })) {
-      if (entry.name === 'node_modules') continue;
+      if (entry.name === 'node_modules' || entry.name === 'tests') continue;
       const name = join(folder, entry.name).replaceAll('\\', '/');
       if (entry.isSymbolicLink()) throw Error('音乐组件来源不能包含链接');
       if (entry.isDirectory()) await walk(name);

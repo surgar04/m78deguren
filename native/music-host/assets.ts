@@ -6,6 +6,30 @@ import { boundedBody, musicUrl, platformFetch } from './network.ts';
 import type { createPlatforms } from './providers.ts';
 
 type Entry = { url: string; kind: 'audio' | 'image'; expires: number };
+// WebView2 的自定义协议需整段收齐后才能交给解码器，不等同于 Electron 的流式响应。
+// 原先 2 MiB 会让首包和拖动都等待过多数据；256 KiB 在 320 kbps 下约为 6.5 秒音频。
+export const AUDIO_CHUNK_BYTES = 256 * 1024;
+export function audioRange(value: string): string | null {
+  const match = /^bytes=(\d+)-(\d*)$/.exec(value);
+  if (match) {
+    const start = Number(match[1]);
+    const last = start + AUDIO_CHUNK_BYTES - 1;
+    const end = match[2] ? Number(match[2]) : last;
+    if (
+      !Number.isSafeInteger(start) ||
+      !Number.isSafeInteger(last) ||
+      !Number.isSafeInteger(end) ||
+      end < start
+    )
+      return null;
+    return `bytes=${start}-${Math.min(end, last)}`;
+  }
+  const suffix = /^bytes=-(\d+)$/.exec(value);
+  const length = Number(suffix?.[1]);
+  return suffix && Number.isSafeInteger(length) && length > 0
+    ? `bytes=-${Math.min(length, AUDIO_CHUNK_BYTES)}`
+    : null;
+}
 /** 服务只听 IPv4 回环，访问口令只交 Rust；前端看到的是原生协议中的一次性资源身份。 */
 export function createAssets(platforms: ReturnType<typeof createPlatforms>, secret: string) {
   const entries = new Map<string, Entry>();
@@ -77,17 +101,12 @@ export function createAssets(platforms: ReturnType<typeof createPlatforms>, secr
           }
           const headers = new Headers();
           if (entry.kind === 'audio') {
-            const range = request.headers.range ?? 'bytes=0-';
-            const match = /^bytes=(\d+)-(\d*)$/.exec(range);
-            if (match) {
-              const start = Number(match[1]),
-                end = match[2] ? Number(match[2]) : start + 2097151;
-              headers.set('range', `bytes=${start}-${Math.min(end, start + 2097151)}`);
-            } else if (/^bytes=-\d+$/.test(range)) headers.set('range', range);
-            else {
+            const range = audioRange(request.headers.range ?? 'bytes=0-');
+            if (!range) {
               response.writeHead(416).end();
               return;
             }
+            headers.set('range', range);
           }
           if (entry.kind === 'image') {
             const image = await images.load(entry.url);

@@ -223,7 +223,12 @@ export async function createMusicEngine(request: NativeMusicBridge) {
     },
     async loginCheck(provider: OnlineMusicProvider, key: string) {
       const result = await omni.checkLogin(provider, attempts.resolve(provider, key));
-      if (result.state === 'confirmed') attempts.complete(key);
+      if (result.state === 'confirmed') {
+        attempts.complete(key);
+        // 必须使用上游的 sign-in 语义递增账号代次：sync 会加入登录前仍在运行的访客读取，
+        // 使新授权在本次进程内仍显示未登录。账号接口随后会合并这次新读取，无需重启。
+        void omni.readAccount(provider, 'sign-in');
+      }
       return {
         state: result.state,
         message: result.state === 'error' ? (result.message ?? '登录未完成') : '',

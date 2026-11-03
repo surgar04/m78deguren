@@ -4,8 +4,11 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="*" Name="臻境" Language="2052" Codepage="936" Version="{{version}}"
            Manufacturer="Sur方糖" UpgradeCode="{{upgrade_code}}">
-    <Package Id="*" InstallerVersion="500" Compressed="yes" InstallScope="perUser"
-             InstallPrivileges="limited" Platform="x64" SummaryCodepage="936"
+    <!-- 不写 InstallScope=perUser：WiX 3 会强制写入 limited 标记，覆盖 elevated。
+         ALLUSERS 保持未定义（下方条件禁止外部覆盖），仍登记为当前用户安装；
+         标准 MSI 提权负责数据盘 Config.Msi 回滚安全描述符，不修改磁盘 ACL、不禁用回滚。 -->
+    <Package Id="*" InstallerVersion="500" Compressed="yes"
+             InstallPrivileges="elevated" Platform="x64" SummaryCodepage="936"
              Description="臻境 · MSI 安装程序" Manufacturer="Sur方糖" />
     <MajorUpgrade Schedule="afterInstallInitialize"
                   DowngradeErrorMessage="已安装更新版本的臻境，不允许降级覆盖。" />
@@ -34,6 +37,8 @@
     <!-- Windows 10/11 的 MSI VersionNT 仍可能为 603；不能用 1000 阻止正常安装。 -->
     <Condition Message="此安装包需要 64 位 Windows。">Installed OR VersionNT64</Condition>
     <Condition Message="本安装包仅支持当前用户安装，请勿设置 ALLUSERS。">NOT ALLUSERS</Condition>
+    <!-- 不用 Privileged/AdminUser 作前置门槛，以免标准用户还没看到 UAC 凭据窗口就被拒绝。
+         权限提升交由标准 MSI 和 Windows 策略处理。 -->
     <Condition Message="请先卸载旧 EXE 安装版（用户数据会保留），再安装 MSI。">Installed OR (NOT OLD_NSIS AND NOT LEGACY_NSIS)</Condition>
     <Binary Id="InstallerActions" SourceFile="{{main_binary_path}}.msi-actions.dll" />
     <CustomAction Id="ValidateInstallDirectory" BinaryKey="InstallerActions" DllEntry="ValidateInstallDirectory"
