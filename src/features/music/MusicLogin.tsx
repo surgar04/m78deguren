@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { faQq, faSpotify, faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { faQq, faYoutube } from '@fortawesome/free-brands-svg-icons';
 import {
   faMusic,
   faShieldHalved,
@@ -23,7 +23,7 @@ import { musicEngine } from './engine';
 import { providerLabel } from './model';
 import { musicAuthCode, musicAuthFailure } from '@/lib/music-auth';
 
-const symbols = { qq: faQq, netease: faMusic, spotify: faSpotify, ytm: faYoutube };
+const symbols = { qq: faQq, netease: faMusic, ytm: faYoutube };
 /** 授权是一条独立流程：选方式→生成→手机/浏览器确认，不在多个零散段落中寻找操作。 */
 export function MusicLogin({
   provider,
@@ -105,7 +105,7 @@ export function MusicLogin({
         ]),
       );
   }, [poll.data?.state, provider, cache]);
-  const browser = provider === 'ytm' || provider === 'spotify';
+  const browser = provider === 'ytm';
   const confirmed = !start.isPending && poll.data?.state === 'confirmed';
   const failure = start.error ?? poll.error ?? methods.error;
   const diagnosticCode = poll.data?.code || (failure ? musicAuthCode(failure) : '');
@@ -157,9 +157,6 @@ export function MusicLogin({
             在这里相遇。
           </h3>
           <p>连接后读取你的歌单与收藏，使用平台提供的播放权益。</p>
-          {provider === 'spotify' && (
-            <p>Spotify 播放需要 Premium；平台拒绝音频密钥或地区版权限制时仍可能无法播放。</p>
-          )}
           {provider === 'ytm' && <p>通过 YouTube Music 网页授权，无需安装桌面客户端或 PWA。</p>}
           <div className="music-login-privacy">
             <Icon icon={faShieldHalved} />
@@ -298,11 +295,9 @@ export function MusicLogin({
                     : '生成登录二维码'}
           </button>
           <small>
-            {provider === 'spotify'
-              ? '完整播放需要 Spotify Premium，曲目可用性由平台决定。'
-              : provider === 'ytm'
-                ? '使用专用浏览器窗口，不读取已有浏览器的个人资料。'
-                : '请仅使用本人账号授权，平台会员与地区限制保持不变。'}
+            {provider === 'ytm'
+              ? '使用专用浏览器窗口，不读取已有浏览器的个人资料。'
+              : '请仅使用本人账号授权，平台会员与地区限制保持不变。'}
           </small>
         </section>
       </div>

@@ -63,7 +63,7 @@ export default defineConfig({
             .split('\n')
             .filter(
               (line) =>
-                !['kugouProvider', 'bodianProvider', 'qishuiProvider'].some(
+                !['kugouProvider', 'bodianProvider', 'qishuiProvider', 'spotifyProvider'].some(
                   (name) =>
                     (line.startsWith('import ') && line.includes(name)) ||
                     line.trim() === `registerOnlineMusicProvider(${name});`,
@@ -71,6 +71,11 @@ export default defineConfig({
             )
             .join('\n');
         }
+        if (file.endsWith('/utils/lyrics/lyricSources.ts'))
+          return source
+            .split('\n')
+            .filter((line) => !line.includes("id: 'spotify'"))
+            .join('\n');
         if (file.endsWith('/upstream/src/index.css')) {
           // 固定版本的原字体本地分发，沉浸页离线时也保持字形与行宽。
           return source.replaceAll(
@@ -141,6 +146,14 @@ ${point}`,
       generateBundle(_, bundle) {
         if (!bundle['nebbia-strokes.json'])
           this.error('雾笺笔顺与许可数据未生成；不允许将降级效果作为完整迁移发布。');
+        for (const chunk of Object.values(bundle))
+          if (
+            chunk.type === 'chunk' &&
+            Object.keys(chunk.modules).some((name) =>
+              name.replaceAll('\\', '/').includes('/onlineMusic/spotify/'),
+            )
+          )
+            this.error('已撤下的平台模块意外进入音乐生产包，停止构建。');
       },
     },
     react(),

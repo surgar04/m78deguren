@@ -28,13 +28,14 @@ import {
   musicPageSchema,
   musicMatchSchema,
   musicThemeSchema,
+  onlineMusicProviderSchema,
   type MusicCollection,
   type MusicTrack,
   type OnlineMusicProvider,
 } from '@/lib/music-contracts';
 import { musicEngine } from './engine';
 import { musicPlayer, useMusicTrack, useMusicPlaying } from './player';
-import { useMusicPreferences, MUSIC_PROVIDERS } from './preferences';
+import { useMusicPreferences, MUSIC_PROVIDERS, ONLINE_MUSIC_PROVIDERS } from './preferences';
 import { useLocalMusic, useMusicAccount } from './repository';
 import './music.css';
 import './music-layout.css';
@@ -42,6 +43,14 @@ import './music-layout.css';
 const Immersive = lazy(() =>
   import('./ImmersivePlayer').then((module) => ({ default: module.ImmersivePlayer })),
 );
+const ONLINE_TABS = [
+  ['search', '在线搜索'],
+  ['collections', '我的歌单'],
+] as const;
+const LOCAL_TABS = [
+  ['local', '本地音乐'],
+  ['favorites', '本地收藏'],
+] as const;
 function Match({
   track,
   provider,
@@ -52,9 +61,10 @@ function Match({
   onClose: () => void;
 }) {
   const cache = useQueryClient();
+  const [selectedProvider, setSelectedProvider] = useState(provider);
   const query = useQuery({
-    queryKey: ['music', 'match', track.key, provider],
-    queryFn: () => musicEngine('match', [track, provider], musicMatchSchema),
+    queryKey: ['music', 'match', track.key, selectedProvider],
+    queryFn: () => musicEngine('match', [track, selectedProvider], musicMatchSchema),
     retry: false,
   });
   const action = useMutation({
@@ -76,9 +86,27 @@ function Match({
   return (
     <Modal title="在线匹配与补全" onClose={onClose} wide>
       <p>
-        为「{track.title}」匹配 {providerLabel(provider)}{' '}
+        为「{track.title}」匹配 {providerLabel(selectedProvider)}{' '}
         的元信息、封面与同步歌词。不会修改原始音乐文件，匹配结果可还原。
       </p>
+      <label>
+        匹配平台{' '}
+        <select
+          aria-label="匹配平台"
+          value={selectedProvider}
+          onChange={(event) => {
+            const selected = onlineMusicProviderSchema.parse(event.target.value);
+            setSelectedProvider(selected);
+            useMusicPreferences.getState().patch({ matchProvider: selected });
+          }}
+        >
+          {ONLINE_MUSIC_PROVIDERS.map(([id, label]) => (
+            <option key={id} value={id}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
       <p className="music-help">
         按原项目的标题、歌手、专辑及时长评分。请选择正确版本；现场、翻唱和重制版可能有时间偏差。
       </p>
@@ -177,7 +205,9 @@ export default function MusicPage() {
     track = useMusicTrack(),
     playing = useMusicPlaying();
   const playback = { track, playing };
-  const [tab, setTab] = useState<'search' | 'collections' | 'local' | 'favorites'>('search'),
+  const [tab, setTab] = useState<'search' | 'collections' | 'local' | 'favorites'>(
+      preferences.provider === 'local' ? 'local' : 'search',
+    ),
     [text, setText] = useState(''),
     [search, setSearch] = useState('');
   const [visibleCount, setVisibleCount] = useState(200);
@@ -189,6 +219,7 @@ export default function MusicPage() {
     [effectsOpen, setEffectsOpen] = useState(false);
   const account = useMusicAccount(preferences.provider),
     local = useLocalMusic();
+  const onlineProvider = preferences.provider === 'local' ? null : preferences.provider;
   const songQueryKey = [
     'music',
     'songs',
@@ -200,12 +231,18 @@ export default function MusicPage() {
   const online = useInfiniteQuery({
     queryKey: songQueryKey,
     enabled:
-      isDesktop() && ((tab === 'search' && !!search) || (tab === 'collections' && !!collection)),
+      isDesktop() &&
+      !!onlineProvider &&
+      ((tab === 'search' && !!search) || (tab === 'collections' && !!collection)),
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
       musicEngine(
         tab === 'collections' ? 'playlist' : 'search',
-        [preferences.provider, tab === 'collections' ? collection?.id : search, pageParam],
+        [
+          onlineMusicProviderSchema.parse(onlineProvider),
+          tab === 'collections' ? collection?.id : search,
+          pageParam,
+        ],
         musicPageSchema,
       ),
     getNextPageParam: (page) => (page.hasMore ? page.nextOffset : undefined),
@@ -213,8 +250,13 @@ export default function MusicPage() {
   });
   const collections = useQuery({
     queryKey: ['music', 'collections', preferences.provider],
-    enabled: isDesktop() && tab === 'collections',
-    queryFn: () => musicEngine('library', [preferences.provider], z.array(musicCollectionSchema)),
+    enabled: isDesktop() && !!onlineProvider && tab === 'collections',
+    queryFn: () =>
+      musicEngine(
+        'library',
+        [onlineMusicProviderSchema.parse(onlineProvider)],
+        z.array(musicCollectionSchema),
+      ),
     retry: false,
   });
   const native = useMutation({
@@ -236,7 +278,8 @@ export default function MusicPage() {
     onSuccess: (data) => cache.setQueryData(['music', 'local'], data),
   });
   const disconnect = useMutation({
-    mutationFn: () => musicEngine('logout', [preferences.provider], z.unknown()),
+    mutationFn: () =>
+      musicEngine('logout', [onlineMusicProviderSchema.parse(onlineProvider)], z.unknown()),
     onSuccess: () => {
       void cache.invalidateQueries({ queryKey: ['music', 'account'] });
       void cache.invalidateQueries({ queryKey: ['music', 'collections'] });
@@ -274,7 +317,7 @@ export default function MusicPage() {
     (tab === 'local' || tab === 'favorites'
       ? (native.error ?? local.error ?? remove.error ?? restore.error)
       : null) ??
-    disconnect.error;
+    (onlineProvider ? disconnect.error : null);
   const filteredCollections = (collections.data ?? []).filter((row) =>
     row.title.toLowerCase().includes(text.toLowerCase()),
   );
@@ -328,6 +371,10 @@ export default function MusicPage() {
                     className={preferences.provider === id ? 'active' : ''}
                     onClick={() => {
                       preferences.patch({ provider: id });
+                      if (id !== 'local') preferences.patch({ matchProvider: id });
+                      setTab(id === 'local' ? 'local' : 'search');
+                      setLogin(false);
+                      setVisibleCount(200);
                       setCollection(null);
                       setText('');
                       setSearch('');
@@ -340,38 +387,40 @@ export default function MusicPage() {
               <div className="music-account">
                 <span>
                   <Icon icon={faHeadphones} />
-                  {account.isPending
-                    ? '正在准备音乐服务…'
-                    : account.data?.connected
-                      ? account.data.nickname
-                      : `${providerLabel(preferences.provider)} · 未连接`}
+                  {preferences.provider === 'local'
+                    ? `本地曲库 · ${local.data?.tracks.length ?? 0} 首歌曲`
+                    : account.isPending
+                      ? '正在准备音乐服务…'
+                      : account.data?.connected
+                        ? account.data.nickname
+                        : `${providerLabel(preferences.provider)} · 未连接`}
                 </span>
-                {account.data?.connected ? (
-                  <button
-                    type="button"
-                    onClick={() => disconnect.mutate()}
-                    disabled={disconnect.isPending}
-                  >
-                    退出
-                  </button>
-                ) : (
-                  <button type="button" disabled={account.isPending} onClick={() => setLogin(true)}>
-                    连接账号
-                  </button>
-                )}
+                {onlineProvider &&
+                  (account.data?.connected ? (
+                    <button
+                      type="button"
+                      onClick={() => disconnect.mutate()}
+                      disabled={disconnect.isPending}
+                    >
+                      退出
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={account.isPending}
+                      onClick={() => setLogin(true)}
+                    >
+                      连接账号
+                    </button>
+                  ))}
               </div>
             </div>
-            {account.error && <p className="music-help">{errorMessage(account.error)}</p>}
+            {onlineProvider && account.error && (
+              <p className="music-help">{errorMessage(account.error)}</p>
+            )}
             <div className="music-library-filters">
               <div className="music-tabs" role="tablist" aria-label="曲库来源">
-                {(
-                  [
-                    ['search', '在线搜索'],
-                    ['collections', '我的歌单'],
-                    ['local', '本地音乐'],
-                    ['favorites', '本地收藏'],
-                  ] as const
-                ).map(([id, label]) => (
+                {(onlineProvider ? ONLINE_TABS : LOCAL_TABS).map(([id, label]) => (
                   <button
                     type="button"
                     role="tab"
@@ -612,7 +661,7 @@ export default function MusicPage() {
                     <div className="music-empty">
                       <Icon icon={faMusic} />
                       <h2>
-                        {online.isFetching || native.isPending
+                        {(onlineProvider ? online.isFetching : local.isPending || native.isPending)
                           ? '正在读取音乐…'
                           : tab === 'search'
                             ? '从一首喜欢的歌开始'
@@ -623,9 +672,15 @@ export default function MusicPage() {
                       <p>
                         {tab === 'search'
                           ? '搜索平台曲库，或添加本地音乐。平台登录与会员权益由各平台管理。'
-                          : text
-                            ? '尝试其他关键词；平台歌单仅筛选当前已加载的歌曲，可继续加载更多。'
-                            : '添加本地音频或连接平台歌单，所有内容来自真实曲库。'}
+                          : !onlineProvider
+                            ? text
+                              ? '尝试其他关键词，筛选本地歌曲、歌手或专辑。'
+                              : tab === 'favorites'
+                                ? '在本地歌曲旁点亮收藏，喜欢的音乐会出现在这里。'
+                                : '添加歌曲或导入文件夹；原件保持不变，可匹配封面和歌词。'
+                            : text
+                              ? '尝试其他关键词；平台歌单仅筛选当前已加载的歌曲，可继续加载更多。'
+                              : '连接平台账号后读取真实歌单。'}
                       </p>
                     </div>
                   )}
@@ -657,9 +712,15 @@ export default function MusicPage() {
           <MusicNowPlaying onMatch={setMatch} onSettings={() => setEffectsOpen(true)} />
         </section>
         <MusicControls />
-        {login && <Login provider={preferences.provider} onClose={() => setLogin(false)} />}
+        {login && onlineProvider && (
+          <Login provider={onlineProvider} onClose={() => setLogin(false)} />
+        )}
         {match && (
-          <Match track={match} provider={preferences.provider} onClose={() => setMatch(null)} />
+          <Match
+            track={match}
+            provider={preferences.matchProvider}
+            onClose={() => setMatch(null)}
+          />
         )}
         {effectsOpen && (
           <Modal

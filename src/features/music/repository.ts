@@ -3,7 +3,8 @@ import { isDesktop, executeMusic } from '@/lib/desktop';
 import {
   musicLocalLibrarySchema,
   musicAccountSchema,
-  type OnlineMusicProvider,
+  onlineMusicProviderSchema,
+  type MusicProvider,
 } from '@/lib/music-contracts';
 import { musicEngine } from './engine';
 
@@ -15,11 +16,12 @@ export function useLocalMusic() {
     refetchInterval: (query) => (query.state.data?.importing ? 1000 : false),
   });
 }
-export function useMusicAccount(provider: OnlineMusicProvider) {
+export function useMusicAccount(provider: MusicProvider) {
   return useQuery({
     queryKey: ['music', 'account', provider],
-    queryFn: () => musicEngine('account', [provider], musicAccountSchema),
-    enabled: isDesktop(),
+    queryFn: () =>
+      musicEngine('account', [onlineMusicProviderSchema.parse(provider)], musicAccountSchema),
+    enabled: isDesktop() && provider !== 'local',
     staleTime: 60000,
     retry: false,
   });

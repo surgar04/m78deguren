@@ -37,7 +37,7 @@ export function createAssets(platforms: ReturnType<typeof createPlatforms>, secr
   const images = createImageLoader();
   return {
     register(url: string, kind: 'audio' | 'image') {
-      if (!['folia-spotify:', 'folia-ytm:'].some((scheme) => url.startsWith(scheme))) musicUrl(url);
+      if (!url.startsWith('folia-ytm:')) musicUrl(url);
       if (url.length > 16384) throw Error('音乐资源地址过长');
       const existing = [...entries].find(
         ([, item]) => item.url === url && item.kind === kind && item.expires > Date.now(),

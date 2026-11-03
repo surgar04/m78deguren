@@ -1,9 +1,10 @@
 import './check-environment.ts';
-import { cp, mkdir, readFile, writeFile, readdir, lstat, rm } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import { cp, mkdir, readFile, writeFile, readdir, lstat, rm, realpath } from 'node:fs/promises';
+import { resolve, join, relative, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { musicHostSources } from './music-inputs.ts';
+import { musicVendorFileAllowed } from './music-vendor-files.ts';
 
 /** 从同一 pnpm 锁文件创建无链接的独立生产目录；发布版不读取开发机 store。 */
 const root = resolve(import.meta.dirname, '..');
@@ -43,14 +44,29 @@ if (!process.argv.includes('--refresh-only'))
     child.once('exit', (code) => (code === 0 ? done() : fail(Error(`音乐依赖部署失败：${code}`))));
   });
 const output = join(root, 'src-tauri/resources/music-host');
+/** 只重建确定的组件输出，不触及工具链、依赖缓存、用户数据；拒绝联接及越界目标。 */
+async function resetOutput(target: string) {
+  if (
+    ![output, join(output, 'upstream')].includes(target) ||
+    !resolve(target).startsWith(root + sep)
+  )
+    throw Error('音乐组件清理范围无效');
+  const metadata = await lstat(target).catch(() => null);
+  if (!metadata) return;
+  if (
+    metadata.isSymbolicLink() ||
+    !metadata.isDirectory() ||
+    (await realpath(target)).toLowerCase() !== resolve(target).toLowerCase()
+  )
+    throw Error('音乐组件不能经过目录链接');
+  await rm(target, { recursive: true, force: true });
+}
+// 覆盖复制不会删除已经撤下的生产依赖，完整重建必须先清除旧组件目录。
+await resetOutput(process.argv.includes('--refresh-only') ? join(output, 'upstream') : output);
 await mkdir(output, { recursive: true });
 if (!process.argv.includes('--refresh-only'))
   await cp(join(stage, 'node_modules'), join(output, 'node_modules'), {
     recursive: true,
-    filter: (source) =>
-      !/[\\/]@lox-audioserver[\\/]node-librespot[\\/]prebuilds[\\/](?!win32-x64-msvc(?:[\\/]|$))/u.test(
-        source,
-      ),
   });
 for (const name of await readdir(join(root, 'native/music-host'))) {
   if (
@@ -58,43 +74,18 @@ for (const name of await readdir(join(root, 'native/music-host'))) {
     (name.endsWith('.ts') && name !== 'tsconfig.json') ||
     name === 'package.json'
   )
-    await cp(join(root, 'native/music-host', name), join(output, name), { recursive: true });
+    await cp(join(root, 'native/music-host', name), join(output, name), {
+      recursive: true,
+      ...(name === 'upstream'
+        ? {
+            filter: (source: string) =>
+              musicVendorFileAllowed(relative(join(root, 'native/music-host/upstream'), source)),
+          }
+        : {}),
+    });
 }
 if (!process.argv.includes('--refresh-only')) await cp(process.execPath, join(output, 'node.exe'));
-// librespot 的 Windows 原生插件依赖 VC Runtime。仅从已校验的现有应用组件复制，
-// 放在 Node.exe 同目录参与 Windows 私有 DLL 搜索；不要求用户安装全局运行库。
-const crtRoot = join(root, 'src-tauri/resources/hardware-monitor');
-const crtManifest = JSON.parse(await readFile(join(crtRoot, 'manifest.json'), 'utf8')) as {
-  files?: Record<string, unknown>;
-};
-const crtName = 'vcruntime140.dll';
-const crtExpected = crtManifest.files?.[crtName];
-if (typeof crtExpected !== 'string' || !/^[a-f0-9]{64}$/u.test(crtExpected))
-  throw Error('音乐组件缺少可信 VC Runtime 来源摘要');
-const crtSource = join(crtRoot, 'runtime', crtName);
-if (!(await lstat(crtSource)).isFile()) throw Error('VC Runtime 来源文件类型不正确');
-const crtBytes = await readFile(crtSource);
-if (createHash('sha256').update(crtBytes).digest('hex') !== crtExpected)
-  throw Error('VC Runtime 来源摘要不一致');
-await writeFile(join(output, crtName), crtBytes);
-// Node 按原生插件目录执行受限 DLL 搜索；同时就近部署，兼容其加载标志与 PATH 隔离。
-await writeFile(
-  join(output, 'node_modules/@lox-audioserver/node-librespot/prebuilds/win32-x64-msvc', crtName),
-  crtBytes,
-);
 const files: Record<string, string> = {};
-const prebuilds = join(output, 'node_modules/@lox-audioserver/node-librespot/prebuilds');
-for (const name of await readdir(prebuilds))
-  if (name !== 'win32-x64-msvc') {
-    const target = resolve(prebuilds, name);
-    if (
-      !target.startsWith(output + '\\') ||
-      (process.env['ZHENJING_RESTRICT_WRITES_TO_D'] === '1' && !/^D:\\/u.test(target)) ||
-      (await lstat(target)).isSymbolicLink()
-    )
-      throw Error('原生预编译模块清理范围无效');
-    await rm(target, { recursive: true, force: true });
-  }
 const pending: { path: string; relative: string }[] = [];
 async function scan(folder: string, prefix = ''): Promise<void> {
   for (const info of await readdir(folder, { withFileTypes: true })) {

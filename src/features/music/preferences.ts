@@ -6,11 +6,13 @@ import {
   musicStyleSchema,
   musicThemeSchema,
   onlineMusicProviderSchema,
+  musicProviderSchema,
 } from '@/lib/music-contracts';
 
 const schema = z.object({
   renderPolicy: z.enum(['auto', 'original', 'efficient']).default('auto'),
-  provider: onlineMusicProviderSchema.default('netease'),
+  provider: musicProviderSchema.default('netease'),
+  matchProvider: onlineMusicProviderSchema.default('netease'),
   style: musicStyleSchema.default('classic'),
   background: musicBackgroundSchema.default('latent'),
   daylight: z.boolean().default(false),
@@ -24,6 +26,22 @@ const schema = z.object({
 });
 type Preferences = z.infer<typeof schema>;
 const initial = schema.parse({});
+/** 仅迁移已撤下的平台选择与收藏，不因一个旧字段使音量、主题和其余平台偏好整体丢失。 */
+export function migrateMusicPreferences(saved: unknown) {
+  const record = z.record(z.string(), z.unknown()).safeParse(saved);
+  if (!record.success) return initial;
+  const value = record.data;
+  const result = schema.safeParse({
+    ...value,
+    provider: value.provider === 'spotify' ? 'local' : value.provider,
+    favorites: Array.isArray(value.favorites)
+      ? value.favorites.filter(
+          (key: unknown) => typeof key === 'string' && !key.startsWith('spotify:'),
+        )
+      : value.favorites,
+  });
+  return result.success ? result.data : initial;
+}
 export const useMusicPreferences = create<
   Preferences & { patch: (patch: Partial<Preferences>) => void }
 >()(
@@ -37,8 +55,7 @@ export const useMusicPreferences = create<
       version: 1,
       partialize: (state) => schema.parse(state),
       merge: (saved, current) => {
-        const result = schema.safeParse(saved);
-        return { ...current, ...(result.success ? result.data : initial) };
+        return { ...current, ...migrateMusicPreferences(saved) };
       },
     },
   ),
@@ -66,5 +83,6 @@ export const MUSIC_PROVIDERS = [
   ['netease', '网易云音乐'],
   ['qq', 'QQ 音乐'],
   ['ytm', 'YouTube Music'],
-  ['spotify', 'Spotify'],
+  ['local', '本地曲库'],
 ] as const;
+export const ONLINE_MUSIC_PROVIDERS = MUSIC_PROVIDERS.filter((row) => row[0] !== 'local');

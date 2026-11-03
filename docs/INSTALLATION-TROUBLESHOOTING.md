@@ -27,7 +27,7 @@ icacls X:\
 
 - YouTube Music 使用网页版账号授权与独立隔离脚本窗口，不依赖不存在的官方原生桌面客户端，也不要求安装 PWA。
 - 使用连接弹窗启动的浏览器完成授权；首次失败可直接重新连接，无需重启整个应用。保留当前账号原始浏览器资料，不手动复制 Cookie。
-- Spotify 的 Folia 播放链路要求 Premium；能绑定账号不代表账号具有第三方播放权益。平台拒绝音频密钥、地区版权限制与网络失败会分别提示，不能通过重试无限绕过。
-- Spotify 原生播放连接与网页 HTTP 请求是不同链路。仅浏览器/HTTP 代理可用不能证明原生 TCP 音频连接可用；中国大陆使用者需要确保网络方案实际覆盖 Spotify 播放连接。不得关闭证书验证或导出账号令牌来排障。
+- 音乐页仅提供网易云音乐、QQ 音乐、YouTube Music 三个在线平台；第四个入口为本地曲库，支持导入音频、收藏及在线匹配封面和歌词，不需要绑定平台账号。
+- 旧版选择了 Spotify 的用户会转到本地曲库；其他平台的登录会话、播放偏好和本地原始文件保留。曲目会员、地区和版权限制仍由各在线平台决定，不提供绕过方式。
 
 参考：[微软 MSI 错误码](https://learn.microsoft.com/en-us/windows/win32/msi/windows-installer-error-messages)、[MSI 回滚机制](https://learn.microsoft.com/en-us/windows/win32/msi/rollback-installation)、[WiX 3 Package 属性](https://docs.firegiant.com/wix3/xsd/wix/package/)、[Folia 源码](https://github.com/chthollyphile/folia-major)。

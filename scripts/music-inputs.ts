@@ -3,7 +3,12 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 export async function musicHostSources(root: string): Promise<Record<string, string>> {
-  const names = ['pnpm-lock.yaml', 'scripts/build-music-host.ts', 'scripts/music-inputs.ts'];
+  const names = [
+    'pnpm-lock.yaml',
+    'scripts/build-music-host.ts',
+    'scripts/music-inputs.ts',
+    'scripts/music-vendor-files.ts',
+  ];
   async function walk(folder: string): Promise<void> {
     for (const entry of await readdir(resolve(root, folder), { withFileTypes: true })) {
       if (entry.name === 'node_modules' || entry.name === 'tests') continue;

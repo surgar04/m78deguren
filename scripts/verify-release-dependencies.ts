@@ -15,8 +15,6 @@ const targets = [
   'src-tauri/resources/hardware-monitor/runtime/ZhenjingMonitor.exe',
   'native/hardware-monitor/Hud/Collector/ECPFrames-x64.exe',
   'src-tauri/resources/music-host/node.exe',
-  'src-tauri/resources/music-host/vcruntime140.dll',
-  'src-tauri/resources/music-host/node_modules/@lox-audioserver/node-librespot/prebuilds/win32-x64-msvc/librespot_addon.node',
 ];
 const runtime = 'src-tauri/resources/hardware-monitor/runtime';
 const runtimeFiles = await readdir(runtime);

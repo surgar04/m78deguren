@@ -54,7 +54,8 @@ impl Catalog {
     pub fn snapshot(&self) -> Value {
         json!({"tracks":self.entries.values().map(|entry| {
             let mut track = entry.track.clone();
-            if let Some(matched) = &entry.matched {
+            // 旧索引可能来自已撤下的平台；仅忽略其覆盖层，不删除本地原件或已导入曲目。
+            if let Some(matched) = &entry.matched && matches!(matched["provider"].as_str(),Some("qq"|"netease"|"ytm")) {
                 for key in ["title", "artists", "album"] { track[key] = matched[key].clone(); }
                 if !matched["cover"].is_null(){track["cover"]=matched["cover"].clone();}
                 track["matched"] = json!(true);
@@ -257,4 +258,32 @@ pub async fn lyrics(state: &MusicState, id: &str, choose: bool) -> Result<Value>
         .map_err(io_error)?;
     }
     Ok(json!({"text":text,"format":format}))
+}
+
+#[cfg(test)]
+mod migration_tests {
+    use super::*;
+    #[test]
+    fn unavailable_matching_layer_never_hides_local_song_or_changes_original_file() {
+        let mut catalog = Catalog::default();
+        let path = PathBuf::from("D:/fixture/original.flac");
+        let id = uuid::Uuid::new_v4().to_string();
+        let original = json!({"key":format!("local:{id}"),"id":id,"provider":"local","title":"original","artists":["artist"],"album":"album","cover":null,"durationMs":1000,"matched":false});
+        catalog.entries.insert(id.clone(),Entry{path:path.clone(),track:original.clone(),matched:Some(json!({"provider":"spotify","id":"old","title":"obsolete","cover":"https://retired.invalid/cover"}))});
+        assert_eq!(catalog.snapshot()["tracks"][0], original);
+        for provider in ["netease", "qq", "ytm"] {
+            if let Some(entry) = catalog.entries.get_mut(&id) {
+                entry.matched = Some(
+                    json!({"provider":provider,"id":"valid","title":"matched","artists":["matched artist"],"album":"matched album","cover":null}),
+                );
+            }
+            let snapshot = catalog.snapshot();
+            assert_eq!(snapshot["tracks"][0]["matchSource"]["provider"], provider);
+            assert_eq!(snapshot["tracks"][0]["title"], "matched");
+            assert_eq!(
+                catalog.entries.get(&id).map(|entry| &entry.path),
+                Some(&path)
+            );
+        }
+    }
 }

@@ -9,7 +9,7 @@ let desktopRequest: NativeMusicBridge | null = null;
 /** 原生宿主故障采用 Folia 的结构化错误返回，避免被误报为“需要桌面版 YouTube”。 */
 export async function requestProvider(
   request: NativeMusicBridge,
-  provider: 'ytm' | 'spotify',
+  provider: 'ytm',
   action: string,
   params: Record<string, unknown> = {},
 ): Promise<unknown> {
@@ -78,7 +78,7 @@ export async function requestProvider(
       error: {
         code: 'network',
         reason,
-        message: `${provider === 'ytm' ? 'YouTube Music' : 'Spotify'}：${failure.title}。${failure.hint}`,
+        message: `YouTube Music：${failure.title}。${failure.hint}`,
       },
     };
   }
@@ -91,11 +91,11 @@ const relay = z.object({
   contentType: z.string().optional(),
 });
 
-/** 只提供所选四个平台需要的桌面接口；不暴露文件系统、Shell、任意 IPC 或 Electron 运行时。 */
+/** 只提供三个在线平台需要的桌面接口；本地曲库通过专用 IPC，不创建在线账户。 */
 export function installDesktopBridge(request: NativeMusicBridge): void {
   desktopRequest = request;
   const providerRequest = async (
-    provider: 'ytm' | 'spotify',
+    provider: 'ytm',
     action: string,
     params: Record<string, unknown> = {},
   ) => requestProvider(request, provider, action, params);
@@ -128,8 +128,6 @@ export function installDesktopBridge(request: NativeMusicBridge): void {
       },
       ytmRequest: (action: string, params: Record<string, unknown>) =>
         providerRequest('ytm', action, params),
-      spotifyRequest: (action: string, params: Record<string, unknown>) =>
-        providerRequest('spotify', action, params),
       fetchLyricProxy: async (url: string, init?: { method?: string; body?: string }) => {
         const value = relay.parse(
           await request({

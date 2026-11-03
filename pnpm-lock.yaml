@@ -340,10 +340,6 @@ importers:
       zod:
         specifier: 4.6.7
         version: 4.6.7
-    optionalDependencies:
-      '@lox-audioserver/node-librespot':
-        specifier: 0.5.1
-        version: 0.5.1
 
 packages:
 
@@ -763,10 +759,6 @@ packages:
 
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
-
-  '@lox-audioserver/node-librespot@0.5.1':
-    resolution: {integrity: sha512-VXUPcBfJVlSvciyhEO2k4UvRbJIhjZ3cuA5+xVwtRulmrcKd42Nk//yxeJQYdF3CmPRjt12hkHBRhwwrfkARtw==}
-    engines: {node: '>=18'}
 
   '@mediapipe/tasks-vision@0.10.17':
     resolution: {integrity: sha512-CZWV/q6TTe8ta61cZXjfnnHsfWIdFhms03M9T7Cnd5y2mdpylJM0rF1qRq+wsQVRMLz1OYPVEBU9ph2Bx8cxrg==}
@@ -3027,10 +3019,6 @@ packages:
     resolution: {integrity: sha512-eonl3sLUha+S1GzTPxychyhnUzKyeQkZ7jLjKrBagJgPla13F+uQ71HgpFefyHgqrjEbCPkDArxYsjY8/+gLKA==}
     engines: {node: '>= 0.4.0'}
 
-  node-addon-api@8.9.2:
-    resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
-    engines: {node: ^18 || ^20 || >= 21}
-
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
@@ -4617,11 +4605,6 @@ snapshots:
       keyv: 5.6.0
 
   '@keyv/serialize@1.1.1': {}
-
-  '@lox-audioserver/node-librespot@0.5.1':
-    dependencies:
-      node-addon-api: 8.9.2
-    optional: true
 
   '@mediapipe/tasks-vision@0.10.17': {}
 
@@ -6868,9 +6851,6 @@ snapshots:
       content-type: 2.1.0
 
   netmask@2.1.1: {}
-
-  node-addon-api@8.9.2:
-    optional: true
 
   node-domexception@1.0.0: {}
 

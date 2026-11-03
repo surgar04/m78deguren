@@ -35,10 +35,8 @@ struct MatchSource {
 fn validate_track(input: Value) -> Result<Value, AppError> {
     let track: OnlineTrack =
         serde_json::from_value(input).map_err(|_| error("匹配元信息字段无效"))?;
-    if !matches!(
-        track.provider.as_str(),
-        "qq" | "netease" | "ytm" | "spotify"
-    ) || track.id.is_empty()
+    if !matches!(track.provider.as_str(), "qq" | "netease" | "ytm")
+        || track.id.is_empty()
         || track.id.len() > 128
         || track.key != format!("{}:{}", track.provider, track.id)
         || track.title.len() > 16384
@@ -48,6 +46,11 @@ fn validate_track(input: Value) -> Result<Value, AppError> {
         || !track.duration_ms.is_finite()
         || !(0.0..=604800000.0).contains(&track.duration_ms)
         || track.cover.as_ref().is_some_and(|v| v.len() > 16384)
+        || track.match_source.as_ref().is_some_and(|source| {
+            !matches!(source.provider.as_str(), "qq" | "netease" | "ytm")
+                || source.id.is_empty()
+                || source.id.len() > 128
+        })
     {
         return Err(error("匹配元信息超出范围"));
     }
@@ -211,7 +214,7 @@ pub async fn music_execute(
             action,
             params,
         } => {
-            if !matches!(provider.as_str(), "ytm" | "spotify")
+            if provider != "ytm"
                 || action.is_empty()
                 || action.len() > 80
                 || !action
@@ -292,10 +295,7 @@ pub async fn music_execute(
                     .map_err(|_| error("匹配元信息无效"))?
                     .len()
                     > 65536
-                    || !matches!(
-                        track["provider"].as_str(),
-                        Some("qq" | "netease" | "ytm" | "spotify")
-                    )
+                    || !matches!(track["provider"].as_str(), Some("qq" | "netease" | "ytm"))
                     || track["title"].as_str().is_none_or(|v| v.len() > 16384)
                     || !track["artists"].is_array()
                 {
@@ -419,6 +419,16 @@ mod tests {
         let mut bad_artists = row;
         bad_artists["artists"] = json!([12]);
         assert!(validate_track(bad_artists).is_err());
+    }
+    #[test]
+    fn retired_matching_source_cannot_enter_music_ipc() {
+        for provider in ["netease", "qq", "ytm"] {
+            let row = json!({"key":format!("{provider}:123"),"id":"123","provider":provider,"title":"fixture","artists":[],"album":"","durationMs":10,"cover":null});
+            assert!(validate_track(row.clone()).is_ok());
+            let mut retired = row;
+            retired["matchSource"] = json!({"provider":"spotify","id":"old"});
+            assert!(validate_track(retired).is_err());
+        }
     }
     #[test]
     fn file_registration_cannot_be_bypassed_with_ipc_paths() {

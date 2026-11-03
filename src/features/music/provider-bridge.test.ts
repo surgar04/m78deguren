@@ -44,13 +44,10 @@ describe('Folia 到原生 JSON 的兼容边界', () => {
     expect(Object.getPrototypeOf(named)).toBe(Object.prototype);
     expect(Object.hasOwn(named, '__proto__')).toBe(true);
   });
-  it('原生连接失败返回可读原因，平台 Premium 等真实错误原样保留', async () => {
-    const premium = {
-      ok: false,
-      error: { code: 'subscription-required', message: 'Spotify plays for Premium accounts only' },
-    };
-    await expect(requestProvider(() => Promise.resolve(premium), 'spotify', 'audio')).resolves.toBe(
-      premium,
+  it('原生连接失败返回可读原因，YouTube 正常音源结果原样保留', async () => {
+    const audio = { ok: true, data: { url: 'folia-ytm://audio/fixture' } };
+    await expect(requestProvider(() => Promise.resolve(audio), 'ytm', 'audio')).resolves.toBe(
+      audio,
     );
     const result = await requestProvider(
       () => Promise.reject(Error('secret-not-for-display')),

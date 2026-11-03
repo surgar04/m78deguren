@@ -7,7 +7,7 @@ import { createYtmAuth, type AuthPhase } from './ytm-auth.ts';
 import { MusicNetworkError, clearMusicRoutes } from './network-route.ts';
 
 const require = createRequire(import.meta.url);
-type Platform = 'ytm' | 'spotify';
+type Platform = 'ytm';
 type Bridge = {
   request: (operation: string, params: Record<string, unknown>) => Promise<unknown>;
   handleAudioRequest: (request: Request) => Promise<Response>;
@@ -24,7 +24,7 @@ const bridgeShape = z
       .optional(),
   })
   .passthrough();
-export type HostCall = (action: 'open' | 'sandbox', payload: string) => Promise<unknown>;
+export type HostCall = (action: 'sandbox', payload: string) => Promise<unknown>;
 
 /** 复用 Folia 的账户、分页、音源和歌词桥。只在该平台第一次被访问时加载其库和原生模块。 */
 export function createPlatforms(
@@ -48,21 +48,7 @@ export function createPlatforms(
       warn: () => {},
     };
     let candidate: unknown;
-    if (provider === 'spotify') {
-      const source: unknown = require('./upstream/electron/spotify/spotifyApiBridge.cjs');
-      const factory = z
-        .object({
-          createSpotifyApiBridge: z.custom<(options: object) => unknown>(
-            (value) => typeof value === 'function',
-          ),
-        })
-        .parse(source);
-      candidate = factory.createSpotifyApiBridge({
-        ...shared,
-        openExternal: (url: string) => call('open', url),
-        audioDirectory: () => join(root, 'cache/spotify'),
-      });
-    } else {
+    {
       const source: unknown = require('./upstream/electron/ytm/ytmApiBridge.cjs');
       const factory = z
         .object({
@@ -194,10 +180,10 @@ export function createPlatforms(
       }
       return result;
     },
-    audio: (url: string, headers: Headers) =>
-      get(url.startsWith('folia-spotify:') ? 'spotify' : 'ytm').handleAudioRequest(
-        new Request(url, { headers }),
-      ),
+    audio: (url: string, headers: Headers) => {
+      if (!url.startsWith('folia-ytm:')) throw Error('音乐音源协议未开放');
+      return get('ytm').handleAudioRequest(new Request(url, { headers }));
+    },
     async shutdown() {
       await Promise.allSettled(
         [...bridges.values()].map(async (bridge) => {

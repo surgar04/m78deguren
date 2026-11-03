@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 /** 平台身份属于歌曲主键的一部分，禁止不同平台的相同数字 ID 相互覆盖。 */
-export const onlineMusicProviderSchema = z.enum(['qq', 'netease', 'ytm', 'spotify']);
-export const musicProviderSchema = z.enum(['qq', 'netease', 'ytm', 'spotify', 'local']);
+export const onlineMusicProviderSchema = z.enum(['qq', 'netease', 'ytm']);
+export const musicProviderSchema = z.enum(['qq', 'netease', 'ytm', 'local']);
 export type OnlineMusicProvider = z.infer<typeof onlineMusicProviderSchema>;
 export type MusicProvider = z.infer<typeof musicProviderSchema>;
 export const musicStyleSchema = z.enum([
@@ -174,7 +174,7 @@ export const musicRequestSchema = z.discriminatedUnion('operation', [
   z
     .object({
       operation: z.literal('provider'),
-      provider: onlineMusicProviderSchema,
+      provider: z.literal('ytm'),
       action: z.string().min(1).max(80),
       params,
     })

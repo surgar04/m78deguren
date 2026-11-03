@@ -107,7 +107,6 @@ impl Host {
             "NODE_EXTRA_CA_CERTS",
             "NODE_TLS_REJECT_UNAUTHORIZED",
             "ELECTRON_RUN_AS_NODE",
-            "LOX_LIBRESPOT_ADDON_PATH",
         ] {
             command.env_remove(key);
         }
@@ -299,22 +298,6 @@ async fn host_call(
         .filter(|v| v.len() <= 4 * 1024 * 1024)
         .ok_or_else(|| error("音乐桌面请求过大"))?;
     let value = match response["action"].as_str() {
-        Some("open") => {
-            use tauri_plugin_opener::OpenerExt;
-            let url = reqwest::Url::parse(payload).map_err(|_| error("音乐授权地址无效"))?;
-            if url.scheme() != "https"
-                || url.host_str() != Some("accounts.spotify.com")
-                || !url.username().is_empty()
-                || url.password().is_some()
-            {
-                Err(error("音乐授权地址未开放"))
-            } else {
-                app.opener()
-                    .open_url(url.as_str(), None::<&str>)
-                    .map_err(|_| error("无法打开音乐授权页面"))
-                    .map(|_| Value::Null)
-            }
-        }
         Some("sandbox") => sandbox::evaluate(app, state, payload).await,
         _ => Err(error("音乐桌面能力未开放")),
     };

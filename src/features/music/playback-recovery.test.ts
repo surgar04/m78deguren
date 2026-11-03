@@ -6,8 +6,8 @@ import { playbackMessage } from './playback-guard';
 const engine = vi.hoisted(() => vi.fn());
 vi.mock('./engine', () => ({ musicEngine: engine }));
 const track: MusicTrack = {
-  key: 'spotify:track',
-  provider: 'spotify',
+  key: 'qq:track',
+  provider: 'qq',
   id: 'track',
   title: '测试歌曲',
   artists: [],
@@ -120,10 +120,9 @@ it('挂起的 WebAudio 恢复不会永久锁住普通播放器', async () => {
   expect(player.snapshot().error).toContain('音频输出未能恢复');
 });
 
-it('Premium 限制、密钥拒绝和网络连接错误有不同的提示', () => {
-  expect(playbackMessage(Error('Spotify plays for Premium accounts only'))).toContain('Premium');
-  expect(playbackMessage(Error('Spotify gives this account no audio key'))).toContain('拒绝');
-  expect(playbackMessage(Error('Spotify playback could not connect'))).toContain('音频连接');
+it('其他平台返回的明确播放错误保留，浏览器自动播放限制有独立说明', () => {
+  expect(playbackMessage(Error('QQ 音乐音源暂不可用'))).toContain('QQ 音乐音源暂不可用');
+  expect(playbackMessage(new DOMException('fixture', 'NotAllowedError'))).toContain('允许声音');
 });
 
 it('重新选曲解析期间旧音源的失败和缓冲事件不会取消新请求', async () => {
@@ -135,7 +134,7 @@ it('重新选曲解析期间旧音源的失败和缓冲事件不会取消新请�
       finish = resolve;
     }),
   );
-  const next = player.play({ ...track, key: 'spotify:second', title: '新歌曲' });
+  const next = player.play({ ...track, key: 'qq:second', title: '新歌曲' });
   AudioFixture.current?.dispatchEvent(new Event('error'));
   AudioFixture.current?.dispatchEvent(new Event('waiting'));
   await vi.advanceTimersByTimeAsync(20001);

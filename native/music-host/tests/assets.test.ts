@@ -1,74 +1,49 @@
 // @vitest-environment node
 import { createRequire } from 'node:module';
-import { createCipheriv } from 'node:crypto';
 import { afterEach, expect, it } from 'vitest';
 import { z } from 'zod';
 import { createAssets, audioRange, AUDIO_CHUNK_BYTES } from '../assets.ts';
 
-// 使用冻结上游的真实 AES/分段实现，注入合成 CDN，验证宿主适配而不访问私人账号。
+// 使用冻结上游的真实 YouTube 分段实现，注入合成下载计划，不访问私人账号。
 const require = createRequire(import.meta.url);
 type Audio = {
-  issue: (id: string, bitrate: number) => Promise<{ url: string }>;
+  issue: (id: string, level: string) => Promise<{ url: string }>;
   handle: (request: Request) => Promise<Response>;
   clear: () => void;
 };
 const module = z
   .object({
-    createSpotifyAudio: z.custom<(options: object) => Audio>(
-      (value) => typeof value === 'function',
-    ),
+    createYtmAudio: z.custom<(options: object) => Audio>((value) => typeof value === 'function'),
   })
-  .parse(require('../upstream/electron/spotify/audio.cjs') as unknown);
+  .parse(require('../upstream/electron/ytm/audio.cjs') as unknown);
 const cleanups: (() => void)[] = [];
 afterEach(() => {
   for (const clean of cleanups.splice(0)) clean();
 });
 
-it('Spotify 解密音频经过私有媒体网关后可连续读取、跳转、尾部读取及 HEAD 探测', async () => {
+it('YouTube 音频经过私有媒体网关后可连续读取、跳转、尾部读取及 HEAD 探测', async () => {
   const clear = Buffer.alloc(3 * 1024 * 1024 + 513);
   for (let index = 0; index < clear.length; index++) clear[index] = index % 251;
   clear.write('OggS');
-  const key = Buffer.alloc(16, 17);
-  const cipher = createCipheriv(
-    'aes-128-ctr',
-    key,
-    Buffer.from('72e067fbddcbcf77ebe8bc643f630d93', 'hex'),
-  );
-  const encrypted = Buffer.concat([
-    cipher.update(Buffer.concat([Buffer.alloc(0xa7), clear])),
-    cipher.final(),
-  ]);
-  const audio = module.createSpotifyAudio({
-    accessToken: () => Promise.resolve('fixture-only'),
-    deviceId: () => 'fixture',
+  const audio = module.createYtmAudio({
     log() {},
     warn() {},
-    openSession: () =>
+    loadPlan: () =>
       Promise.resolve({
-        resolveAudioFileAsync: () =>
+        route: 'fixture',
+        mimeType: 'audio/ogg',
+        contentLength: clear.length,
+        open: () =>
           Promise.resolve({
-            format: 'OGG_VORBIS_320',
-            keyHex: key.toString('hex'),
-            cdnUrl: 'https://fixture.scdn.co/audio',
+            stream: new ReadableStream<Uint8Array>({
+              start(controller) {
+                controller.enqueue(clear);
+                controller.close();
+              },
+            }),
+            abort() {},
           }),
-        close() {},
       }),
-    fetch: (_url: string, init: RequestInit) => {
-      const range = new Headers(init.headers).get('range') ?? '';
-      const parsed = /^bytes=(\d+)-(\d+)$/.exec(range);
-      if (!parsed?.[1] || !parsed[2]) throw Error('fixture requires bounded CDN range');
-      const start = Number(parsed[1]),
-        end = Math.min(Number(parsed[2]), encrypted.length - 1);
-      return Promise.resolve(
-        new Response(encrypted.subarray(start, end + 1), {
-          status: 206,
-          headers: {
-            'content-range': `bytes ${start}-${end}/${encrypted.length}`,
-            'content-length': String(end - start + 1),
-          },
-        }),
-      );
-    },
   });
   cleanups.push(() => audio.clear());
   const gateway = createAssets(
@@ -80,7 +55,8 @@ it('Spotify 解密音频经过私有媒体网关后可连续读取、跳转、�
     'fixture-secret',
   );
   cleanups.push(() => gateway.stop());
-  const source = await audio.issue('0123456789abcdefghijkl', 320);
+  expect(() => gateway.register('folia-spotify://audio/retired', 'audio')).toThrow();
+  const source = await audio.issue('0123456789A', 'high');
   const handle = gateway.register(source.url, 'audio');
   const port = await gateway.start();
   const url = `http://127.0.0.1:${port}${new URL(handle.url).pathname}`;

@@ -42,15 +42,12 @@ const call: HostCall = (action, payload) =>
       return;
     }
     const id = randomUUID(),
-      timer = setTimeout(
-        () => {
-          pending.delete(id);
-          reject(Error('音乐桌面请求超时'));
-          // 冷启动隔离 WebView2 需要创建独立档案，预算应覆盖原生就绪等待与脚本执行。
-          // 打开授权网页仍沿用较短时限；外层原生 RPC 继续保留 90 秒总上限。
-        },
-        action === 'sandbox' ? 60000 : 30000,
-      );
+      timer = setTimeout(() => {
+        pending.delete(id);
+        reject(Error('音乐桌面请求超时'));
+        // 冷启动隔离 WebView2 需要创建独立档案，预算应覆盖原生就绪等待与脚本执行。
+        // 外层原生 RPC 继续保留 90 秒总上限；这里只开放隔离求值，不再提供外部授权 URL 入口。
+      }, 60000);
     pending.set(id, { resolve, reject, timer });
     emit({ type: 'host-call', id, action, payload });
   });
@@ -66,7 +63,7 @@ const requestSchema = z
   .object({
     id: z.uuid(),
     operation: z.string().max(32),
-    provider: z.enum(['netease', 'qq', 'ytm', 'spotify']).optional(),
+    provider: z.enum(['netease', 'qq', 'ytm']).optional(),
     action: z.string().max(80).optional(),
     path: z.string().max(32768).optional(),
     method: z.enum(['GET', 'POST']).optional(),
@@ -104,12 +101,8 @@ async function execute(input: unknown): Promise<void> {
   try {
     let value: unknown;
     if (request.operation === 'runtime')
-      value = { available: true, platforms: ['qq', 'netease', 'ytm', 'spotify'] };
-    else if (
-      request.operation === 'provider' &&
-      (request.provider === 'ytm' || request.provider === 'spotify') &&
-      request.action
-    )
+      value = { available: true, platforms: ['qq', 'netease', 'ytm'] };
+    else if (request.operation === 'provider' && request.provider === 'ytm' && request.action)
       value = await platforms.request(request.provider, request.action, request.params ?? {});
     else if (
       request.operation === 'api' &&

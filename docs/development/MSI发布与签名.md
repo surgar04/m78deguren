@@ -14,7 +14,7 @@ MSI 更新清单固定为 zhenjing-update.json，使用与 Windows 代码签名�
 
 公开目录仅包含当前版本 MSI、zhenjing-update.json、SHA256SUMS.txt、publisher.json、build-info.json、INSTALL.md。工具链、开发依赖、私钥、编译缓存与用户数据不作为发布包分发；音乐组件的锁定生产依赖属于应用运行时，由 MSI 显式安装并逐文件校验。
 
-0.10.0 起实际 MSI 解包验收是构建完成前的必经步骤：验证音乐宿主、硬件/HUD 和 Windows 组件的全部哈希及许可，不能只凭前端构建或 WiX 输出判断可分发。Spotify 原生插件依赖的 VC Runtime 放在音乐宿主及插件私有目录，不读取开发机安装的运行库。
+0.10.0 起实际 MSI 解包验收是构建完成前的必经步骤：验证音乐宿主、硬件/HUD 和 Windows 组件的全部哈希及许可，不能只凭前端构建或 WiX 输出判断可分发。音乐宿主仅部署网易云、QQ、YouTube Music 及本地音频所需的生产依赖；完整重建先清理确定的组件输出目录，避免已撤下的平台或原生插件残留。
 
 env:check、TypeScript、ESLint、前端测试、Rust fmt/Clippy/tests、installer:check 和真实 Windows Release 链接按适用范围验收。test:installer 只读查询 MSI 数据库、检查签名清单与哈希、核对包内主程序只允许 Tauri 安装类型标记的三个字节变化。test-package-lifecycle.ps1 仅在明确授权并传入 AllowInstall 时执行本机真实安装、维护重装、正常启动退出和卸载，并核验用户数据及文件保留；测试后清理本次应用登记、快捷方式和隔离目录。
 

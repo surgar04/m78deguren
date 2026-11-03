@@ -6,9 +6,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const fixture = vi.hoisted(() => ({
   playback: {
     track: {
-      key: 'spotify:fixture',
+      key: 'qq:fixture',
       id: 'fixture',
-      provider: 'spotify',
+      provider: 'qq',
       title: '测试歌曲',
       artists: ['测试'],
       album: '',
@@ -60,7 +60,7 @@ it('加载期间仍能取消，不再把唯一播放操作禁用', () => {
 });
 
 it('完整错误独立呈现并提供重新解析音源的操作', () => {
-  fixture.playback.error = 'Spotify 音频连接未建立，请检查网络或点击重试。';
+  fixture.playback.error = 'QQ 音乐音频连接未建立，请检查网络或点击重试。';
   renderControls();
   expect(screen.getByRole('alert')).toHaveTextContent(fixture.playback.error);
   fireEvent.click(screen.getByRole('button', { name: '重试播放' }));

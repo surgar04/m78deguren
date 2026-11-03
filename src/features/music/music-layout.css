@@ -462,9 +462,6 @@
   gap: 16px;
   color: #234c4b;
 }
-.music-login-intro.provider-spotify {
-  background: linear-gradient(155deg, #c5f7d5, #edf7ec);
-}
 .music-login-intro.provider-ytm {
   background: linear-gradient(155deg, #ffe0de, #f3eafa);
 }

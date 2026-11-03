@@ -1,11 +1,10 @@
 import './check-environment.ts';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { randomUUID } from 'node:crypto';
-import { createRequire } from 'node:module';
 import { z } from 'zod';
 
 // 合成音频仅存在独立验收目录，不会混入用户曲库或生产数据。
@@ -83,14 +82,15 @@ async function request(operation: Record<string, unknown>) {
   ]);
 }
 try {
-  // 在真实发布目录加载原生插件，验证 ABI 与私有 CRT；不创建会话、不读取账户或连接 Spotify。
-  const nativeRequire = createRequire(resolve('src-tauri/resources/music-host/index.ts'));
-  z.object({
-    createSession: z.custom<(...args: unknown[]) => unknown>(
-      (value) => typeof value === 'function',
-    ),
-  }).parse(nativeRequire('@lox-audioserver/node-librespot') as unknown);
-  console.log('Spotify native playback module loaded; no account/session was opened.');
+  const manifest = z
+    .object({ files: z.record(z.string(), z.string()) })
+    .parse(
+      JSON.parse(await readFile('src-tauri/resources/music-host/manifest.json', 'utf8')) as unknown,
+    );
+  assert.ok(
+    !Object.keys(manifest.files).some((name) => /spotify|librespot/iu.test(name)),
+    '生产组件不能包含已撤下的平台模块',
+  );
   const state = z.object({ port: z.number(), secret: z.string() }).parse(await ready);
   assert.equal(
     (await fetch(`http://127.0.0.1:${state.port}/media/${randomUUID()}`)).status,
@@ -101,7 +101,25 @@ try {
     .object({ available: z.boolean(), platforms: z.array(z.string()) })
     .parse(await request({ operation: 'runtime' }));
   assert.equal(runtime.available, true);
-  assert.equal(runtime.platforms.length, 4);
+  assert.deepEqual(runtime.platforms, ['qq', 'netease', 'ytm']);
+  const searchQq = () =>
+    request({
+      operation: 'api',
+      provider: 'qq',
+      path: '/search',
+      method: 'GET',
+      params: { keyword: '晴天', type: 'song', page: 1, limit: 1 },
+    });
+  let qq = z.object({ status: z.number(), body: z.string() }).parse(await searchQq());
+  if ([500, 502, 503, 504].includes(qq.status)) {
+    await new Promise<void>((done) => setTimeout(done, 400));
+    qq = z.object({ status: z.number(), body: z.string() }).parse(await searchQq());
+  }
+  assert.equal(qq.status, 200, 'QQ 公开搜索应返回正常状态');
+  const qqSongs = z
+    .object({ code: z.literal(200), items: z.array(z.unknown()) })
+    .parse(JSON.parse(qq.body) as unknown);
+  assert.ok(qqSongs.items.length > 0, 'QQ 实际搜索应返回曲目');
   // 使用截图中实际出错的 QQ 曲目及网易云真实搜索结果，验证发布组件中的封面链路，而非只测 URL 拼接。
   const netease = z.object({ body: z.string() }).parse(
     await request({
@@ -170,7 +188,7 @@ try {
   );
   assert.equal(channels.status, 200, 'QQ 服务端适配器应提供真实登录方式');
   assert.ok(JSON.parse(channels.body), '登录方式必须是有效 JSON');
-  for (const provider of ['spotify', 'ytm']) {
+  for (const provider of ['ytm']) {
     const status = z
       .object({ ok: z.boolean(), data: z.unknown().optional() })
       .parse(
@@ -185,14 +203,14 @@ try {
         passed: true,
         checks: [
           'private-stream-auth',
-          'spotify-native-addon-load',
-          'four-platform-runtime',
+          'three-online-platform-runtime',
+          'retired-native-components-absent',
+          'qq-real-search',
           'qq-large-cover-resize-and-real-netease-cover',
           'relay-private-rejection',
           'endpoint-allowlist',
           'actual-wave-metadata',
           'qq-serverless-channels',
-          'spotify-signed-out',
           'ytm-signed-out',
         ],
       },
