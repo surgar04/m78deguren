@@ -1,5 +1,13 @@
 # 第三方组件说明
 
+本项目整体采用 AGPL-3.0-only；各第三方组件保留其原许可，根协议不覆盖字体、图标、SDK 或运行库的单独条款。许可选择见 [docs/LICENSING.md](docs/LICENSING.md)。
+
+## 界面基础与图标
+
+React、Tailwind CSS、TanStack Query、Zustand 和 Zod 采用各自 MIT 许可；Tauri 采用 MIT / Apache-2.0 双许可。实际版本由锁文件固定，原许可随依赖保留。
+
+GSAP 3.15.0 的包声明为 [Standard no-charge license](https://gsap.com/standard-license/)，不能当作 MIT 或 OSI 开源协议。Font Awesome Free 的代码、图标及字体分别采用 MIT、CC BY 4.0、SIL OFL 1.1；本项目使用显式导入的 Free SVG 图标，不包含 Pro 图标。版权与许可见各包文件及 [Font Awesome 官方许可](https://fontawesome.com/license/free)。
+
 ## sysinfo 0.37.2 / QuickFox 协作
 
 加速准备使用 [sysinfo](https://github.com/GuillaumeGomez/sysinfo) 的 system 最小特性只读进程路径、PID 与创建时间。MIT，Copyright (c) 2015 Guillaume Gomez；许可全文随安装资源保留在 `src-tauri/resources/licenses/Sysinfo-MIT.txt`。QuickFox 为用户自行安装的第三方软件，其安装包、驱动、账户及节点配置不随本项目分发，相关商标与服务归属其权利人。

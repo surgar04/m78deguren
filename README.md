@@ -1,173 +1,152 @@
-# 臻境
+<div align="center">
 
-Tauri 2 桌面工程，React + TypeScript 前端，Rust 后端，pnpm 管理前端依赖。
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/assets/home/brand-light.png" />
+  <img src="public/assets/home/brand.png" width="112" alt="臻境 Logo" />
+</picture>
 
-0.6.0 起只发布 MSI，署名 Sur方糖，不再生成 NSIS 或便携包。MSI 使用自签名代码签名证书；不会修改用户的证书信任，公共 CA 信任尚未配置。当前发布流程及验收边界见 [MSI 发布与签名](docs/development/MSI发布与签名.md)。
+# 臻境 · Zhenjing
 
-设置页使用真实 Rust 服务，包含外观、通用、全局热键、高级、网络和关于。更新源固定为 [surgar04/m78deguren Releases](https://github.com/surgar04/m78deguren/releases)，只接受本项目发布签名。
+**把游戏、音乐与桌面工具，留在一个顺手的地方。**
 
-“游戏加速”提供 QuickFox 官方客户端检测、定位、签名核验及单次国服游戏准备流程；在官方客户端开启加速并人工确认后，复用游戏库启动。不会保存厂商账号或声称自动连通，实际效果需在海外实测。见 [游戏加速协作接入](docs/development/游戏加速协作接入.md)。
+面向 Windows 的游戏与桌面工具箱 · React / TypeScript / Rust / Tauri 2
 
-## 安装与用户数据
+[![License: AGPL-3.0-only](https://img.shields.io/badge/license-AGPL--3.0--only-3b8274)](LICENSE)
+[![Windows x64](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011%20x64-586c87)](https://github.com/surgar04/m78deguren/releases)
+[![Release](https://img.shields.io/github/v/release/surgar04/m78deguren?color=3b8274)](https://github.com/surgar04/m78deguren/releases/latest)
+[![Quality](https://github.com/surgar04/m78deguren/actions/workflows/check.yml/badge.svg?branch=main)](https://github.com/surgar04/m78deguren/actions/workflows/check.yml)
 
-面向 Windows 10/11 x64 用户分发 MSI 安装包，不需要安装 Node、Rust、pnpm、.NET SDK 或 Visual Studio。0.9.1 起采用显式 DLL 布局，硬件/HUD 引擎和自包含 .NET 运行库安装到 `components/monitor`，预编译 Windows 工具安装到 `components/windows-bridge`；不再运行时编译 C# 或解包程序二进制。部分温度、驱动和系统优化能力仍取决于设备支持和用户授权。
+[下载安装](https://github.com/surgar04/m78deguren/releases/latest) · [更新日志](CHANGELOG.md) · [问题反馈](https://github.com/surgar04/m78deguren/issues) · [第三方说明](THIRD_PARTY_NOTICES.md)
 
-0.10.0 起音乐后端和独立 Node 运行时由 MSI 安装到 `components/music-host`，并携带 Spotify 原生插件需要的私有 VC Runtime；用户不需要自行安装 Node.js。完整目录、组件校验、必要 EXE 宿主与 MSI 文件管理规则见 [安装组件与 DLL 布局](docs/development/安装组件与DLL布局.md)。
+</div>
 
-0.10.0 新增音乐页面，支持 QQ 音乐、网易云音乐、YouTube Music、Spotify 和本地音乐库，提供封面与歌词匹配、17 种沉浸歌词演绎以及普通模式下的桌面歌词。在线播放与账号能力取决于平台授权、地区和服务状态。Folia 与 AMLL 的来源、许可和改动范围见 [音乐页面与 Folia 接入](docs/development/音乐页面与Folia接入.md) 及 [第三方许可](THIRD_PARTY_NOTICES.md)。本项目源码以 AGPL-3.0 提供，发行包包含相应许可，不附带第三方账号或付费内容权限。
+---
 
-0.5.1 起默认按当前用户安装到 %LOCALAPPDATA%\\Programs\\Zhenjing，可在向导中选择其他本地磁盘的独立空目录，不再要求存在 D 盘。默认配置、壁纸、WebView 缓存、下载、日志和备份保存在当前用户的 %LOCALAPPDATA%\\Zhenjing，不再读取开发机工作区。可使用 --data-dir 或 ZHENJING_DATA_DIR 显式沿用原有档案；兼容旧变量 XINJING_DATA_DIR，不会自动移动或清空旧数据。卸载保留用户数据。
+## 可以做什么
 
-需要 Microsoft Edge WebView2 运行时。安装器检测缺失时提供微软官方下载入口，由用户自行安装后重新运行；不会静默安装系统组件。主程序与安装引导不直接依赖额外的 VC++ Redistributable；打包会检查实际二进制导入表。
+| 页面 / 入口        | 主要能力                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **首页**           | 系统或自定义用户名问候、公告与一言、随机图片、硬件摘要、EXE 快捷启动、图标提取与拖动排序、游戏模式和 Win 键控制                                        |
+| **游戏库**         | Steam 安装与运行检测、库目录和容量、已安装与账号库存游戏、搜索和启动、商店与安装目录、Steam 安装 / 卸载流程、本机账号管理；识别其他游戏及国服 / 国际服 |
+| **硬件**           | CPU、GPU、内存、主板、BIOS、磁盘与外设信息；实时传感器；ETW 帧率统计；复制信息、导出带图表和时间筛选的 HTML 报告                                       |
+| **工具箱**         | 准心、屏幕测试、录屏管理、下载、网络测速、时间同步、运行库检查与修复，以及按权限开放的 Windows 工具                                                    |
+| **系统优化**       | 分类扫描真实配置、风险和修改预览、单项 / 批量操作、备份与恢复；以编译期白名单限制系统修改范围                                                          |
+| **音乐**           | QQ 音乐、网易云音乐、YouTube Music、Spotify 与本地音乐；封面和歌词匹配、歌单与搜索、桌面歌词；手动开启全屏沉浸演绎和 17 种歌词样式                     |
+| **HUD / 轮盘**     | 统一桌面 HUD，展示系统、媒体、下载和游戏性能；八向快捷轮盘支持可配置按键、位置、大小及透明度                                                           |
+| **设置与首次启动** | 主题、字体、图片 / 视频背景、热键、网络诊断、缓存与存储、更新；独立首次启动向导按步骤准备环境                                                          |
 
-开发机的 D 盘约定仅约束开发和本机验收。下文工具链、缓存及 .local/data 表均属于开发环境，不是对用户电脑盘符的要求。审查与验证说明见 [对外发布适配审查](docs/development/对外发布适配审查.md)。
+所有页面以原生服务的真实数据为准。未安装、无权限、接口不可用或设备不支持时，显示实际空状态与错误，不生成模拟读数。
 
-## 开始开发
+> 音乐播放受账号权益、地区、平台接口及网络限制。QuickFox 协作功能依赖用户自行安装的官方客户端，不包含节点、账号或付费服务。游戏画面、第三方服务与商标归各自权利人所有。
 
-项目固定在 `D:\新境`。所有命令在项目根目录执行；使用入口脚本，环境变量仅对当前进程及其子进程生效。
+## 安装与更新
 
-```powershell
-# 启动完整桌面应用
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:dev
+1. 在 [Releases](https://github.com/surgar04/m78deguren/releases) 下载 `zhenjing-<版本>-windows-x64.msi`。
+2. 按安装向导选择应用与数据目录。面向用户的版本不依赖开发机的 D 盘路径。
+3. 首次启动按向导完成准备。分区、迁移、驱动与系统工具只在明确确认后执行。
 
-# 启动前端页面预览；原生窗口操作需要桌面应用
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 dev
+**运行要求：** Windows 10 / 11 x64、Microsoft Edge WebView2。安装包包含独立音乐宿主、应用私有运行库和自包含 .NET 组件；用户不需要 Node.js、Rust、pnpm、Visual Studio 或 .NET SDK。
 
-# 查看工具链与目录
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 env:check
+应用更新仅接受固定仓库的 **Ed25519 签名清单**，下载后验证 MSI 长度与 SHA256，再在游戏和关键任务空闲时安装。失败记录用于阻止同包循环重装。
 
-# 全量质量检查
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 check
+- MSI 当前使用 **Sur方糖自签名证书**，并非公共 CA 认证；Windows 可能显示未知发布者提示。本项目不自动导入证书信任。
+- 各版本附 `SHA256SUMS.txt`、`build-info.json` 和 `INSTALL.md`；源码与构建锁文件随对应 Git 标签公开。
+- 安装问题见 [安装故障排查](docs/INSTALLATION-TROUBLESHOOTING.md)。
 
-# 构建 Windows MSI 安装包（构建过程不执行安装）
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:build
+## 架构
 
-# 兼容入口，同样只构建安装包，输出 dist/desktop/
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:bundle
+```mermaid
+flowchart TB
+    UI[React 页面与辅助窗口] --> IPC[严格 TypeScript / Zod IPC]
+    UI --> Query[TanStack Query 服务状态]
+    UI --> Prefs[Zustand 界面偏好]
+    IPC --> Commands[Rust Commands · 输入与窗口权限校验]
+    Commands --> Services[Rust Services · 领域逻辑与任务编排]
+    Services --> Windows[Windows 桥接 DLL · 受限系统操作]
+    Services --> Monitor[硬件 / HUD 子进程 · LibreHardwareMonitor]
+    Services --> ETW[Rust ETW · FPS / 1% Low / 0.1% Low]
+    Services --> Music[独立 Node 音乐宿主 · Folia 接入]
+    Services --> Data[用户数据 · 偏好 / 缓存 / 备份 / 时序记录]
+    Services --> Network[复用 HTTP 客户端 · 超时与来源限制]
+    Network --> Updates[GitHub Releases · 签名清单 / MSI]
+    Network --> Providers[音乐平台 / 官方服务]
+    Music --> Engine[Folia 演绎 iframe / AMLL 桌面歌词]
 ```
 
-首页专注本机快捷启动：系统或自定义用户名问候、公告、一言、随机图片、硬件型号、EXE 图标提取及启动、移除和排序。公共顶栏提供常规游戏模式开关、游戏启动自动启用及恢复入口；Win 键仅在识别到的前台游戏中拦截。相关策略均须逐项确认，手机远程功能不在本次实现范围。见 [首页实现说明](docs/development/首页实现说明.md)。
-
-独立游戏库位于 `/#/library`，使用真实 Steam 客户端、账号、目录、安装清单和当前账号缓存，提供搜索、筛选、分页、启动、安装/卸载请求及账号备份恢复。需要完整可见库存时可临时提供官方 Web API Key；密钥不落盘，私密或不可见数据不伪造。见 [Steam 游戏库与安装包说明](docs/development/Steam游戏库与安装包实现.md)。
-
-0.9.0 新增 `/#/library/other`，识别八款游戏及其对应区服、提取本机图标并同步首页快捷启动。设置 → 快捷键可配置桌面八向轮盘；侧栏自定义快捷导航已移除，首页快捷启动继续保留。轮盘默认长按 G，支持 A–Z 字母选择、八等分扇区、鼠标选择、大小、位置及透明度，主窗口收至托盘后仍可运行。识别证据、搜索边界和验收范围见 [其他游戏与桌面轮盘](docs/development/其他游戏与快捷轮盘.md)。
-
-系统与硬件位于 `/#/hardware`，使用真实硬件服务，包含设备详情、实时传感器、趋势图、独立传感器窗口与远程监测入口。HTML 硬件报告包含时序图表及时间范围筛选，保存到应用数据目录，详见[硬件页面实现说明](docs/development/硬件页面实现说明.md)。
-
-工具箱位于 `/#/tools`，23 项内置工具已接入 Rust，并按 `/#/tools/:toolId` 提供独立页面，覆盖显示滤镜、准心、性能叠加、显卡/显示/NVIDIA、音频 EQ、网络/下载、运行库、虚拟化、隐藏功能、菜单、录屏、VAC、应用、校时、屏幕测试及蓝屏证据。外部工具单独提供官方来源目录。运行结果来自本机或真实网络；完整能力与实际硬件边界见[内置工具全量重构验收](docs/development/内置工具全量重构验收.md)。
-
-系统优化位于 `/#/optimization`，完整覆盖 NexBox 的 201 项配置、11 个分类，接入本机真实扫描、风险筛选、枚举选择、修改前后值预览、逐项确认、执行回执及应用备份撤销。安全、增强、全部和批量恢复只生成待审阅清单；最终确认后才执行系统写入。目录为编译期白名单，不接收任意路径、命令或外部 `.reg`。已移除优化页的模拟数据，详见[系统优化全量实现与验收](docs/development/系统优化全量实现与验收.md)。
-
-首页、工具页、优化页、硬件页、设置页及独立 Steam 游戏库均通过原生服务读取真实数据。首页演示种子及旧的游戏库布局已移除；原生能力不可用时显示错误或空状态，不生成替代读数。历史视觉验收见 [design-qa.md](design-qa.md)，该历史文档不代表当前业务数据。
-
-```powershell
-# 历史兼容入口：当前已无首页演示种子，仅将普通前端构建输出到 .cache/build-empty
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 build:empty
-```
-
-## 本机环境与磁盘约束
-
-| 内容                                        | 位置                                              |
-| ------------------------------------------- | ------------------------------------------------- |
-| 源码、锁文件、依赖                          | `D:\新境`、`node_modules`                         |
-| Node 24.22.1 LTS、pnpm 10.33.0              | `.tools/node`、`.tools/pnpm`                      |
-| Rust 1.96.0、rustfmt、Clippy、Rust Analyzer | `.tools/rustup`、`.tools/cargo/bin`               |
-| MSVC 14.44.35207 / Windows SDK 10.0.26100.0 | `.tools/msvc`、`.tools/winsdk`                    |
-| Cargo 注册表与 crate 下载                   | `.tools/cargo/registry`                           |
-| Rust 编译、EXE                              | `.cache/cargo/target`                             |
-| pnpm store / 下载 / 状态                    | `.cache/pnpm`                                     |
-| 临时目录、工具用户目录                      | `.cache/tmp`、`.cache/profile`                    |
-| Vite / Vitest / 覆盖率                      | `.cache/vite`、`.cache/vitest`、`.cache/coverage` |
-| WebView、localStorage、应用数据、日志       | `.local/data`                                     |
-
-本机已经有 WebView2，直接只读使用系统运行时。MSVC、SDK 与 Rust 从已有环境复制到 D 盘，Node 便携包使用官网 SHA256 校验。未修改全局 PATH、用户配置或注册表，未执行 Visual Studio / WebView2 系统安装器。系统自身及编辑器的后台写入不受项目脚本控制；这里约束的是项目及其工具进程的可配置文件位置。
-
-开发入口将应用目录与工具环境全部指向 D 盘，并显式设置开发写入保护变量；越过本机 D 盘边界时启动或操作失败。对外发布版使用上文的每用户路径策略，不把开发盘符限制带给最终用户。当前只构建 MSI，不发布便携 EXE/ZIP。用户自行运行安装/卸载时允许注册卸载项及快捷方式；开发构建不运行安装器。
-
-设计素材生成使用用户另行授权的 C 盘临时例外；工具输出已转存 D 盘并清理相关 C 盘残留。该例外不改变源码、依赖、缓存、构建及运行数据的 D 盘约束。
-
-运行库修复另获逐项确认后的系统写入例外：仅已验证微软签名和哈希的白名单运行库，用户确认后方可启动安装器并写系统目录/注册表；安装包、缓存、应用日志仍在 D 盘。不用于安装开发环境或其他软件。
-
-系统工具同样仅在应用运行时逐项确认后执行，提供应用数据目录中的备份、回执和适用的恢复入口；无法撤销的步骤明确说明。开发验收不自动安装驱动、修改系统配置、注入点击或改变显示颜色。第三方组件许可随安装包分发，见 [第三方组件说明](THIRD_PARTY_NOTICES.md)。
-
-构建入口会清理旧安装包、便携 staging 和 NSIS 中间产物，保留编译缓存及工具链；旧 staging 中的运行数据先移动至 `.local/preserved-packaging-data`。卸载只删除安装文件及注册项，保留用户数据和备份。
-
-`.tools`、`.cache`、`.local` 不提交。不要在开发中删除 `.tools`，它包含实际工具链与 Cargo 下载库。删除 `.cache` 会触发重新编译和下载。锁文件 `pnpm-lock.yaml` 与 `src-tauri/Cargo.lock` 必须提交。
-
-恢复依赖或重新准备工具链：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap.ps1
-```
-
-该脚本在 D 盘下载可校验的 Node/pnpm/Rust，并只读复用已安装的 MSVC/SDK。若它们位于其他目录，可传入 `-MsvcSource`、`-SdkSource`、`-SdkVersion`。若系统缺少这些源组件，脚本会报错；微软标准安装器无法保证不写 C 盘，所以脚本不会自动调用它。无需再次运行当前已完成的环境准备。
-
-如需在同一终端手动执行 Cargo，可先运行 `. .\scripts\env.ps1`。不要直接调用全局 pnpm/rustup 安装环境；项目入口有 D 盘环境检查，但不能约束用户主动绕过入口的命令。
-
-## 技术栈与边界
-
-| 职责                       | 配置                                                                       |
-| -------------------------- | -------------------------------------------------------------------------- |
-| 界面                       | React 19、Vite 8、TypeScript 6 严格模式                                    |
-| 样式 / 图标 / 动画         | Tailwind CSS 4 Vite 插件、Font Awesome SVG、GSAP + `useGSAP`               |
-| 路由 / 服务状态 / 本地状态 | React Router HashRouter、TanStack Query、Zustand                           |
-| 表单 / 校验                | React Hook Form、Zod、resolvers                                            |
-| 工具                       | clsx、tailwind-merge、date-fns                                             |
-| 原生插件                   | dialog、fs、store、opener、log（已安装注册，按需授权）                     |
-| Rust 基础库                | serde / serde_json、thiserror、Tokio、reqwest + Rustls、log                |
-| 检查                       | ESLint 10 类型感知规则、Prettier、Vitest、Testing Library、rustfmt、Clippy |
-
-TypeScript 固定为工具链当前支持的 6.0.3，避免 typescript-eslint 尚未支持的 7.x。React、Vite、Tailwind 等采用初始化时兼容版本，锁文件保证复现。Node 与 pnpm 固定版本，不依赖 C 盘的全局可执行文件。
+前端统一经 `src/lib/desktop.ts` 访问原生接口；Rust 再次验证输入、窗口来源、路径和操作白名单。辅助进程使用独立协议、超时、组件摘要和生命周期管理，不向前端开放任意命令执行。
 
 ```text
 src/
-  app/          应用布局、路由与按需加载
-  pages/        首页、偏好设置页面
-  features/home 首页组件、数据契约、集中演示数据、搜索与偏好状态
-  components/   通用组件、错误边界
-  lib/          IPC 校验、QueryClient、样式工具
-  stores/       客户端偏好状态
-  test/         测试初始化
+  app/                  路由与应用入口
+  pages/                页面边界
+  features/             领域界面、查询、交互与样式
+  lib/                  IPC、严格协议与公共能力
 src-tauri/
-  src/commands.rs   IPC 接口与输入校验
-  src/error.rs      可序列化错误
-  src/services.rs   共享 HTTP 连接池，设置超时
-  src/lib.rs        应用、日志、插件与按用户目录初始化
-  capabilities/    前端权限边界
-scripts/        D 盘环境、工具恢复、环境诊断、安装包构建
+  src/commands/         原生命令与权限校验
+  src/services/         Windows、硬件、游戏、音乐及更新服务
+  capabilities/         Tauri 最小权限声明
+  resources/            可校验原生组件、来源清单及许可
+native/                 C# / C++ 组件与独立音乐宿主
+integrations/           冻结的 Folia 来源与演绎适配
+scripts/                环境、构建、签名、发布及验收
+docs/                   实现说明、设计资料与维护文档
 ```
 
-前端只通过 `src/lib/desktop.ts` 访问 Rust，并校验返回值。Rust 独立验证输入，不能信任前端校验。异步命令用于后续 I/O 服务；HTTP 使用共享连接池与连接/请求超时。插件已注册，但默认只授予 core 权限；没有开放文件系统、store、shell、任意 URL 等泛化权限。新增能力时修改 capability 并指定最小作用域，持久化优先通过限定路径的 Rust 命令实现。CSP 不允许远程脚本；Font Awesome 使用打包 CSS；GSAP 使用作用域和自动清理，并尊重减少动态效果设置。
+## 本地开发
 
-## 质量检查
+开发入口统一配置隔离工具链和写入目录。**本机开发约定要求位于 `D:\新境`，新建文件、依赖、缓存与产物均写入 D 盘；该约束不作为用户安装条件。** 具体规则见 [AGENTS.md](AGENTS.md)。
 
-`check` 顺序执行格式、ESLint、类型、前端测试、Rust 格式、Clippy（警告即失败）和 Rust 测试。`build` 必须先通过类型检查。前端测试覆盖 IPC 边界、搜索归一化、筛选交集、不可变查询数据与偏好水合；Rust 测试覆盖输入边界、错误序列化及禁止回退到 C 盘的目录校验。
+工具链版本以 `package.json`、`rust-toolchain.toml`、`pnpm-lock.yaml` 和 `src-tauri/Cargo.lock` 为准。新环境先按 [开发环境说明](docs/development/开发环境与构建.md) 准备便携工具，不使用全局安装命令替代项目入口。
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 format
-powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 test:coverage
+# 检查环境
+powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 env:check
+
+# 启动真实桌面开发预览
+powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:dev
+
+# 完整质量检查；不执行真实系统安装、分区或账号切换
+powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 check
+
+# 构建发布版 MSI；构建与上传是两个独立步骤
+powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:build
 ```
 
-原生界面检查使用 `playwright-core` 连接本机 WebView2 调试端口，不下载浏览器。先运行 `dev.ps1 desktop:test:dev`，待桌面窗口出现后，在另一终端运行 `dev.ps1 test:desktop`。该脚本已适配首页，覆盖真实 Rust IPC、键盘跳转、搜索与收藏、添加校验、弹窗焦点、路由、偏好持久化、布局及脚本/CSP 错误。是否实际运行以本次验收记录为准，截图与结果位于 `.cache/verification`。
+检查涵盖格式、ESLint、严格类型、前端与原生协议测试、Rust fmt / Clippy / 测试、安装权限与分发组件。桌面发布另需实际 Release 链接、MSI 解包及独立目录启动验收；静态检查不等同于真实账号、驱动或干净系统安装验证。
 
-调试端口由独立的 `src-tauri/tauri.test.conf.json` 显式配置，只监听 `127.0.0.1:9223`，普通开发和正式构建不加载它。当前 WebView2 与 Wry 组合不采用环境变量中的额外浏览器参数，因此使用独立配置；不修改注册表。完成检查后关闭验证进程即可释放端口。
+## 分支与发行
 
-GitHub Actions 配置在 `.github/workflows/check.yml`，执行相同质量检查及 Windows EXE 构建。远程 CI 需要推送到 GitHub 后才会运行。
+- `main`：经过审核、检查与合并的稳定源码；不直接提交日常开发代码。
+- `codex/develop`：开发集成分支；功能分支按 `codex/feat-<主题>`、`codex/fix-<主题>` 或 `codex/docs-<主题>` 命名，通过 PR 合入。
+- 提交使用 Conventional Commits，例如 `feat(music): ...`、`fix(installer): ...`、`docs(readme): ...`。
+- 稳定版与开发者版采用独立发布资产和更新清单；开发者版标为预发布，不替换稳定版的 `latest`。认证、回退和运维约定见 [开发者版本与认证](docs/development/开发者版本与认证.md)。
 
-官方参考：[Tauri Windows 环境](https://v2.tauri.app/start/prerequisites/)、[Tauri 目录与窗口配置](https://v2.tauri.app/reference/config/)、[Tailwind Vite 集成](https://tailwindcss.com/docs/installation/using-vite)、[GSAP React](https://gsap.com/resources/React)。
+README、许可及首次公开内容须先交由维护者审核，再推送和发布。后续操作流程见 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [MSI 发布与签名](docs/development/MSI发布与签名.md)。
 
-修改协议时同步更新 Rust 返回类型、Zod schema 和边界测试。日志不记录用户输入或凭据。发布前应再次审核原生权限并测试实际 Windows WebView2 行为。既有应用标识 `dev.zhenjing.desktop`、MSI UpgradeCode 和更新公钥必须保持升级兼容，不能为改名或发布新版本随意替换。
+## 开源项目与致谢
 
-## 发布新版本
+| 项目                                                                                                                                                  | 本项目的使用方式                                                     | 上游许可                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| [NexBox](https://github.com/MuLiuSaMa/NexBox)                                                                                                         | 功能、页面逻辑与优化配置事实参考；领域服务和界面重写，未打包上游应用 | GPL-3.0；其部分组件另有许可         |
+| [Folia](https://github.com/chthollyphile/folia-major)                                                                                                 | 音乐平台适配、歌词演绎与背景的冻结来源，外围实现原生宿主和传输适配   | AGPL-3.0                            |
+| [Apple Music-like Lyrics](https://github.com/amll-dev/applemusic-like-lyrics)                                                                         | 普通播放器的独立桌面歌词渲染                                         | AGPL-3.0-only                       |
+| [Endfield Charge Plus](https://github.com/GlacierGlimmer/zmd-charge-plus)                                                                             | HUD 引擎、视觉模板和动画来源，适配本项目数据与窗口体系               | MIT                                 |
+| [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)                                                                  | 真实硬件传感器，由受控子进程桥接                                     | MPL-2.0                             |
+| [PresentMon](https://github.com/GameTechDev/PresentMon) / ECPFrames                                                                                   | 显示器 / 指定窗口帧率路径；游戏帧率另由 Rust ETW 实现                | MIT，保留组件原文                   |
+| [Tauri](https://github.com/tauri-apps/tauri)、[React](https://github.com/facebook/react)、[Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) | 桌面、界面和样式基础                                                 | MIT / Apache-2.0 或 MIT，以各包为准 |
 
-统一入口 `dev.ps1 desktop:build` 自动执行质量检查、清理旧产物、构建、MSI 签名和更新清单生成。输出位于 `dist/desktop`，包含 MSI、`zhenjing-update.json`、`SHA256SUMS.txt`、`publisher.json`、`build-info.json`、`INSTALL.md` 六个文件。上传到 GitHub Release 时必须使用 `v` 加版本号的标签，例如 `v0.9.0`，并将稳定版本标记为 Latest；详情见 [GitHub 手动发布](docs/development/GitHub手动发布.md)。
+另外使用 TanStack Query、Zustand、Zod、GSAP、Font Awesome、Inter、MiSans，以及 .NET / Node.js 运行库。**并非所有资产和 SDK 都使用相同开源协议**；GSAP、字体、图标和微软运行库须遵守各自条款，不由根目录协议重新许可。
 
-仓库不包含依赖目录、开发工具链、缓存、用户档案或签名私钥。硬件助手的可校验发布件及来源清单随源码保留，修改该助手源码后需通过 `scripts/build-hardware-monitor.ps1` 重新生成，不能仅修改清单绕过校验。第三方组件及字体许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+固定提交、修改边界、其他依赖、许可原文和字体来源集中记录在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。外部驱动及安装器按需从官方来源获取，不因列在致谢中即表示随包分发。
 
-### 音乐页面
+## 许可证与安全边界
 
-新增 `/music`，接入 QQ 音乐、网易云音乐、YouTube Music、Spotify 与本地音乐。普通播放器默认不启用 GPU 演绎，手动进入“沉浸演绎”才全屏加载 Folia 的 17 种歌词样式。保留原画策略，并提供面向软件显卡的低开销预算。
+本项目代码按 **[GNU Affero General Public License v3.0 only](LICENSE)** 分发，与已集成的 Folia / AMLL 许可保持兼容。分发修改版时保留版权和许可、提供对应完整源码与构建所需材料；第三方代码和资源保留其原许可。详见 [许可选择说明](docs/LICENSING.md)。
 
-首次开发前通过 `dev.ps1 music:prepare` 准备独立音乐组件；`desktop:dev` 的前置命令会检查并补齐。接入结构、验证边界和许可证说明见 [音乐页面与 Folia 接入](docs/development/音乐页面与Folia接入.md)。
+开发者身份仅控制**官方开发者发行渠道和应用内开发模式**，不额外限制 AGPL 赋予的查看、修改与再分发权利，也不将客户端认证描述为绝对防破解。
 
-应用包含 AGPL-3.0 的 Folia 组合代码，以根目录 [LICENSE](LICENSE) 许可分发；向用户分发构建时须同时提供该版本的完整源码及锁文件。
+请勿在 Issue、日志或 PR 中上传 Cookie、平台登录凭据、stoken、签名私钥及用户档案。安全问题与处理边界见 [SECURITY.md](SECURITY.md)。
+
+---
+
+<div align="center">由 Sur方糖维护 · 为日常游戏与桌面体验而作</div>
