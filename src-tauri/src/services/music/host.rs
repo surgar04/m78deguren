@@ -164,6 +164,47 @@ impl Host {
                     {
                         let _ = sender.send(response);
                     }
+                } else if response["type"] == "diagnostic" {
+                    let event = response["event"].as_str().unwrap_or("");
+                    if matches!(event, "auth.phase" | "host.request_failed" | "host.error") {
+                        let code = response["code"]
+                            .as_str()
+                            .filter(|v| {
+                                v.len() <= 64
+                                    && v.bytes()
+                                        .all(|b| b.is_ascii_alphanumeric() || b"-_".contains(&b))
+                            })
+                            .unwrap_or("unknown");
+                        let phase = response["phase"]
+                            .as_str()
+                            .filter(|v| {
+                                matches!(
+                                    *v,
+                                    "idle"
+                                        | "opening"
+                                        | "browser"
+                                        | "reading"
+                                        | "verifying"
+                                        | "confirmed"
+                                        | "error"
+                                        | "cancelled"
+                                )
+                            })
+                            .unwrap_or("");
+                        crate::services::diagnostics::emit(
+                            if event == "auth.phase" && phase != "error" {
+                                crate::services::diagnostics::Level::Info
+                            } else {
+                                crate::services::diagnostics::Level::Error
+                            },
+                            "music-host",
+                            event,
+                            None,
+                            None,
+                            None,
+                            &format!("{phase} {code}"),
+                        );
+                    }
                 } else if response["type"] == "host-call" {
                     if calls.len() >= 8 {
                         break;
@@ -176,6 +217,15 @@ impl Host {
                     });
                 }
             }
+            crate::services::diagnostics::emit(
+                crate::services::diagnostics::Level::Warn,
+                "music-host",
+                "process.disconnected",
+                None,
+                None,
+                None,
+                "音乐进程协议通道已断开",
+            );
             replies.lock().await.clear();
         });
         Ok(Self {

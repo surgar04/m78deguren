@@ -32,8 +32,25 @@ use std::{
 use tokio::sync::Mutex;
 
 pub type Result<T> = std::result::Result<T, AppError>;
+#[track_caller]
 pub fn error(message: impl Into<String>) -> AppError {
-    AppError::Tool(message.into())
+    let message = message.into();
+    let location = std::panic::Location::caller();
+    let source = location
+        .file()
+        .rsplit(['/', '\\'])
+        .next()
+        .unwrap_or("native");
+    crate::services::diagnostics::emit(
+        crate::services::diagnostics::Level::Warn,
+        source,
+        "service.error",
+        None,
+        None,
+        None,
+        &message,
+    );
+    AppError::Tool(message)
 }
 pub fn io_error(cause: std::io::Error) -> AppError {
     log::warn!("工具文件操作失败: {cause}");

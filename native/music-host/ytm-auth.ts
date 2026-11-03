@@ -38,7 +38,11 @@ export type AuthPhase =
 /** 诊断只保存我们定义的阶段、枚举及时间。不保存上游日志、URL、账号、Cookie、异常文本或文件路径。 */
 export function createYtmAuth(
   root: string,
-  options: { browser?: Browser; pause?: (ms: number) => Promise<void> } = {},
+  options: {
+    browser?: Browser;
+    pause?: (ms: number) => Promise<void>;
+    onEvent?: (phase: AuthPhase, code: string) => void;
+  } = {},
 ) {
   const browser =
     options.browser ??
@@ -65,6 +69,7 @@ export function createYtmAuth(
     phase = next;
     code = reason;
     timeline.push({ phase, code, at: new Date().toISOString() });
+    options.onEvent?.(phase, code);
     if (timeline.length > 40) timeline.shift();
     const content = JSON.stringify({ version: 1, provider: 'ytm', timeline });
     saved = saved

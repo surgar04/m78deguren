@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { z } from 'zod';
 import type { createVault } from './vault.ts';
 import { platformFetch } from './network.ts';
-import { createYtmAuth } from './ytm-auth.ts';
+import { createYtmAuth, type AuthPhase } from './ytm-auth.ts';
 import { MusicNetworkError, clearMusicRoutes } from './network-route.ts';
 
 const require = createRequire(import.meta.url);
@@ -31,9 +31,10 @@ export function createPlatforms(
   root: string,
   vault: ReturnType<typeof createVault>,
   call: HostCall,
+  onAuth?: (phase: AuthPhase, code: string) => void,
 ) {
   const bridges = new Map<Platform, Bridge>();
-  const auth = createYtmAuth(root);
+  const auth = createYtmAuth(root, onAuth ? { onEvent: onAuth } : {});
   let browserUserAgent: string | undefined;
   const get = (provider: Platform): Bridge => {
     const held = bridges.get(provider);

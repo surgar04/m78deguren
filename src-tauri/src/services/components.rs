@@ -32,6 +32,11 @@ pub fn configure_child(command: &mut tokio::process::Command) {
         command.env_remove(key);
     }
     command.env("DOTNET_MULTILEVEL_LOOKUP", "0");
+    if let Some((directory, session)) = crate::services::diagnostics::child_context() {
+        command
+            .env("ZHENJING_DIAGNOSTIC_DIR", directory)
+            .env("ZHENJING_DIAGNOSTIC_SESSION", session);
+    }
 }
 fn root(component: &str) -> Result<PathBuf> {
     let executable = std::env::current_exe().map_err(io_error)?;

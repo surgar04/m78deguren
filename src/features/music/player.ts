@@ -10,6 +10,7 @@ import {
 import { musicEngine } from './engine';
 import { useMusicPreferences } from './preferences';
 import { playbackMessage, playbackStep } from './playback-guard';
+import { recordDiagnostic } from '@/lib/diagnostics';
 
 const EMPTY: MusicLyrics = { lines: [], source: '', wordTimed: false, isPureMusic: false };
 interface Playback {
@@ -61,6 +62,25 @@ export class MusicPlayer {
   };
   snapshot = () => this.value;
   private update(patch: Partial<Playback>) {
+    // 只记录播放状态和错误，不记录歌曲名称、账号或音源 URL；timeupdate 不产生逐帧日志。
+    if (patch.error && patch.error !== this.value.error)
+      recordDiagnostic({
+        level: 'error',
+        event: 'media.error',
+        operation: this.value.track?.provider ?? 'music',
+        trace: null,
+        durationMs: null,
+        message: patch.error,
+      });
+    if (typeof patch.playing === 'boolean' && patch.playing !== this.value.playing)
+      recordDiagnostic({
+        level: 'info',
+        event: 'media.state',
+        operation: patch.playing ? 'play' : 'pause',
+        trace: null,
+        durationMs: null,
+        message: null,
+      });
     this.value = { ...this.value, ...patch };
     this.listeners.forEach((callback) => callback());
   }

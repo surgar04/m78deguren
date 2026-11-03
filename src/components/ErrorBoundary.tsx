@@ -1,4 +1,5 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
+import { recordException } from '@/lib/diagnostics';
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   override state = { failed: false };
@@ -7,8 +8,8 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
     return { failed: true };
   }
 
-  override componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('界面渲染失败', error, info.componentStack);
+  override componentDidCatch(error: Error) {
+    recordException(error);
   }
 
   override render() {

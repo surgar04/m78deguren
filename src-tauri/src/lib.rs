@@ -162,6 +162,7 @@ fn data_root() -> Result<PathBuf, Box<dyn std::error::Error>> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     if let Err(error) = run_app() {
+        services::diagnostics::bootstrap_failure(&error.to_string());
         eprintln!("臻境启动失败: {error}");
         // GUI 子系统没有可见终端；初始化失败必须向用户说明原因，不能只留下闪退。
         rfd::MessageDialog::new()
@@ -175,6 +176,7 @@ pub fn run() {
 
 fn run_app() -> Result<(), Box<dyn std::error::Error>> {
     let root = data_root()?;
+    services::diagnostics::initialize(&root)?;
     let developer = services::developer::DeveloperState::new(&root)?;
     let logs = root.join("logs");
     std::fs::create_dir_all(&logs)?;
@@ -349,8 +351,13 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                     path: logs,
                     file_name: Some("zhenjing".into()),
                 })])
-                .level(log::LevelFilter::Info)
-                .max_file_size(5_000_000)
+                .level(log::LevelFilter::Debug)
+                .filter(services::diagnostics::enabled)
+                .format(|out, _, record| {
+                    out.finish(format_args!("{}", services::diagnostics::format(record)))
+                })
+                .max_file_size(services::diagnostics::MAX_FILE as u128)
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(6))
                 .build(),
         )
         .on_window_event(|window, event| {
@@ -417,6 +424,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                     .minimized_start;
             let mut builder = tauri::WebviewWindowBuilder::from_config(app.handle(), &config)?
                 .data_directory(root.join("webview"))
+                .initialization_script(services::diagnostics::BOOTSTRAP_SCRIPT)
                 .visible(services::developer::locked() || first_start || !minimized);
             // 按工作区和 DPI 计算逻辑尺寸，避免 125%/150% 缩放时窗口超出屏幕或遮挡任务栏。
             if let Ok(Some(monitor)) = app.primary_monitor() {
@@ -440,13 +448,19 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         })
         .invoke_handler(|invoke| {
             // 原生统一关口，不能通过改前端路由或手工调用业务 IPC 绕过认证页。
-            if services::developer::locked() && invoke.message.command() != "developer_execute" {
+            if services::developer::locked()
+                && !matches!(
+                    invoke.message.command(),
+                    "developer_execute" | "diagnostics_execute"
+                )
+            {
                 invoke.resolver.reject("请先完成开发者认证或回退到稳定通道");
                 return true;
             }
             let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
                 commands::developer::developer_execute,
                 commands::developer_workspace::developer_workspace_execute,
+                commands::diagnostics::diagnostics_execute,
                 commands::greet,
                 commands::app_info,
                 commands::tools::tools_execute,
@@ -469,6 +483,9 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         .run({
             let shutting_down = std::sync::atomic::AtomicBool::new(false);
             move |app, event| {
+                if matches!(event, tauri::RunEvent::Exit) {
+                    services::diagnostics::shutdown();
+                }
                 if let tauri::RunEvent::ExitRequested { api, code, .. } = event
                     && !shutting_down.swap(true, std::sync::atomic::Ordering::SeqCst)
                 {

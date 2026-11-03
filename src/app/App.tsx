@@ -4,6 +4,7 @@ import { FirstRunGate } from '@/features/onboarding/FirstRunGate';
 import DesktopLyricsBridge from '@/features/music/desktop-lyrics/DesktopLyricsBridge';
 import MusicMiniPlayer from '@/features/music/MusicMiniPlayer';
 import { DeveloperGate } from '@/features/developer/DeveloperGate';
+import { NavigationDiagnostics } from '@/components/NavigationDiagnostics';
 const Setup = lazy(() => import('@/features/onboarding/SetupPage'));
 const Overview = lazy(() => import('@/pages/Overview'));
 const Settings = lazy(() => import('@/pages/Settings'));
@@ -33,6 +34,7 @@ const ScreenTestWindow = lazy(() =>
 export function App() {
   return (
     <HashRouter>
+      <NavigationDiagnostics />
       <button
         type="button"
         onClick={() => {

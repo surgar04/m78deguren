@@ -2,6 +2,7 @@ use std::time::Duration;
 pub mod acceleration;
 pub mod components;
 pub mod developer;
+pub mod diagnostics;
 pub mod hardware;
 pub mod home;
 pub mod hud;

@@ -1,5 +1,42 @@
-import { convertFileSrc, invoke, isTauri } from '@tauri-apps/api/core';
+import { convertFileSrc, invoke as rawInvoke, isTauri } from '@tauri-apps/api/core';
+import {
+  diagnosticRequestSchema,
+  type DiagnosticEvent,
+  type DiagnosticRequest,
+} from './diagnostic-contracts';
+import { traceCall } from './diagnostics';
 import { z } from 'zod';
+/** 全部业务 IPC 的关联与耗时集中处理，永不记录参数、返回正文或认证票据。 */
+async function invoke<T>(command: string, args?: Record<string, unknown>): Promise<T> {
+  const request = z
+    .object({ request: z.object({ operation: z.string().max(80) }) })
+    .safeParse(args);
+  const operation = request.success ? request.data.request.operation : null;
+  const trace = traceCall(command, operation);
+  try {
+    const result = await rawInvoke<T>(command, args);
+    const failed = z.object({ ok: z.literal(false) }).safeParse(result).success;
+    trace.finish(failed);
+    return result;
+  } catch (cause) {
+    trace.finish(true);
+    throw cause;
+  }
+}
+export async function executeDiagnostics<T>(
+  request: DiagnosticRequest,
+  schema: z.ZodType<T>,
+): Promise<T> {
+  requireDesktop();
+  return schema.parse(
+    await rawInvoke<unknown>('diagnostics_execute', {
+      request: diagnosticRequestSchema.parse(request),
+    }),
+  );
+}
+export function reportDiagnostics(entries: DiagnosticEvent[]): Promise<unknown> {
+  return executeDiagnostics({ operation: 'ingest', entries }, z.unknown());
+}
 import {
   workspaceRequestSchema,
   workspaceStatusSchema,

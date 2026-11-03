@@ -783,12 +783,30 @@ impl UpdateService {
         changed
     }
     pub async fn installing(&self) {
+        crate::services::diagnostics::emit(
+            crate::services::diagnostics::Level::Info,
+            "update",
+            "update.installing",
+            None,
+            None,
+            None,
+            "已验证的 MSI 更新进入安装阶段",
+        );
         let mut status = self.status.lock().await;
         status.phase = "installing".into();
         status.message = "正在自动安装更新，完成后将重新启动臻境".into();
         status.token = None;
     }
     pub async fn install_failed(&self, message: &str) {
+        crate::services::diagnostics::emit(
+            crate::services::diagnostics::Level::Error,
+            "update",
+            "update.failed",
+            None,
+            None,
+            None,
+            message,
+        );
         self.status.lock().await.phase = "ready".into();
         self.install_message(&format!("自动安装未完成：{message}；可查看维护日志后重试"))
             .await;

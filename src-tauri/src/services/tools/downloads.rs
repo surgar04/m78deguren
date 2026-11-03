@@ -421,6 +421,7 @@ impl DownloadManager {
         let manager = self.clone();
         let id = id.to_owned();
         tauri::async_runtime::spawn(async move {
+            let diagnostic_task = crate::services::diagnostics::Task::new("download.transfer");
             let mut attempts = 0;
             let outcome = loop {
                 let outcome = manager.transfer(&id, &client, &cancellation).await;
@@ -442,6 +443,11 @@ impl DownloadManager {
                 tokio::select! { _=cancellation.cancelled()=>break outcome, _=tokio::time::sleep(Duration::from_secs(attempts))=>{} }
             };
             let current = manager.task(&id).await.ok();
+            if cancellation.is_cancelled() {
+                diagnostic_task.cancel();
+            } else {
+                diagnostic_task.finish(outcome.is_ok());
+            }
             manager
                 .patch(&id, |task| {
                     task.bytes_per_second = 0.0;

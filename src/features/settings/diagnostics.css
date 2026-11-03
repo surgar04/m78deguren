@@ -1,0 +1,123 @@
+.diagnostics-settings > p {
+  color: var(--muted, #58718b);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.home-modal.diagnostics-dialog {
+  width: min(1040px, calc(100vw - 40px));
+  max-width: 1040px;
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+}
+.diagnostics-dialog > p {
+  margin-block: 12px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.diagnostics-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 16px 0;
+}
+.diagnostics-toolbar label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12px;
+}
+.diagnostics-toolbar input,
+.diagnostics-toolbar select {
+  padding: 8px 10px;
+  border: 1px solid #adc9ca70;
+  border-radius: 9px;
+  background: #ffffff90;
+  color: inherit;
+}
+.diagnostics-records {
+  max-height: 48dvh;
+  overflow: auto;
+  border: 1px solid #adc9ca60;
+  border-radius: 12px;
+}
+.diagnostics-records details {
+  padding: 10px 12px;
+  border-bottom: 1px solid #adc9ca40;
+}
+.diagnostics-records summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  cursor: pointer;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.diagnostics-records time {
+  color: #58718b;
+  font-variant-numeric: tabular-nums;
+}
+.diagnostics-records p,
+.diagnostics-records code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  font-size: 12px;
+}
+.diagnostics-records [data-level='error'] {
+  color: #ad3434;
+}
+.diagnostics-records [data-level='warn'] {
+  color: #916000;
+}
+.diagnostics-clear {
+  margin-block: 12px;
+  padding: 12px;
+  border: 1px solid #c88858;
+  border-radius: 12px;
+}
+.diagnostics-dialog button,
+.diagnostics-settings > .settings-actions button {
+  padding: 8px 12px;
+  border: 1px solid #adc9ca80;
+  border-radius: 9px;
+  background: #ffffffa8;
+  color: #254854;
+  font-size: 12px;
+  cursor: pointer;
+}
+.diagnostics-dialog button:focus-visible {
+  outline: 2px solid #138b79;
+  outline-offset: 2px;
+}
+.diagnostics-dialog button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.diagnostics-dialog .settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.diagnostics-clear > button {
+  margin: 8px 8px 0 0;
+}
+.diagnostics-clear > button:first-of-type {
+  background: #ffe6c8;
+  border-color: #c88858;
+}
+.diagnostics-records summary::before {
+  content: '›';
+  color: #58718b;
+}
+.diagnostics-records details[open] summary::before {
+  transform: rotate(90deg);
+}
+@media (max-width: 720px) {
+  .diagnostics-toolbar > label {
+    flex: 1 1 160px;
+  }
+  .diagnostics-records {
+    max-height: 42dvh;
+  }
+}

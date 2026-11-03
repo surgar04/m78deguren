@@ -22,6 +22,8 @@ import {
 } from './repository';
 import { Failure, Review, SettingRow, SettingToggle } from './controls';
 import { useText } from './i18n';
+import { DiagnosticsPanel } from './DiagnosticsPanel';
+import './diagnostics.css';
 
 type Preview = z.infer<typeof maintenancePreviewSchema>;
 type Pawn = z.infer<typeof pawnPreparedSchema>;
@@ -172,6 +174,7 @@ export function AdvancedPanel() {
   return (
     <>
       <h2>{t('高级')}</h2>
+      <DiagnosticsPanel />
       <Failure error={error} />
       <h3>{t('应用数据')}</h3>
       {footprint.data && (

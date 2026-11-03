@@ -8,6 +8,10 @@ import { App } from './app/App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { queryClient } from './lib/query-client';
 import './styles.css';
+import { installFrontendDiagnostics } from './lib/diagnostics';
+import { isDesktop, reportDiagnostics } from './lib/desktop';
+
+if (isDesktop()) installFrontendDiagnostics(reportDiagnostics);
 
 config.autoAddCss = false;
 // 在懒加载 HUD 页面之前清除根画布底色，避免启动时出现主界面背景色的矩形闪烁。

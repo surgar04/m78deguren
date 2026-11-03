@@ -54,7 +54,9 @@ const call: HostCall = (action, payload) =>
     pending.set(id, { resolve, reject, timer });
     emit({ type: 'host-call', id, action, payload });
   });
-const platforms = createPlatforms(root, vault, call),
+const platforms = createPlatforms(root, vault, call, (phase, code) =>
+    emit({ type: 'diagnostic', event: 'auth.phase', phase, code }),
+  ),
   api = createProviderApi(vault);
 const secret = randomBytes(32).toString('hex'),
   assets = createAssets(platforms, secret);
@@ -132,6 +134,7 @@ async function execute(input: unknown): Promise<void> {
     else throw Error('音乐请求未开放或参数无效');
     emit({ type: 'result', id: request.id, ok: true, value });
   } catch (cause) {
+    emit({ type: 'diagnostic', event: 'host.request_failed', code: 'request-failed' });
     const message = cause instanceof Error ? cause.message : '音乐服务请求失败';
     emit({
       type: 'result',
@@ -180,5 +183,16 @@ lines.on('close', () => {
   void shutdown();
 });
 process.once('SIGTERM', () => {
+  void shutdown();
+});
+// 未处理异常只传固定原因代码；不把异常对象/堆栈中的平台响应混入标准输出协议。
+process.once('uncaughtException', () => {
+  emit({ type: 'diagnostic', event: 'host.error', code: 'uncaught-exception' });
+  process.exitCode = 1;
+  void shutdown();
+});
+process.once('unhandledRejection', () => {
+  emit({ type: 'diagnostic', event: 'host.error', code: 'unhandled-rejection' });
+  process.exitCode = 1;
   void shutdown();
 });

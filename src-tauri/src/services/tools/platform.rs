@@ -8,6 +8,18 @@ use tokio::{io::AsyncReadExt, process::Command};
 pub struct ScriptChild {
     child: tokio::process::Child,
     _source_guard: std::fs::File,
+    diagnostic: Option<crate::services::diagnostics::Task>,
+}
+impl Drop for ScriptChild {
+    fn drop(&mut self) {
+        if let Some(task) = self.diagnostic.take() {
+            if let Ok(Some(status)) = self.child.try_wait() {
+                task.finish(status.success());
+            } else {
+                drop(task);
+            }
+        }
+    }
 }
 impl std::ops::Deref for ScriptChild {
     type Target = tokio::process::Child;
@@ -106,8 +118,14 @@ pub(crate) async fn run_embedded(
     limit: Duration,
     source: &str,
 ) -> Result<serde_json::Value> {
-    let mut child = spawn_embedded(root, operation, arguments, source).await?;
-    collect_output(&mut child, operation, limit).await
+    let task = crate::services::diagnostics::Task::new(operation);
+    let result = async {
+        let mut child = spawn_embedded(root, operation, arguments, source).await?;
+        collect_output(&mut child, operation, limit).await
+    }
+    .await;
+    task.finish(result.is_ok());
+    result
 }
 
 /// 长期输入服务也只能启动编译期绑定的脚本；调用方负责取消与读取有界状态消息。
@@ -240,6 +258,9 @@ pub(crate) async fn spawn_embedded(
     Ok(ScriptChild {
         child,
         _source_guard: source_guard,
+        diagnostic: Some(crate::services::diagnostics::Task::new(&format!(
+            "process/{operation}"
+        ))),
     })
 }
 

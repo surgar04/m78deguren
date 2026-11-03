@@ -293,6 +293,7 @@ internal static class Program
     }
     public static async Task<int> Main(string[] args)
     {
+        DiagnosticLog.Initialize();
         Console.OutputEncoding = new UTF8Encoding(false);
         Console.InputEncoding = new UTF8Encoding(false);
         try
@@ -367,6 +368,7 @@ internal static class Program
         }
         catch (Exception cause)
         {
+            DiagnosticLog.Write("managed.request_failed", cause);
             Send(new
             {
                 type = "error",
