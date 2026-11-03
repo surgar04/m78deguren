@@ -3,6 +3,7 @@ import { HashRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import { FirstRunGate } from '@/features/onboarding/FirstRunGate';
 import DesktopLyricsBridge from '@/features/music/desktop-lyrics/DesktopLyricsBridge';
 import MusicMiniPlayer from '@/features/music/MusicMiniPlayer';
+import { DeveloperGate } from '@/features/developer/DeveloperGate';
 const Setup = lazy(() => import('@/features/onboarding/SetupPage'));
 const Overview = lazy(() => import('@/pages/Overview'));
 const Settings = lazy(() => import('@/pages/Settings'));
@@ -48,37 +49,39 @@ export function App() {
           </div>
         }
       >
-        <FirstRunGate>
-          <MusicMiniPlayer />
-          <DesktopLyricsBridge />
-          <Routes>
-            <Route path="/desktop-lyrics" element={<DesktopLyricsWindow />} />
-            <Route path="/setup" element={<Setup />} />
-            <Route path="/hud" element={<HudWindow />} />
-            <Route path="/desktop-island" element={<Navigate to="/hud" replace />} />
-            <Route path="/performance-overlay" element={<Navigate to="/hud" replace />} />
-            <Route path="/tool-overlay" element={<CrosshairOverlay />} />
-            <Route path="/screen-test" element={<ScreenTestWindow />} />
-            <Route path="/" element={<Overview />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/library/other" element={<OtherGames />} />
-            <Route path="/music" element={<Music />} />
-            <Route path="/hardware" element={<Hardware />} />
-            <Route path="/sensor-monitor" element={<SensorMonitor />} />
-            <Route path="/tools/:toolId?" element={<Tools />} />
-            <Route path="/optimization" element={<Optimization />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route
-              path="*"
-              element={
-                <main className="not-found-page">
-                  <h1>页面不存在</h1>
-                  <Link to="/">返回首页</Link>
-                </main>
-              }
-            />
-          </Routes>
-        </FirstRunGate>
+        <DeveloperGate>
+          <FirstRunGate>
+            <MusicMiniPlayer />
+            <DesktopLyricsBridge />
+            <Routes>
+              <Route path="/desktop-lyrics" element={<DesktopLyricsWindow />} />
+              <Route path="/setup" element={<Setup />} />
+              <Route path="/hud" element={<HudWindow />} />
+              <Route path="/desktop-island" element={<Navigate to="/hud" replace />} />
+              <Route path="/performance-overlay" element={<Navigate to="/hud" replace />} />
+              <Route path="/tool-overlay" element={<CrosshairOverlay />} />
+              <Route path="/screen-test" element={<ScreenTestWindow />} />
+              <Route path="/" element={<Overview />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/library/other" element={<OtherGames />} />
+              <Route path="/music" element={<Music />} />
+              <Route path="/hardware" element={<Hardware />} />
+              <Route path="/sensor-monitor" element={<SensorMonitor />} />
+              <Route path="/tools/:toolId?" element={<Tools />} />
+              <Route path="/optimization" element={<Optimization />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route
+                path="*"
+                element={
+                  <main className="not-found-page">
+                    <h1>页面不存在</h1>
+                    <Link to="/">返回首页</Link>
+                  </main>
+                }
+              />
+            </Routes>
+          </FirstRunGate>
+        </DeveloperGate>
       </Suspense>
     </HashRouter>
   );

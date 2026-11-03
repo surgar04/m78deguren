@@ -6,20 +6,57 @@ import { readFile, writeFile, lstat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { z } from 'zod';
 import { readExistingGitHubCredential } from './github-credentials.ts';
+import { currentRelease } from './release-identity.ts';
 
 /** 先建立草稿，全部资产回读校验后再发布；任何一步失败都不能报告“更新已上线”。 */
-const root = resolve('dist/desktop');
 const repo = 'surgar04/m78deguren';
-const version = z
+const baseVersion = z
   .string()
   .regex(/^\d+\.\d+\.\d+$/u)
   .parse((JSON.parse(await readFile('package.json', 'utf8')) as { version?: unknown }).version);
+const identity = currentRelease(baseVersion);
+const version = identity.version,
+  root = resolve(identity.directory);
+const tag = identity.tag;
+const sourceBranch = identity.prerelease ? 'codex/develop' : 'main';
+const branch = execFileSync('git', ['branch', '--show-current'], {
+  encoding: 'utf8',
+  windowsHide: true,
+}).trim();
+const sourceCommit = execFileSync('git', ['rev-parse', 'HEAD'], {
+  encoding: 'utf8',
+  windowsHide: true,
+}).trim();
+assert.equal(branch, sourceBranch, `此发行只能从 ${sourceBranch} 发布，请先完成分支审核和合并。`);
+assert.equal(
+  execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8', windowsHide: true }).trim(),
+  '',
+  '发布前须提交并审核全部源码。',
+);
 // 标签是签名 URL 的一部分。拒绝在同版本的无 v Release 旁再创建一个重复版本。
 async function rejectMismatchedTag() {
   if ((await api(`/releases/tags/${version}`)) !== null)
     throw Error(
       `存在标签 ${version}；签名更新要求 v${version}。请先修正现有 Release 标签，再发布，不要重复创建版本。`,
     );
+}
+/** 已存在的标签也必须指向当前源码，不能用正确的文件名掩盖错误的源码标签。 */
+async function verifyTagTarget() {
+  const reference = await api(`/git/ref/tags/${tag}`);
+  if (reference === null) return;
+  const object = z.object({
+    type: z.enum(['commit', 'tag']),
+    sha: z.string().regex(/^[a-f0-9]{40}$/u),
+  });
+  let target = z.object({ object }).parse(reference).object;
+  for (let depth = 0; depth < 4; depth++) {
+    if (target.type === 'commit') {
+      assert.equal(target.sha, sourceCommit, '已有标签不属于当前源码提交，拒绝发布。');
+      return;
+    }
+    target = z.object({ object }).parse(await api(`/git/tags/${target.sha}`)).object;
+  }
+  throw Error('发布标签嵌套过深，拒绝发布。');
 }
 let token = process.env['GH_TOKEN'] ?? process.env['GITHUB_TOKEN'];
 if (!token) {
@@ -57,6 +94,7 @@ if (process.argv.includes('--preflight')) {
     .parse(await api(''));
   assert.ok(access.permissions.push, '发布令牌没有当前仓库的写权限。');
   await rejectMismatchedTag();
+  await verifyTagTarget();
   const previous = await api(`/releases/tags/v${version}`);
   if (previous !== null)
     assert.ok(
@@ -71,6 +109,18 @@ execFileSync(process.execPath, [resolve('scripts/verify-installer.ts')], {
   stdio: 'inherit',
   windowsHide: true,
 });
+const provenance = z
+  .object({
+    sourceCommit: z.string().regex(/^[a-f0-9]{40}$/u),
+    sourceDirty: z.literal(false),
+    channel: z.literal(identity.channel),
+  })
+  .parse(JSON.parse(await readFile(resolve(root, 'build-info.json'), 'utf8')));
+assert.equal(
+  provenance.sourceCommit,
+  sourceCommit,
+  '安装包来源不是当前已审核提交，须在正确分支重新构建。',
+);
 const hash = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
 async function api(path: string, method = 'GET', body?: unknown) {
   const result = await fetch(`https://api.github.com/repos/${repo}${path}`, {
@@ -105,24 +155,24 @@ const releaseSchema = z.object({
   html_url: z.url(),
   assets: z.array(assetSchema),
 });
-const tag = `v${version}`;
 await rejectMismatchedTag();
+await verifyTagTarget();
 const existing = await api(`/releases/tags/${tag}`);
 let release = releaseSchema.parse(
   existing ??
     (await api('/releases', 'POST', {
       tag_name: tag,
-      target_commitish: 'main',
-      name: `臻境 ${version}`,
+      target_commitish: sourceCommit,
+      name: `${identity.prerelease ? '臻境开发者版' : '臻境'} ${version}`,
       body: await readFile('CHANGELOG.md', 'utf8'),
       draft: true,
-      prerelease: false,
+      prerelease: identity.prerelease,
     })),
 );
 assert.equal(release.tag_name, tag);
 const names = [
-  `zhenjing-${version}-windows-x64.msi`,
-  'zhenjing-update.json',
+  identity.name,
+  identity.manifest,
   'SHA256SUMS.txt',
   'publisher.json',
   'build-info.json',
@@ -163,16 +213,22 @@ for (const name of names) {
 }
 if (release.draft)
   release = releaseSchema.parse(
-    await api(`/releases/${release.id}`, 'PATCH', { draft: false, make_latest: 'true' }),
+    await api(`/releases/${release.id}`, 'PATCH', {
+      draft: false,
+      make_latest: identity.prerelease ? 'false' : 'true',
+    }),
   );
 assert.equal(release.draft, false);
-const latest = releaseSchema.parse(await api('/releases/latest'));
-assert.equal(latest.tag_name, tag, 'GitHub latest 尚未指向当前版本，不宣称自动更新已生效。');
+if (!identity.prerelease) {
+  const latest = releaseSchema.parse(await api('/releases/latest'));
+  assert.equal(latest.tag_name, tag, 'GitHub latest 尚未指向当前版本，不宣称自动更新已生效。');
+}
 await writeFile(
-  '.cache/verification/github-release.json',
+  `.cache/verification/${identity.prerelease ? 'developer-' : ''}github-release.json`,
   JSON.stringify(
     {
       version,
+      channel: identity.channel,
       tag,
       url: release.html_url,
       uploadedAssets: names,
@@ -183,4 +239,6 @@ await writeFile(
     2,
   ),
 );
-console.log(`已发布并确认 latest：${release.html_url}`);
+console.log(
+  `${identity.prerelease ? '已发布开发者预发布（不更改稳定 latest）' : '已发布并确认 latest'}：${release.html_url}`,
+);

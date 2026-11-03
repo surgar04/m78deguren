@@ -34,7 +34,8 @@ $certificate=[Security.Cryptography.X509Certificates.X509Certificate2]::new($pfx
 try{
     if($certificate.Subject -cne 'CN=Sur方糖' -or -not $certificate.HasPrivateKey -or $certificate.NotAfter -lt [DateTime]::Now.AddDays(90)){throw '签名证书主体、私钥或有效期不符合发布条件，请执行受控证书轮换'}
     if(@($certificate.Extensions | Where-Object {$_.Oid.Value -eq '2.5.29.19' -and $_.CertificateAuthority}).Count){throw '禁止使用 CA 证书签名和分发信任'}
-    $directory=Join-Path $projectRoot 'dist\desktop';[IO.Directory]::CreateDirectory($directory)|Out-Null
+    $distribution=if($env:ZHENJING_BUILD_EDITION -eq 'developer'){'dist/desktop-developer'}else{'dist/desktop'}
+    $directory=Join-Path $projectRoot $distribution;[IO.Directory]::CreateDirectory($directory)|Out-Null
     $cer=$certificate.Export([Security.Cryptography.X509Certificates.X509ContentType]::Cert)
     $sha=[Security.Cryptography.SHA256]::Create();try{$digest=([BitConverter]::ToString($sha.ComputeHash($cer))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}
     $metadata=@{subject=$certificate.Subject;thumbprint=$certificate.Thumbprint;sha256=$digest;notAfter=$certificate.NotAfter.ToUniversalTime().ToString('o');selfSigned=$true;certificateAuthority=$false}

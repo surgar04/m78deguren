@@ -8,7 +8,7 @@
     "devUrl": "http://127.0.0.1:1420",
     "beforeBuildCommand": "pnpm build",
     "beforeBundleCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-msi-actions.ps1",
-    "frontendDist": "../dist"
+    "frontendDist": "../.cache/frontend"
   },
   "app": {
     "windows": [

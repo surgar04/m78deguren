@@ -11,7 +11,8 @@ try{
     & (Join-Path $projectRoot '.tools\winsdk\bin\signtool.exe') sign /fd SHA256 /f $pfx /p $password $full
     if($LASTEXITCODE -ne 0){throw 'Windows 包签名失败'}
     $signature=Get-AuthenticodeSignature -LiteralPath $full
-    $publisher=Get-Content -LiteralPath (Join-Path $projectRoot 'dist\desktop\publisher.json') -Raw|ConvertFrom-Json
+    $distribution=if($env:ZHENJING_BUILD_EDITION -eq 'developer'){'dist/desktop-developer'}else{'dist/desktop'}
+    $publisher=Get-Content -LiteralPath (Join-Path $projectRoot ($distribution+'/publisher.json')) -Raw|ConvertFrom-Json
     if(-not $signature.SignerCertificate -or $signature.SignerCertificate.Thumbprint -cne $publisher.thumbprint -or $signature.Status -eq 'HashMismatch'){throw '签名回读的证书或文件摘要不匹配'}
     Write-Output ('签名完成：'+[IO.Path]::GetFileName($full)+'；证书信任状态：'+$signature.Status)
 }finally{$password=$null}

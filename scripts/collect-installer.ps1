@@ -9,7 +9,10 @@ if([Diagnostics.FileVersionInfo]::GetVersionInfo($application).ProductVersion -n
 if($LASTEXITCODE -ne 0){throw '发布二进制运行依赖检查失败'}
 & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot 'scripts\collect-installer.ts') $Profile
 if($LASTEXITCODE -ne 0){throw '安装包封装失败'}
-$target=Join-Path $projectRoot ('dist\desktop\zhenjing-'+$version+'-windows-x64.msi')
+$distribution='dist/desktop'
+$releaseVersion=$version
+if($env:ZHENJING_BUILD_EDITION -eq 'developer'){$distribution='dist/desktop-developer';$releaseVersion=$version+'-dev.'+$env:ZHENJING_DEVELOPER_BUILD}
+$target=Join-Path $projectRoot ($distribution+'/zhenjing-'+$releaseVersion+'-windows-x64.msi')
 & "$PSScriptRoot\sign-windows-package.ps1" -Path $target
-$readme=[IO.File]::ReadAllText((Join-Path $projectRoot 'docs\release-readme.md')).Replace('{{VERSION}}',$version)
-[IO.File]::WriteAllText((Join-Path $projectRoot 'dist\desktop\INSTALL.md'),$readme,[Text.UTF8Encoding]::new($false))
+$readme=[IO.File]::ReadAllText((Join-Path $projectRoot 'docs\release-readme.md')).Replace('{{VERSION}}',$releaseVersion)
+[IO.File]::WriteAllText((Join-Path $projectRoot ($distribution+'/INSTALL.md')),$readme,[Text.UTF8Encoding]::new($false))

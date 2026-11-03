@@ -1,5 +1,18 @@
 import { convertFileSrc, invoke, isTauri } from '@tauri-apps/api/core';
 import { z } from 'zod';
+import {
+  developerRequestSchema,
+  developerStatusSchema,
+  type DeveloperRequest,
+} from './developer-contracts';
+
+/** stoken 只走认证命令，不放入查询键、错误文本或偏好存储。 */
+export async function executeDeveloper(request: DeveloperRequest) {
+  requireDesktop();
+  return developerStatusSchema.parse(
+    await invoke<unknown>('developer_execute', { request: developerRequestSchema.parse(request) }),
+  );
+}
 import { musicRequestSchema, type MusicRequest } from './music-contracts';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { toolRequestSchema, type ToolRequest } from './tool-contracts';

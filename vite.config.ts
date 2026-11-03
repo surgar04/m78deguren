@@ -22,5 +22,6 @@ export default defineConfig({
       ],
     },
   },
-  build: { target: 'es2022', sourcemap: false },
+  // 前端清理不能删除 dist 中已签好的另一发行安装包。
+  build: { target: 'es2022', sourcemap: false, outDir: '.cache/frontend' },
 });

@@ -7,9 +7,11 @@ import { z } from 'zod';
 
 // 只读检查实际 PE 导入表，不运行安装器，也不假设验收机已安装的 VC++ 运行库会存在于用户电脑。
 const profile = z.enum(['debug', 'release']).parse(process.argv[2]);
+const cargo = process.env['CARGO_TARGET_DIR'];
+assert.ok(cargo, '必须通过 D 盘开发入口检查');
 const targets = [
-  `.cache/cargo/target/${profile}/zhenjing.exe`,
-  '.cache/cargo/target/release/zhenjing.exe.msi-actions.dll',
+  `${cargo}/${profile}/zhenjing.exe`,
+  `${cargo}/release/zhenjing.exe.msi-actions.dll`,
   'src-tauri/resources/hardware-monitor/runtime/ZhenjingMonitor.exe',
   'native/hardware-monitor/Hud/Collector/ECPFrames-x64.exe',
   'src-tauri/resources/music-host/node.exe',

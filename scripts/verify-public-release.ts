@@ -3,17 +3,23 @@ import assert from 'node:assert/strict';
 import { createHash, createPublicKey, verify } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { z } from 'zod';
+import { currentRelease } from './release-identity.ts';
 
 // 手动发布后的只读核对，不需要令牌：latest、全部资产摘要、远端清单签名必须同时一致。
 const repo = 'surgar04/m78deguren';
-const version = z
+const baseVersion = z
   .object({ version: z.string().regex(/^\d+\.\d+\.\d+$/u) })
   .parse(JSON.parse(await readFile('package.json', 'utf8')) as unknown).version;
-const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
-  headers: { Accept: 'application/vnd.github+json' },
-  signal: AbortSignal.timeout(30000),
-  redirect: 'error',
-});
+const identity = currentRelease(baseVersion),
+  version = identity.version;
+const response = await fetch(
+  `https://api.github.com/repos/${repo}/releases/${identity.prerelease ? `tags/${identity.tag}` : 'latest'}`,
+  {
+    headers: { Accept: 'application/vnd.github+json' },
+    signal: AbortSignal.timeout(30000),
+    redirect: 'error',
+  },
+);
 assert.ok(response.ok, `GitHub latest 尚不可用：HTTP ${response.status}`);
 const release = z
   .object({
@@ -33,17 +39,17 @@ assert.equal(
 );
 assert.equal(release.html_url, `https://github.com/${repo}/releases/tag/v${version}`);
 assert.equal(release.draft, false);
-assert.equal(release.prerelease, false);
+assert.equal(release.prerelease, identity.prerelease);
 const names = [
-  `zhenjing-${version}-windows-x64.msi`,
-  'zhenjing-update.json',
+  identity.name,
+  identity.manifest,
   'SHA256SUMS.txt',
   'publisher.json',
   'build-info.json',
   'INSTALL.md',
 ];
 for (const name of names) {
-  const bytes = await readFile(`dist/desktop/${name}`),
+  const bytes = await readFile(`${identity.directory}/${name}`),
     asset = release.assets.find((asset) => asset.name === name);
   assert.ok(asset, `Release 缺少 ${name}`);
   assert.equal(asset.size, bytes.length);
@@ -53,7 +59,9 @@ for (const name of names) {
     `远端资产摘要不一致：${name}`,
   );
 }
-let url = new URL(`https://github.com/${repo}/releases/latest/download/zhenjing-update.json`),
+let url = new URL(
+    `https://github.com/${repo}/releases/${identity.prerelease ? `download/${identity.tag}` : 'latest/download'}/${identity.manifest}`,
+  ),
   envelope: unknown;
 for (let redirect = 0; redirect < 8; redirect++) {
   assert.ok(
@@ -106,7 +114,7 @@ assert.equal(
   `https://github.com/${repo}/releases/download/v${version}/zhenjing-${version}-windows-x64.msi`,
 );
 await writeFile(
-  '.cache/verification/github-public-release.json',
+  `.cache/verification/${identity.prerelease ? 'developer-' : ''}github-public-release.json`,
   JSON.stringify(
     { passed: true, version, url: release.html_url, assets: names, updateSignatureVerified: true },
     null,

@@ -16,6 +16,61 @@ use tokio::sync::{Mutex, Notify};
 
 pub const FEED: &str =
     "https://github.com/surgar04/m78deguren/releases/latest/download/zhenjing-update.json";
+
+fn active_channel() -> &'static str {
+    if crate::services::developer::enabled() {
+        "developer"
+    } else {
+        "stable"
+    }
+}
+fn current_version() -> Result<semver::Version> {
+    semver::Version::parse(&crate::services::developer::update_version())
+        .map_err(|_| error("当前发行版本无效"))
+}
+fn active_release(release: &Release) -> Result<()> {
+    if release.channel != active_channel() {
+        return Err(error("更新通道已切换，请重新检查更新"));
+    }
+    Ok(())
+}
+
+/// 开发者预发布不参与 GitHub latest；只从固定仓库寻找规范命名的开发者标签。
+async fn developer_feed(http: &reqwest::Client) -> Result<Option<String>> {
+    #[derive(Deserialize)]
+    struct Metadata {
+        tag_name: String,
+        prerelease: bool,
+        draft: bool,
+    }
+    let response = http
+        .get("https://api.github.com/repos/surgar04/m78deguren/releases?per_page=100")
+        .timeout(Duration::from_secs(25))
+        .send()
+        .await
+        .map_err(|_| error("无法连接开发者发布源"))?;
+    if !response.status().is_success() {
+        return Err(error("开发者发布列表暂不可用"));
+    }
+    let releases: Vec<Metadata> =
+        serde_json::from_slice(&response_bytes(response, 2_097_152).await?)
+            .map_err(|_| error("开发者发布列表无效"))?;
+    let latest = releases
+        .into_iter()
+        .filter(|r| r.prerelease && !r.draft)
+        .filter_map(|r| {
+            let version = semver::Version::parse(r.tag_name.strip_prefix('v')?).ok()?;
+            valid_developer_version(&version).then_some((version, r.tag_name))
+        })
+        .max_by(|a, b| a.0.cmp(&b.0));
+    Ok(latest.map(|(_,tag)| format!("https://github.com/surgar04/m78deguren/releases/download/{tag}/zhenjing-developer-update.json")))
+}
+fn valid_developer_version(version: &semver::Version) -> bool {
+    version.build.is_empty()
+        && version.pre.as_str().strip_prefix("dev.").is_some_and(|v| {
+            !v.starts_with('0') && v.parse::<u64>().is_ok_and(|n| (1..=999999).contains(&n))
+        })
+}
 fn github_host(host: &str) -> bool {
     matches!(
         host,
@@ -185,8 +240,8 @@ fn validate_release(release: &Release) -> Result<()> {
     };
     if (!legacy && release.app_id != "dev.zhenjing.desktop")
         || release.platform != "windows-x86_64"
-        || release.channel != "stable"
-        || !version.pre.is_empty()
+        || !((release.channel == "stable" && version.pre.is_empty() && version.build.is_empty())
+            || (cfg!(feature = "developer-edition") && release.channel == "developer" && valid_developer_version(&version)))
         || url.scheme() != "https"
         || url.host_str() != Some("github.com")
         // 仅为检查旧已签名版本保留 0.2.x 的清单兼容；新版本必须使用安装包。
@@ -272,6 +327,24 @@ pub struct UpdateService {
     pub wake: Notify,
 }
 impl UpdateService {
+    /// 切换通道时使旧下载的待安装指针和单次租约失效，保留用户的下载文件。
+    pub async fn reset_channel(&self) -> Result<()> {
+        let _guard = self.serial.lock().await;
+        if self.status.lock().await.phase == "installing" {
+            return Err(error("更新正在安装，暂不能切换发行通道"));
+        }
+        *self.pending.lock().await = None;
+        *self.release.lock().await = None;
+        *self.lease.lock().await = None;
+        *self.status.lock().await = Status::default();
+        match tokio::fs::remove_file(self.directory.join("update-pending.json")).await {
+            Ok(()) => {}
+            Err(cause) if cause.kind() == std::io::ErrorKind::NotFound => {}
+            Err(cause) => return Err(io_error(cause)),
+        }
+        self.wake.notify_one();
+        Ok(())
+    }
     /// 所有待更新指针变更都在 serial 内执行；旧任务仍留在下载列表，不删除用户已下载文件。
     async fn forget_superseded(&self, latest: &semver::Version) {
         let old = self
@@ -338,14 +411,23 @@ impl UpdateService {
             status.message = "正在读取 GitHub Releases 签名清单".into();
         }
         let result = async {
+            let developer = active_channel() == "developer";
+            let feed = if developer {
+                let Some(feed) = developer_feed(http).await? else {
+                    return Ok(CheckedRelease::Absent);
+                };
+                feed
+            } else {
+                FEED.into()
+            };
             let response = http
-                .get(FEED)
+                .get(feed)
                 .timeout(Duration::from_secs(25))
                 .header("Cache-Control", "no-cache")
                 .send()
                 .await
                 .map_err(|_| error("无法连接 GitHub Releases，请检查网络"))?;
-            if response.status() == reqwest::StatusCode::NOT_FOUND {
+            if response.status() == reqwest::StatusCode::NOT_FOUND && !developer {
                 // 缺少清单不等于没有 Release；只展示官方元数据，不将未签名资产作为可执行更新。
                 let metadata = http
                     .get("https://api.github.com/repos/surgar04/m78deguren/releases/latest")
@@ -376,6 +458,7 @@ impl UpdateService {
             let envelope: Envelope =
                 serde_json::from_slice(&bytes).map_err(|_| error("发布源未返回有效的签名清单"))?;
             let release = verify(&envelope)?;
+            active_release(&release)?;
             Ok(CheckedRelease::Signed(envelope, release))
         }
         .await;
@@ -383,8 +466,7 @@ impl UpdateService {
         status.checked_at = Some(crate::services::tools::network::now_ms());
         match result {
             Ok(CheckedRelease::Signed(envelope, release)) => {
-                let current = semver::Version::parse(env!("CARGO_PKG_VERSION"))
-                    .map_err(|_| error("本机版本号无效"))?;
+                let current = current_version()?;
                 let latest = semver::Version::parse(&release.version)
                     .map_err(|_| error("更新版本号无效"))?;
                 status.phase = if latest > current {
@@ -412,8 +494,7 @@ impl UpdateService {
             }
             Ok(CheckedRelease::Unverified(metadata)) => {
                 self.forget_superseded(&metadata.version).await;
-                let current = semver::Version::parse(env!("CARGO_PKG_VERSION"))
-                    .map_err(|_| error("本机版本号无效"))?;
+                let current = current_version()?;
                 status.phase = if metadata.version > current {
                     "unverified"
                 } else {
@@ -459,8 +540,8 @@ impl UpdateService {
         let pending = self.pending.lock().await.clone();
         if let Some(pending) = pending {
             let release = verify(&pending.envelope)?;
-            let current = semver::Version::parse(env!("CARGO_PKG_VERSION"))
-                .map_err(|_| error("本机版本号错误"))?;
+            active_release(&release)?;
+            let current = current_version()?;
             if semver::Version::parse(&release.version).map_err(|_| error("待更新版本无效"))?
                 <= current
             {
@@ -558,9 +639,9 @@ impl UpdateService {
             .await
             .clone()
             .ok_or_else(|| error("请先检查并验证更新清单"))?;
+        active_release(&release)?;
         if semver::Version::parse(&release.version).map_err(|_| error("版本号无效"))?
-            <= semver::Version::parse(env!("CARGO_PKG_VERSION"))
-                .map_err(|_| error("本机版本号无效"))?
+            <= current_version()?
         {
             return Err(error("没有比当前版本更新的包，不执行降级或重复替换"));
         }
@@ -625,6 +706,7 @@ impl UpdateService {
             return Err(error("安装凭据已过期，请刷新待更新状态"));
         }
         let lease = lease.take().ok_or_else(|| error("更新凭据已使用"))?;
+        active_release(&lease.release)?;
         Ok((lease.path, lease.release))
     }
     pub async fn has_pending(&self) -> bool {

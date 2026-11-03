@@ -1,0 +1,105 @@
+.developer-auth::backdrop {
+  background: #142f3b66;
+  backdrop-filter: blur(12px);
+}
+.developer-auth {
+  width: min(calc(100% - 32px), 540px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  overflow: auto;
+  border: 1px solid #ffffffaa;
+  background: var(--glass-background, #eaf5f4f5);
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: 24px;
+  color: var(--text-primary, #132d37);
+}
+.developer-auth img {
+  height: 84px;
+  object-fit: contain;
+  float: right;
+}
+.developer-eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #397f71;
+}
+.developer-auth h1 {
+  margin: 12px 0;
+  font-size: 28px;
+}
+.developer-auth p,
+.developer-auth small {
+  line-height: 1.75;
+}
+.developer-auth form {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+.developer-auth label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+.developer-auth input,
+.developer-auth textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #9dbcb755;
+  border-radius: 12px;
+  background: #ffffffaa;
+  color: #132d37;
+  font: inherit;
+}
+.developer-auth textarea {
+  resize: vertical;
+  font: 12px/1.5 monospace;
+}
+.developer-auth-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.developer-auth button,
+.developer-edition-panel button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #80bfb655;
+  background: #ffffffb0;
+  cursor: pointer;
+}
+.developer-auth .primary-button {
+  background: #a4efdc;
+}
+.developer-auth button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.developer-edition-panel {
+  padding: 18px;
+  margin: 18px 0;
+  border: 1px solid #80bfb655;
+  border-radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  .developer-auth {
+    background: #162334f5;
+    color: #e6eef7;
+  }
+  .developer-auth input {
+    background: #0b1725;
+    color: #e6eef7;
+  }
+  .developer-auth button {
+    background: #233c47;
+    color: #e6eef7;
+  }
+  .developer-auth .primary-button {
+    background: #a4efdc;
+    color: #132d37;
+  }
+}

@@ -7,12 +7,14 @@ import { resolve, join, sep, isAbsolute } from 'node:path';
 import { z } from 'zod';
 import { msiExecutable } from './installer-format.ts';
 import { materializeMsiLayout } from './msi-layout.ts';
+import { currentRelease } from './release-identity.ts';
 
 const pkg = z
   .object({ version: z.string() })
   .parse(JSON.parse(await readFile('package.json', 'utf8')) as unknown);
-const root = resolve('dist/desktop'),
-  name = `zhenjing-${pkg.version}-windows-x64.msi`,
+const identity = currentRelease(pkg.version);
+const root = resolve(identity.directory),
+  name = identity.name,
   installer = join(root, name);
 assert.deepEqual(
   (await readdir(root)).sort(),
@@ -20,7 +22,7 @@ assert.deepEqual(
     'build-info.json',
     'publisher.json',
     'SHA256SUMS.txt',
-    'zhenjing-update.json',
+    identity.manifest,
     'INSTALL.md',
     name,
   ].sort(),
@@ -181,7 +183,7 @@ try {
   assert.equal(images.length, 1);
   const image = images[0];
   assert.ok(image);
-  const linked = await readFile('.cache/cargo/target/release/zhenjing.exe');
+  const linked = await readFile(`${identity.cargoDirectory}/release/zhenjing.exe`);
   assert.equal(
     hash(await readFile(image)),
     hash(msiExecutable(linked)),
@@ -200,24 +202,32 @@ try {
   });
   const envelope = z
     .object({ payload: z.string(), signature: z.string() })
-    .parse(JSON.parse(await readFile(join(root, 'zhenjing-update.json'), 'utf8')) as unknown);
+    .parse(JSON.parse(await readFile(join(root, identity.manifest), 'utf8')) as unknown);
   const payload = Buffer.from(envelope.payload, 'base64');
   assert.ok(verify(null, payload, publicKey, Buffer.from(envelope.signature, 'base64')));
   const release = z
-    .object({ url: z.string(), version: z.string(), sha256: z.string(), bytes: z.number() })
+    .object({
+      url: z.string(),
+      version: z.string(),
+      channel: z.string(),
+      sha256: z.string(),
+      bytes: z.number(),
+    })
     .parse(JSON.parse(payload.toString()) as unknown);
-  assert.equal(release.version, pkg.version);
+  assert.equal(release.version, identity.version);
+  assert.equal(release.channel, identity.channel);
   assert.equal(
     release.url,
-    `https://github.com/surgar04/m78deguren/releases/download/v${pkg.version}/${name}`,
+    `https://github.com/surgar04/m78deguren/releases/download/${identity.tag}/${name}`,
   );
   assert.equal(release.sha256, hash(binary));
   assert.equal(release.bytes, binary.length);
   await writeFile(
-    '.cache/verification/msi-artifact.json',
+    `.cache/verification/${identity.prerelease ? 'developer-' : ''}msi-artifact.json`,
     JSON.stringify(
       {
-        version: pkg.version,
+        version: identity.version,
+        channel: identity.channel,
         passed: true,
         format: 'msi',
         sha256: hash(binary),

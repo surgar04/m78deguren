@@ -172,7 +172,15 @@ pub async fn apply(app: &tauri::AppHandle, token: &str, explicit_retry: bool) ->
         source: Some(source),
         sha256: Some(release.sha256.clone()),
         bytes: Some(release.bytes),
-        version: Some(release.version.clone()),
+        // MSI 和 PE 采用三段数字版本；通道 / dev 序号由外层签名清单保护。
+        version: Some(
+            release
+                .version
+                .split('-')
+                .next()
+                .unwrap_or(&release.version)
+                .to_owned(),
+        ),
         lock_file: super::storage::ownership_path(&state.root)?,
         launch_environment: maintenance::launch_environment(),
     };

@@ -35,6 +35,12 @@ foreach ($entry in $directories.GetEnumerator()) {
     [Environment]::SetEnvironmentVariable($entry.Key, $path, 'Process')
 }
 $env:npm_config_userconfig = Join-Path $projectRoot '.npmrc'
+# 开发者发行与稳定发行隔离 Cargo 产物；嵌套入口遵循同一受限枚举。
+if($env:ZHENJING_BUILD_EDITION -and $env:ZHENJING_BUILD_EDITION -notin @('stable','developer')){throw '未知构建发行类型'}
+if($env:ZHENJING_BUILD_EDITION -eq 'developer'){
+    $env:CARGO_TARGET_DIR=Join-Path $projectRoot '.cache/cargo/developer-target'
+    [IO.Directory]::CreateDirectory($env:CARGO_TARGET_DIR)|Out-Null
+}
 $env:npm_config_globalconfig = Join-Path $projectRoot '.cache\npm\global.npmrc'
 $env:COREPACK_ENABLE_AUTO_PIN = '0'
 $env:RUSTUP_TOOLCHAIN = '1.96.0'

@@ -1,4 +1,12 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("cargo:rerun-if-env-changed=ZHENJING_DEVELOPER_BUILD");
+    if std::env::var_os("CARGO_FEATURE_DEVELOPER_EDITION").is_some() {
+        let number: u64 = std::env::var("ZHENJING_DEVELOPER_BUILD")?.parse()?;
+        if number == 0 || number > 999999 {
+            return Err("开发者构建编号必须为 1..999999".into());
+        }
+        println!("cargo:rustc-env=ZHENJING_DEVELOPER_BUILD={number}");
+    }
     use sha2::{Digest, Sha256};
     let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
     let directory = base.join("resources/hardware-monitor");

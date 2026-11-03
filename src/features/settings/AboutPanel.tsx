@@ -1,4 +1,5 @@
 import { bytes } from './format';
+import { DeveloperEditionPanel } from '@/features/developer/DeveloperGate';
 import { z } from 'zod';
 import { updateStatusSchema } from '@/lib/settings-contracts';
 import { useSettingsSnapshot, useSettingsQuery, useSettingsAction } from './repository';
@@ -15,6 +16,7 @@ export function AboutPanel() {
   return (
     <>
       <h2>{t('关于臻境')}</h2>
+      <DeveloperEditionPanel />
       <div className="preferences-about">
         <img data-brand-logo src="/assets/home/brand.png" alt="臻境" width="80" height="110" />
         <div>

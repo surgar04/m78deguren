@@ -10,7 +10,8 @@
     <Package Id="*" InstallerVersion="500" Compressed="yes"
              InstallPrivileges="elevated" Platform="x64" SummaryCodepage="936"
              Description="臻境 · MSI 安装程序" Manufacturer="Sur方糖" />
-    <MajorUpgrade Schedule="afterInstallInitialize"
+    <!-- 同一三段版本的稳定 / 开发者发行可以替换；低三段版本仍拒绝降级。 -->
+    <MajorUpgrade Schedule="afterInstallInitialize" AllowSameVersionUpgrades="yes"
                   DowngradeErrorMessage="已安装更新版本的臻境，不允许降级覆盖。" />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
     <Icon Id="ProductIcon" SourceFile="{{icon_path}}" />

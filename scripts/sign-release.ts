@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { z } from 'zod';
+import { currentRelease } from './release-identity.ts';
+import { execFileSync } from 'node:child_process';
 
 // 更新清单使用独立的 Ed25519 密钥，不能用自签名证书替代客户端已有的发布信任。
 const pkg = z
@@ -17,8 +19,9 @@ assert.equal(
   publicKey.export({ format: 'der', type: 'spki' }).subarray(-32).toString('base64'),
   channel.publicKey,
 );
-const root = 'dist/desktop',
-  name = `zhenjing-${pkg.version}-windows-x64.msi`;
+const identity = currentRelease(pkg.version);
+const root = identity.directory,
+  name = identity.name;
 const binary = await readFile(`${root}/${name}`);
 assert.equal(binary.subarray(0, 8).toString('hex'), 'd0cf11e0a1b11ae1');
 assert.ok(binary.length > 1048576 && binary.length <= 268435456);
@@ -27,20 +30,20 @@ const sha256 = digest(binary);
 const payload = Buffer.from(
   JSON.stringify({
     appId: 'dev.zhenjing.desktop',
-    version: pkg.version,
+    version: identity.version,
     platform: 'windows-x86_64',
-    channel: 'stable',
-    url: `https://github.com/${channel.repository}/releases/download/v${pkg.version}/${name}`,
+    channel: identity.channel,
+    url: `https://github.com/${channel.repository}/releases/download/${identity.tag}/${name}`,
     sha256,
     bytes: binary.length,
     changelog: await readFile('CHANGELOG.md', 'utf8'),
-    releaseUrl: `https://github.com/${channel.repository}/releases/tag/v${pkg.version}`,
+    releaseUrl: `https://github.com/${channel.repository}/releases/tag/${identity.tag}`,
   }),
 );
 const signature = sign(null, payload, key);
 assert.ok(verify(null, payload, publicKey, signature));
 await writeFile(
-  `${root}/zhenjing-update.json`,
+  `${root}/${identity.manifest}`,
   JSON.stringify(
     { payload: payload.toString('base64'), signature: signature.toString('base64') },
     null,
@@ -55,7 +58,17 @@ await writeFile(
   `${root}/build-info.json`,
   JSON.stringify(
     {
-      version: pkg.version,
+      version: identity.version,
+      channel: identity.channel,
+      sourceCommit: execFileSync('git', ['rev-parse', 'HEAD'], {
+        encoding: 'utf8',
+        windowsHide: true,
+      }).trim(),
+      sourceDirty:
+        execFileSync('git', ['status', '--porcelain'], {
+          encoding: 'utf8',
+          windowsHide: true,
+        }).trim() !== '',
       profile: 'release',
       format: 'msi',
       publisher: 'Sur方糖',
@@ -64,7 +77,7 @@ await writeFile(
       name,
       sha256,
       bytes: binary.length,
-      mainExeSha256: digest(await readFile('.cache/cargo/target/release/zhenjing.exe')),
+      mainExeSha256: digest(await readFile(`${identity.cargoDirectory}/release/zhenjing.exe`)),
     },
     null,
     2,

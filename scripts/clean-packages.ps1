@@ -23,7 +23,9 @@ if(Test-Path -LiteralPath $staging){
     }
 }
 # 固定清理列表；不删除 Cargo 编译缓存、NSIS 工具、依赖、签名密钥或发布仓库。
-foreach($relative in @('.cache\package','.cache\msi','dist\desktop','.cache\cargo\target\release\bundle','.cache\cargo\target\release\nsis','.cache\cargo\target\debug\bundle','.cache\cargo\target\debug\nsis')){
+$distribution=if($env:ZHENJING_BUILD_EDITION -eq 'developer'){'dist/desktop-developer'}else{'dist/desktop'}
+$cargo=if($env:ZHENJING_BUILD_EDITION -eq 'developer'){'.cache/cargo/developer-target'}else{'.cache/cargo/target'}
+foreach($relative in @('.cache/package','.cache/msi',$distribution,($cargo+'/release/bundle'),($cargo+'/release/nsis'),($cargo+'/debug/bundle'),($cargo+'/debug/nsis'))){
     $target=Assert-PackagePath (Join-Path $projectRoot $relative)
     if(Test-Path -LiteralPath $target){
         # 递归前检查所有后代，防止遇到链接后删除或移动到工程外。

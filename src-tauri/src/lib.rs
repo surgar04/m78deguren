@@ -175,6 +175,7 @@ pub fn run() {
 
 fn run_app() -> Result<(), Box<dyn std::error::Error>> {
     let root = data_root()?;
+    let developer = services::developer::DeveloperState::new(&root)?;
     let logs = root.join("logs");
     std::fs::create_dir_all(&logs)?;
     let mut context = tauri::generate_context!();
@@ -190,6 +191,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         tauri::utils::config::AppDirectoriesOverride::Root(root.clone()),
     );
     tauri::Builder::default()
+        .manage(developer)
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(settings)
         .manage(onboarding)
@@ -351,6 +353,12 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                 .build(),
         )
         .on_window_event(|window, event| {
+            if services::developer::locked()
+                && matches!(event, tauri::WindowEvent::CloseRequested { .. })
+            {
+                window.app_handle().exit(0);
+                return;
+            }
             if window.label() == "main"
                 && let tauri::WindowEvent::CloseRequested { api, .. } = event
             {
@@ -389,7 +397,6 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
             }
         })
         .setup(move |app| {
-            services::settings::runtime::tray(app.handle())?;
             let mut config = app
                 .config()
                 .app
@@ -409,7 +416,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                     .minimized_start;
             let mut builder = tauri::WebviewWindowBuilder::from_config(app.handle(), &config)?
                 .data_directory(root.join("webview"))
-                .visible(first_start || !minimized);
+                .visible(services::developer::locked() || first_start || !minimized);
             // 按工作区和 DPI 计算逻辑尺寸，避免 125%/150% 缩放时窗口超出屏幕或遮挡任务栏。
             if let Ok(Some(monitor)) = app.primary_monitor() {
                 let available = monitor
@@ -424,38 +431,38 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                 );
             }
             builder.build()?;
-            services::settings::runtime::boot(app.handle())?;
-            services::hud::runtime::boot(app.handle());
-            let home_app = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                if let Err(cause) = home_app
-                    .state::<services::home::HomeState>()
-                    .boot(&home_app)
-                    .await
-                {
-                    log::warn!("首页原生服务启动失败: {cause}");
-                }
-            });
+            if !services::developer::locked() {
+                boot_runtime(app.handle())?;
+            }
             log::info!("臻境已启动");
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            commands::greet,
-            commands::app_info,
-            commands::tools::tools_execute,
-            commands::builtin::builtin_execute,
-            commands::optimizer::optimizer_execute,
-            commands::settings::settings_execute,
-            commands::hardware::hardware_execute,
-            commands::hud::hud_execute,
-            commands::music::music_execute,
-            commands::onboarding::onboarding_execute,
-            commands::steam::steam_execute,
-            commands::home::home_execute,
-            commands::launchers::other_games_execute,
-            commands::launchers::quick_launch_execute,
-            commands::acceleration::acceleration_execute
-        ])
+        .invoke_handler(|invoke| {
+            // 原生统一关口，不能通过改前端路由或手工调用业务 IPC 绕过认证页。
+            if services::developer::locked() && invoke.message.command() != "developer_execute" {
+                invoke.resolver.reject("请先完成开发者认证或回退到稳定通道");
+                return true;
+            }
+            let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
+                commands::developer::developer_execute,
+                commands::greet,
+                commands::app_info,
+                commands::tools::tools_execute,
+                commands::builtin::builtin_execute,
+                commands::optimizer::optimizer_execute,
+                commands::settings::settings_execute,
+                commands::hardware::hardware_execute,
+                commands::hud::hud_execute,
+                commands::music::music_execute,
+                commands::onboarding::onboarding_execute,
+                commands::steam::steam_execute,
+                commands::home::home_execute,
+                commands::launchers::other_games_execute,
+                commands::launchers::quick_launch_execute,
+                commands::acceleration::acceleration_execute
+            ];
+            handler(invoke)
+        })
         .build(context)?
         .run({
             let shutting_down = std::sync::atomic::AtomicBool::new(false);
@@ -497,6 +504,40 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
         });
+    Ok(())
+}
+
+/// 未决定开发者身份时不注册热键、托盘或启动自动更新 / HUD；决定后只启动一次。
+pub(crate) fn boot_runtime(app: &tauri::AppHandle) -> services::tools::Result<()> {
+    static STARTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    if STARTED
+        .compare_exchange(
+            false,
+            true,
+            std::sync::atomic::Ordering::AcqRel,
+            std::sync::atomic::Ordering::Acquire,
+        )
+        .is_err()
+    {
+        return Ok(());
+    }
+    if let Err(cause) =
+        services::settings::runtime::tray(app).and_then(|()| services::settings::runtime::boot(app))
+    {
+        STARTED.store(false, std::sync::atomic::Ordering::Release);
+        return Err(cause);
+    }
+    services::hud::runtime::boot(app);
+    let home_app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        if let Err(cause) = home_app
+            .state::<services::home::HomeState>()
+            .boot(&home_app)
+            .await
+        {
+            log::warn!("首页原生服务启动失败: {cause}");
+        }
+    });
     Ok(())
 }
 

@@ -1,4 +1,6 @@
-﻿param([switch]$Debug,[switch]$Publish)
+﻿param([switch]$Debug,[switch]$Publish,[ValidateSet('stable','developer')][string]$Edition='stable',[ValidateRange(1,999999)][int]$DeveloperBuild=1)
+$env:ZHENJING_BUILD_EDITION=$Edition
+$env:ZHENJING_DEVELOPER_BUILD=[string]$DeveloperBuild
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot\env.ps1"
 if($Debug){throw '分发包只支持 Release；调试请使用 desktop:dev。'}
@@ -25,6 +27,7 @@ if($LASTEXITCODE -ne 0){throw '质量检查未通过，停止打包与发布。'
 # 统一使用 MSI，保留 Windows Installer 事务，不生成其他安装格式。
 $env:LOCALAPPDATA=$env:TAURI_BUNDLER_TOOLS_DIR
 $arguments=@('tauri','build','--bundles','msi')
+if($Edition -eq 'developer'){$arguments+=@('--features','developer-edition')}
 & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot '.tools\pnpm\bin\pnpm.cjs') @arguments
 if($LASTEXITCODE -ne 0){throw 'Windows 安装包构建失败'}
 & "$PSScriptRoot\prepare-package-certificate.ps1"
