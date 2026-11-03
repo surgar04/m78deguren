@@ -1,5 +1,5 @@
 import { bytes } from './format';
-import { DeveloperEditionPanel } from '@/features/developer/DeveloperGate';
+import { DeveloperEditionPanel, DeveloperUpgradeButton } from '@/features/developer/DeveloperGate';
 import { z } from 'zod';
 import { updateStatusSchema } from '@/lib/settings-contracts';
 import { useSettingsSnapshot, useSettingsQuery, useSettingsAction } from './repository';
@@ -54,6 +54,12 @@ export function AboutPanel() {
             ? '正在检查…'
             : t('检查更新')}
         </button>
+        <DeveloperUpgradeButton
+          disabled={
+            action.isPending || data?.phase === 'downloading' || data?.phase === 'installing'
+          }
+          onUpgrade={() => action.mutateAsync({ operation: 'update-developer', consent: true })}
+        />
         {data?.phase === 'available' && (
           <button
             type="button"

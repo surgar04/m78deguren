@@ -25,6 +25,7 @@
     "release:publish:developer": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/developer-release.ps1 -Action publish",
     "release:verify:developer": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/developer-release.ps1 -Action verify",
     "developer:issue": "node scripts/issue-developer-token.ts",
+    "test:developer:workspace": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-developer-workspace.ps1",
     "desktop:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Publish",
     "desktop:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-packages.ps1",
     "release:publish": "node scripts/publish-release.ts",

@@ -102,6 +102,7 @@ export const settingsRequestSchema = z.discriminatedUnion('operation', [
     })
     .strict(),
   z.object({ operation: z.literal('patch'), patch: nativePatchSchema }).strict(),
+  z.object({ operation: z.literal('update-developer'), consent: z.boolean() }).strict(),
   z.object({ operation: z.literal('asset-import'), kind: assetSchema.shape.kind }).strict(),
   z.object({ operation: z.literal('asset-remove'), id: assetSchema.shape.id }).strict(),
   z

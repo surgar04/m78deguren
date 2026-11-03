@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DeveloperGate } from './DeveloperGate';
+import { DeveloperGate, DeveloperUpgradeButton } from './DeveloperGate';
 
 const bridge = vi.hoisted(() => ({ execute: vi.fn() }));
 vi.mock('@/lib/desktop', () => ({
@@ -46,6 +46,28 @@ function mount() {
   );
 }
 describe('开发者启动关口', () => {
+  it('稳定版只有明确确认发行切换后才请求开发者更新', async () => {
+    bridge.execute.mockResolvedValue({
+      edition: 'stable',
+      mode: 'stable',
+      build: '1.0.0',
+      expiresAt: null,
+      message: '',
+    });
+    const upgrade = vi.fn().mockResolvedValue(null);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <DeveloperUpgradeButton disabled={false} onUpgrade={upgrade} />
+      </QueryClientProvider>,
+    );
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: '更新到开发者版本' }));
+    expect(upgrade).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: '确认并下载开发者版本' }));
+    await waitFor(() => expect(upgrade).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
   it('未经认证不挂载业务页面，跳过后使用原生返回的稳定模式', async () => {
     mount();
     await screen.findByRole('dialog');

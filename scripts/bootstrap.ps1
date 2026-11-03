@@ -1,24 +1,25 @@
 ﻿param(
-    [string]$MsvcSource = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207',
-    [string]$SdkSource = 'C:\Program Files (x86)\Windows Kits\10',
-    [string]$SdkVersion = '10.0.26100.0'
+    [string]$MsvcSource,
+    [string]$SdkSource,
+    [string]$SdkVersion,
+    [switch]$ToolsOnly
 )
 $ErrorActionPreference = 'Stop'
 $originalProfile = [Environment]::GetFolderPath('UserProfile')
 . "$PSScriptRoot\env.ps1"
 Set-Location -LiteralPath $projectRoot
 
-if (-not (Test-Path '.tools\msvc\bin\link.exe') -and -not (Test-Path "$MsvcSource\bin\Hostx64\x64\link.exe")) {
-    throw '缺少可只读复用的 MSVC 源组件；禁止调用系统安装器。'
-}
-if (-not (Test-Path '.tools\winsdk\lib\um\kernel32.lib') -and -not (Test-Path "$SdkSource\Lib\$SdkVersion\um\x64\kernel32.lib")) {
-    throw '缺少可只读复用的 Windows SDK 源组件；禁止调用系统安装器。'
+if(-not $ToolsOnly){
+    . "$PSScriptRoot/cpp-tools.ps1"
+    $cpp=Find-ProjectCppTools $MsvcSource $SdkSource $SdkVersion
+    if(-not $cpp.Ready){throw ('缺少可只读复用的编译组件：'+($cpp.Missing -join '、')+'；禁止自动调用系统安装器。')}
+    $MsvcSource=$cpp.MsvcSource;$SdkSource=$cpp.SdkSource;$SdkVersion=$cpp.SdkVersion
 }
 
 function Copy-ToolDirectory([string]$Source, [string]$Destination) {
     if (-not (Test-Path -LiteralPath $Source)) { throw "缺少源组件: $Source" }
     $output = Join-Path $projectRoot $Destination
-    if (-not ([IO.Path]::GetFullPath($output)).StartsWith('D:\', [StringComparison]::OrdinalIgnoreCase)) { throw '目标必须在 D 盘' }
+    if (-not ([IO.Path]::GetFullPath($output)).StartsWith($projectRoot+'\', [StringComparison]::OrdinalIgnoreCase) -or ($env:ZHENJING_RESTRICT_WRITES_TO_D -eq '1' -and [IO.Path]::GetPathRoot($output) -ine 'D:\')) { throw '工具目标越过已选择的工作区' }
     New-Item -ItemType Directory -Force -Path $output | Out-Null
     & robocopy $Source $output /E /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "复制失败: $Source" }
@@ -73,12 +74,13 @@ if (-not (Test-Path '.tools\rustup\toolchains\1.96.0-x86_64-pc-windows-msvc')) {
 }
 & rustup component add rust-analyzer rust-src --toolchain 1.96.0
 if ($LASTEXITCODE -ne 0) { throw 'Rust Analyzer 安装失败' }
-if (-not (Test-Path '.tools\msvc\bin\link.exe')) {
+if($ToolsOnly){Write-Output '便携 Node、pnpm、Rust 已准备；未安装系统组件或项目依赖。';exit 0}
+if (-not $cpp.MsvcLocal) {
     Copy-ToolDirectory "$MsvcSource\bin\Hostx64\x64" '.tools\msvc\bin'
     Copy-ToolDirectory "$MsvcSource\include" '.tools\msvc\include'
     Copy-ToolDirectory "$MsvcSource\lib\x64" '.tools\msvc\lib'
 }
-if (-not (Test-Path '.tools\winsdk\lib\um\kernel32.lib')) {
+if (-not $cpp.SdkLocal) {
     Copy-ToolDirectory "$SdkSource\Lib\$SdkVersion\um\x64" '.tools\winsdk\lib\um'
     Copy-ToolDirectory "$SdkSource\Lib\$SdkVersion\ucrt\x64" '.tools\winsdk\lib\ucrt'
     Copy-ToolDirectory "$SdkSource\Include\$SdkVersion" '.tools\winsdk\include'

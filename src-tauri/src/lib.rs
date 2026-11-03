@@ -192,6 +192,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
     );
     tauri::Builder::default()
         .manage(developer)
+        .manage(services::developer::workspace::WorkspaceState::new(&root))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(settings)
         .manage(onboarding)
@@ -445,6 +446,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
             }
             let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
                 commands::developer::developer_execute,
+                commands::developer_workspace::developer_workspace_execute,
                 commands::greet,
                 commands::app_info,
                 commands::tools::tools_execute,
@@ -472,6 +474,13 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                 {
                     api.prevent_exit();
                     let app = app.clone();
+                    let cancel_app = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let _ = cancel_app
+                            .state::<services::developer::workspace::WorkspaceState>()
+                            .cancel()
+                            .await;
+                    });
                     app.state::<services::hud::HudState>().cancellation.cancel();
                     let hardware = app.state::<services::hardware::Hardware>().inner().clone();
                     tauri::async_runtime::spawn(async move {

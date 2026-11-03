@@ -217,6 +217,7 @@ pub(crate) async fn spawn_embedded(
                 "settings-maintenance",
                 "migrate",
                 "home-runtime",
+                "developer-workspace",
             ]
             .contains(&operation),
         );

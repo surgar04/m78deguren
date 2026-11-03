@@ -120,6 +120,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 desktop:build
 - `codex/develop`：开发集成分支；功能分支按 `codex/feat-<主题>`、`codex/fix-<主题>` 或 `codex/docs-<主题>` 命名，通过 PR 合入。
 - 提交使用 Conventional Commits，例如 `feat(music): ...`、`fix(installer): ...`、`docs(readme): ...`。
 - 稳定版与开发者版采用独立发布资产和更新清单；开发者版标为预发布，不替换稳定版的 `latest`。认证、回退和运维约定见 [开发者版本与认证](docs/development/开发者版本与认证.md)。
+- 发布版可在关于页选择更新到开发者版本；认证后可选源码目录，获取开发分支并准备隔离开发环境。缺少 C++ / SDK 时提供微软官方入口，流程见 [开发者工作区](docs/development/开发者工作区与版本切换.md)。
 
 README、许可及首次公开内容须先交由维护者审核，再推送和发布。后续操作流程见 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [MSI 发布与签名](docs/development/MSI发布与签名.md)。
 

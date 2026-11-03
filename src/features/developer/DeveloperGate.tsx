@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode, type FormEvent } from 'rea
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { executeDeveloper, isDesktop, errorMessage, desktopWindowLabel } from '@/lib/desktop';
 import './developer.css';
+import { WorkspaceGate, WorkspaceCard } from './WorkspaceSetup';
 
 const key = ['developer-identity'] as const;
 function useDeveloperStatus() {
@@ -39,6 +40,7 @@ export function DeveloperGate({ children }: { children: ReactNode }) {
       </main>
     );
   if (status.data?.mode === 'locked') return <DeveloperAuthentication />;
+  if (status.data?.mode === 'developer') return <WorkspaceGate>{children}</WorkspaceGate>;
   return children;
 }
 
@@ -163,6 +165,75 @@ export function DeveloperEditionPanel() {
         {status.data.mode === 'developer' ? '管理开发者身份' : '重新认证开发者身份'}
       </button>
       {open && <DeveloperAuthentication onClose={() => setOpen(false)} />}
+      {status.data.mode === 'developer' && <WorkspaceCard />}
     </section>
+  );
+}
+
+/** 稳定客户端仅选择官方开发者安装包；认证发生在新客户端启动后。 */
+export function DeveloperUpgradeButton({
+  disabled,
+  onUpgrade,
+}: {
+  disabled: boolean;
+  onUpgrade: () => Promise<unknown>;
+}) {
+  const status = useDeveloperStatus();
+  const [open, setOpen] = useState(false),
+    [busy, setBusy] = useState(false),
+    [failure, setFailure] = useState('');
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (open && !dialog?.open) dialog?.showModal();
+    return () => dialog?.close();
+  }, [open]);
+  if (status.data?.edition !== 'stable') return null;
+  return (
+    <>
+      <button type="button" disabled={disabled || busy} onClick={() => setOpen(true)}>
+        更新到开发者版本
+      </button>
+      {open && (
+        <dialog
+          ref={ref}
+          className="developer-auth"
+          aria-modal="true"
+          aria-labelledby="developer-upgrade-title"
+          onCancel={(event) => {
+            event.preventDefault();
+            if (!busy) setOpen(false);
+          }}
+        >
+          <h2 id="developer-upgrade-title">切换到开发者版本</h2>
+          <p>
+            将从本项目预发布中下载已签名的开发者安装包，并在空闲时安装。安装后必须输入受邀邮箱及
+            stoken；认证失败将使用稳定功能与更新通道。
+          </p>
+          <p>认证成功后可选择源码目录，并自动准备开发环境。开发者版本可能包含尚未稳定的改动。</p>
+          {failure && <p role="alert">{failure}</p>}
+          <div className="developer-auth-actions">
+            <button type="button" disabled={busy} onClick={() => setOpen(false)}>
+              取消
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              className="primary-button"
+              onClick={() => {
+                setBusy(true);
+                setFailure('');
+                void onUpgrade()
+                  .then(() => setOpen(false))
+                  .catch((cause: unknown) => setFailure(errorMessage(cause)))
+                  .finally(() => setBusy(false));
+              }}
+            >
+              {busy ? '正在检查开发者发行…' : '确认并下载开发者版本'}
+            </button>
+          </div>
+        </dialog>
+      )}
+    </>
   );
 }

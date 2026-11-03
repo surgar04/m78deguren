@@ -95,6 +95,13 @@ async fn ensure_installed(exe: &Path) -> Result<()> {
 
 /// 自动升级等待游戏、首次向导及有状态工具空闲，不抢占用户正在进行的会话。
 async fn ensure_idle(app: &tauri::AppHandle) -> Result<()> {
+    if app
+        .state::<crate::services::developer::workspace::WorkspaceState>()
+        .is_running()
+        .await
+    {
+        return Err(error("开发工作区正在准备，更新将在任务完成后安装"));
+    }
     if !app
         .state::<OnboardingState>()
         .progress

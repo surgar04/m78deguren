@@ -1,5 +1,6 @@
 //! 官方开发者发行身份。私钥只存在维护者的忽略目录；客户端只内嵌验签公钥。
 //! 认证仅保留在当前进程，不把邮箱或 stoken 写入用户配置、日志或命令行。
+pub mod workspace;
 use crate::services::tools::{Result, error, io_error, save_json};
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use ed25519_dalek::{Signature, VerifyingKey};

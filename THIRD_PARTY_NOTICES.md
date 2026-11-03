@@ -4,6 +4,8 @@
 
 ## 界面基础与图标
 
+开发工作区按需从 [Git for Windows](https://github.com/git-for-windows/git/releases) 获取官方 MinGit ZIP，用于固定开发分支的源码管理。工具不随 MSI 分发，下载时核对官方资产摘要，保留其随附许可；其他便携工具同样从各自官方来源准备。
+
 React、Tailwind CSS、TanStack Query、Zustand 和 Zod 采用各自 MIT 许可；Tauri 采用 MIT / Apache-2.0 双许可。实际版本由锁文件固定，原许可随依赖保留。
 
 GSAP 3.15.0 的包声明为 [Standard no-charge license](https://gsap.com/standard-license/)，不能当作 MIT 或 OSI 开源协议。Font Awesome Free 的代码、图标及字体分别采用 MIT、CC BY 4.0、SIL OFL 1.1；本项目使用显式导入的 Free SVG 图标，不包含 Pro 图标。版权与许可见各包文件及 [Font Awesome 官方许可](https://fontawesome.com/license/free)。

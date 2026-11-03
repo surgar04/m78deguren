@@ -1,6 +1,21 @@
 import { convertFileSrc, invoke, isTauri } from '@tauri-apps/api/core';
 import { z } from 'zod';
 import {
+  workspaceRequestSchema,
+  workspaceStatusSchema,
+  type WorkspaceRequest,
+} from './workspace-contracts';
+
+/** 工作区只传原生目录选择票据，不向原生端传命令、下载地址或仓库分支。 */
+export async function executeWorkspace(request: WorkspaceRequest) {
+  requireDesktop();
+  return workspaceStatusSchema.parse(
+    await invoke<unknown>('developer_workspace_execute', {
+      request: workspaceRequestSchema.parse(request),
+    }),
+  );
+}
+import {
   developerRequestSchema,
   developerStatusSchema,
   type DeveloperRequest,

@@ -8,6 +8,7 @@ use base64::Engine;
 use ed25519_dalek::{Signature, VerifyingKey};
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::{
     path::{Path, PathBuf},
     time::{Duration, Instant},
@@ -28,11 +29,29 @@ fn current_version() -> Result<semver::Version> {
     semver::Version::parse(&crate::services::developer::update_version())
         .map_err(|_| error("当前发行版本无效"))
 }
-fn active_release(release: &Release) -> Result<()> {
-    if release.channel != active_channel() {
+fn active_release(release: &Release, transition: bool) -> Result<()> {
+    if release.channel
+        != if transition {
+            "developer"
+        } else {
+            active_channel()
+        }
+    {
         return Err(error("更新通道已切换，请重新检查更新"));
     }
     Ok(())
+}
+/// 从稳定版转入同一基础版本的 dev.N 属于发行切换，不能按 SemVer 误判为降级。
+fn available(release: &Release, transition: bool) -> Result<bool> {
+    let next = semver::Version::parse(&release.version).map_err(|_| error("更新版本无效"))?;
+    let current = current_version()?;
+    Ok(if transition {
+        release.channel == "developer"
+            && valid_developer_version(&next)
+            && (next.major, next.minor, next.patch) >= (current.major, current.minor, current.patch)
+    } else {
+        next > current
+    })
 }
 
 /// 开发者预发布不参与 GitHub latest；只从固定仓库寻找规范命名的开发者标签。
@@ -241,7 +260,7 @@ fn validate_release(release: &Release) -> Result<()> {
     if (!legacy && release.app_id != "dev.zhenjing.desktop")
         || release.platform != "windows-x86_64"
         || !((release.channel == "stable" && version.pre.is_empty() && version.build.is_empty())
-            || (cfg!(feature = "developer-edition") && release.channel == "developer" && valid_developer_version(&version)))
+            || (release.channel == "developer" && valid_developer_version(&version)))
         || url.scheme() != "https"
         || url.host_str() != Some("github.com")
         // 仅为检查旧已签名版本保留 0.2.x 的清单兼容；新版本必须使用安装包。
@@ -308,6 +327,8 @@ impl Default for Status {
 struct Pending {
     envelope: Envelope,
     download_id: String,
+    #[serde(default)]
+    developer_transition: bool,
 }
 struct Lease {
     token: String,
@@ -316,6 +337,7 @@ struct Lease {
     release: Release,
 }
 pub struct UpdateService {
+    transition: AtomicBool,
     directory: PathBuf,
     pub status: Mutex<Status>,
     release: Mutex<Option<(Envelope, Release)>>,
@@ -333,6 +355,7 @@ impl UpdateService {
         if self.status.lock().await.phase == "installing" {
             return Err(error("更新正在安装，暂不能切换发行通道"));
         }
+        self.transition.store(false, Ordering::Release);
         *self.pending.lock().await = None;
         *self.release.lock().await = None;
         *self.lease.lock().await = None;
@@ -344,6 +367,32 @@ impl UpdateService {
         }
         self.wake.notify_one();
         Ok(())
+    }
+    /// 只代表用户选择下载官方开发者发行，不授予开发者身份。安装后仍由原生身份关口认证。
+    pub async fn begin_developer(
+        &self,
+        tools: &ToolsState,
+        http: &reqwest::Client,
+    ) -> Result<Status> {
+        if cfg!(feature = "developer-edition") {
+            return Err(error("当前已是开发者安装包，请在关于页面认证身份"));
+        }
+        if matches!(
+            self.status.lock().await.phase.as_str(),
+            "downloading" | "installing"
+        ) {
+            return Err(error("请先完成当前更新任务"));
+        }
+        self.reset_channel().await?;
+        self.transition.store(true, Ordering::Release);
+        let status = self.check(http).await?;
+        if status.phase == "available" {
+            self.download(tools, http).await
+        } else {
+            self.transition.store(false, Ordering::Release);
+            *self.release.lock().await = None;
+            Ok(status)
+        }
     }
     /// 所有待更新指针变更都在 serial 内执行；旧任务仍留在下载列表，不删除用户已下载文件。
     async fn forget_superseded(&self, latest: &semver::Version) {
@@ -381,6 +430,10 @@ impl UpdateService {
             })
             .transpose()?;
         Ok(Self {
+            transition: AtomicBool::new(
+                !cfg!(feature = "developer-edition")
+                    && pending.as_ref().is_some_and(|p| p.developer_transition),
+            ),
             directory: directory.to_owned(),
             status: Mutex::new(Status::default()),
             release: Mutex::new(release),
@@ -411,7 +464,8 @@ impl UpdateService {
             status.message = "正在读取 GitHub Releases 签名清单".into();
         }
         let result = async {
-            let developer = active_channel() == "developer";
+            let transition = self.transition.load(Ordering::Acquire);
+            let developer = transition || active_channel() == "developer";
             let feed = if developer {
                 let Some(feed) = developer_feed(http).await? else {
                     return Ok(CheckedRelease::Absent);
@@ -458,7 +512,7 @@ impl UpdateService {
             let envelope: Envelope =
                 serde_json::from_slice(&bytes).map_err(|_| error("发布源未返回有效的签名清单"))?;
             let release = verify(&envelope)?;
-            active_release(&release)?;
+            active_release(&release, transition)?;
             Ok(CheckedRelease::Signed(envelope, release))
         }
         .await;
@@ -469,18 +523,19 @@ impl UpdateService {
                 let current = current_version()?;
                 let latest = semver::Version::parse(&release.version)
                     .map_err(|_| error("更新版本号无效"))?;
-                status.phase = if latest > current {
+                let is_available = available(&release, self.transition.load(Ordering::Acquire))?;
+                status.phase = if is_available {
                     "available"
                 } else {
                     "up-to-date"
                 }
                 .into();
-                status.message = if latest > current {
+                status.message = if is_available {
                     "发现可信的新版本；下载并验证后将在空闲时自动安装重启"
                 } else if latest < current {
                     "本机版本领先发布源，不会降级安装"
                 } else {
-                    "当前版本已是此发布源的最新稳定版本"
+                    "当前版本已是所选发行通道的最新版本"
                 }
                 .into();
                 status.latest_version = Some(release.version.clone());
@@ -511,7 +566,12 @@ impl UpdateService {
             }
             Ok(CheckedRelease::Absent) => {
                 status.phase = "no-release".into();
-                status.message = "仓库尚无可用的签名更新清单".into();
+                status.message = if self.transition.load(Ordering::Acquire) {
+                    "开发者版本尚未发布，未下载或安装任何文件"
+                } else {
+                    "仓库尚无可用的签名更新清单"
+                }
+                .into();
                 status.latest_version = None;
                 status.token = None;
                 status.changelog.clear();
@@ -540,11 +600,9 @@ impl UpdateService {
         let pending = self.pending.lock().await.clone();
         if let Some(pending) = pending {
             let release = verify(&pending.envelope)?;
-            active_release(&release)?;
-            let current = current_version()?;
-            if semver::Version::parse(&release.version).map_err(|_| error("待更新版本无效"))?
-                <= current
-            {
+            let transition = self.transition.load(Ordering::Acquire);
+            active_release(&release, transition)?;
+            if !available(&release, transition)? {
                 *self.pending.lock().await = None;
                 let _ = tokio::fs::remove_file(self.directory.join("update-pending.json")).await;
             } else if let Ok(task) = manager.task(&pending.download_id).await {
@@ -639,10 +697,9 @@ impl UpdateService {
             .await
             .clone()
             .ok_or_else(|| error("请先检查并验证更新清单"))?;
-        active_release(&release)?;
-        if semver::Version::parse(&release.version).map_err(|_| error("版本号无效"))?
-            <= current_version()?
-        {
+        let transition = self.transition.load(Ordering::Acquire);
+        active_release(&release, transition)?;
+        if !available(&release, transition)? {
             return Err(error("没有比当前版本更新的包，不执行降级或重复替换"));
         }
         let existing = self.pending.lock().await.clone();
@@ -686,6 +743,7 @@ impl UpdateService {
         let pending = Pending {
             envelope,
             download_id: id,
+            developer_transition: transition,
         };
         save_json(&self.directory.join("update-pending.json"), &pending).await?;
         *self.pending.lock().await = Some(pending);
@@ -706,7 +764,7 @@ impl UpdateService {
             return Err(error("安装凭据已过期，请刷新待更新状态"));
         }
         let lease = lease.take().ok_or_else(|| error("更新凭据已使用"))?;
-        active_release(&lease.release)?;
+        active_release(&lease.release, self.transition.load(Ordering::Acquire))?;
         Ok((lease.path, lease.release))
     }
     pub async fn has_pending(&self) -> bool {
@@ -740,6 +798,39 @@ impl UpdateService {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn preview_requires_explicit_transition_and_never_downgrades_core() -> Result<()> {
+        let base = env!("CARGO_PKG_VERSION");
+        let release = Release {
+            app_id: "dev.zhenjing.desktop".into(),
+            version: format!("{base}-dev.1"),
+            platform: "windows-x86_64".into(),
+            channel: "developer".into(),
+            url: format!(
+                "https://github.com/surgar04/m78deguren/releases/download/v{base}-dev.1/zhenjing-{base}-dev.1-windows-x64.msi"
+            ),
+            sha256: "a".repeat(64),
+            bytes: 2_000_000,
+            changelog: "preview".into(),
+            release_url: format!(
+                "https://github.com/surgar04/m78deguren/releases/tag/v{base}-dev.1"
+            ),
+        };
+        validate_release(&release)?;
+        assert!(active_release(&release, false).is_err());
+        assert!(active_release(&release, true).is_ok());
+        assert!(available(&release, true)?);
+        assert!(!available(&release, false)?);
+        let mut older = release.clone();
+        older.version = "0.0.1-dev.1".into();
+        assert!(!available(&older, true)?);
+        let record: Pending = serde_json::from_value(
+            serde_json::json!({"envelope":{"payload":"","signature":""},"downloadId":"x"}),
+        )
+        .map_err(|_| error("legacy pending"))?;
+        assert!(!record.developer_transition);
+        Ok(())
+    }
     #[test]
     fn metadata_never_accepts_other_repositories_or_preview_tags() -> Result<()> {
         let valid = br#"{"tag_name":"v1.2.3","html_url":"https://github.com/surgar04/m78deguren/releases/tag/v1.2.3","body":"release notes"}"#;

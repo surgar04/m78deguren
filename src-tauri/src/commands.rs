@@ -3,6 +3,7 @@ use serde::Serialize;
 pub mod acceleration;
 pub mod builtin;
 pub mod developer;
+pub mod developer_workspace;
 pub mod hardware;
 pub mod home;
 pub mod hud;

@@ -1,11 +1,20 @@
 ﻿$ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-if ([IO.Path]::GetPathRoot($projectRoot) -ne 'D:\') {
+$workspaceMode=$false
+if($env:ZHENJING_WORKSPACE_ROOT -and [IO.Path]::GetFullPath($env:ZHENJING_WORKSPACE_ROOT).TrimEnd('\') -ieq $projectRoot.TrimEnd('\')){
+    $workspaceProfileFile=Join-Path $projectRoot '.local/workspace-profile.json'
+    if((Test-Path -LiteralPath $workspaceProfileFile) -and (Get-Item -LiteralPath $workspaceProfileFile).Length -le 4096){
+        $workspaceProfile=[IO.File]::ReadAllText($workspaceProfileFile)|ConvertFrom-Json
+        $workspaceMode=$workspaceProfile.repository -ceq 'https://github.com/surgar04/m78deguren.git' -and $workspaceProfile.branch -ceq 'codex/develop' -and $workspaceProfile.root -ieq $projectRoot
+    }
+}
+$restrictToD= -not $workspaceMode -or $env:ZHENJING_RESTRICT_WRITES_TO_D -eq '1'
+if ($restrictToD -and [IO.Path]::GetPathRoot($projectRoot) -ne 'D:\') {
     throw '本项目只允许在 D 盘运行。'
 }
 
 # 仅改变当前进程及子进程，避免修改用户环境、注册表或 C 盘配置。
-$env:ZHENJING_RESTRICT_WRITES_TO_D = '1'
+$env:ZHENJING_RESTRICT_WRITES_TO_D = if($restrictToD){'1'}else{'0'}
 $directories = @{
     TEMP = '.cache\tmp'
     TMP = '.cache\tmp'
@@ -22,6 +31,7 @@ $directories = @{
     npm_config_cache_dir = '.cache\pnpm\cache'
     npm_config_config_dir = '.cache\pnpm\config'
     COREPACK_HOME = '.cache\corepack'
+    NODE_COMPILE_CACHE = '.cache\node-compile'
     CARGO_HOME = '.tools\cargo'
     RUSTUP_HOME = '.tools\rustup'
     CARGO_TARGET_DIR = '.cache\cargo\target'
@@ -67,6 +77,13 @@ $libraryPaths = @('.tools\msvc\lib', '.tools\winsdk\lib\ucrt', '.tools\winsdk\li
 $env:LIB = $libraryPaths -join ';'
 $includePaths = @('.tools\msvc\include', '.tools\winsdk\include\ucrt', '.tools\winsdk\include\shared', '.tools\winsdk\include\um', '.tools\winsdk\include\winrt') | ForEach-Object { Join-Path $projectRoot $_ }
 $env:INCLUDE = $includePaths -join ';'
-$toolPaths = @('scripts', '.tools\node', '.tools\cargo\bin', '.tools\msvc\bin', '.tools\winsdk\bin') | ForEach-Object { Join-Path $projectRoot $_ }
+$toolPaths = @('scripts', '.tools\node', '.tools\dotnet', '.tools\cargo\bin', '.tools\msvc\bin', '.tools\winsdk\bin') | ForEach-Object { Join-Path $projectRoot $_ }
+if($workspaceMode){
+    # 开发终端的 Git 配置同样隔离；不读写用户全局配置或凭据。
+    $env:GIT_CONFIG_NOSYSTEM='1'
+    $env:GIT_CONFIG_GLOBAL=Join-Path $projectRoot '.local/gitconfig'
+    $workspaceGit=Join-Path (Split-Path -Parent $projectRoot) '.zhenjing-setup/git/cmd'
+    if(Test-Path -LiteralPath (Join-Path $workspaceGit 'git.exe')){$toolPaths=@($workspaceGit)+$toolPaths}
+}
 $env:PATH = ($toolPaths -join ';') + ';' + $env:PATH
 Set-Location -LiteralPath $projectRoot

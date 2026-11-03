@@ -1,3 +1,4 @@
+import './check-environment.ts';
 import { cp, mkdir, readFile, writeFile, readdir, lstat, rm } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -6,8 +7,6 @@ import { musicHostSources } from './music-inputs.ts';
 
 /** 从同一 pnpm 锁文件创建无链接的独立生产目录；发布版不读取开发机 store。 */
 const root = resolve(import.meta.dirname, '..');
-if (process.env.ZHENJING_RESTRICT_WRITES_TO_D !== '1' || !root.startsWith('D:\\'))
-  throw Error('请使用 dev.ps1 入口');
 const sources = await musicHostSources(root);
 const stage = join(root, '.cache/music-host-flat');
 await mkdir(stage, { recursive: true });
@@ -88,7 +87,11 @@ const prebuilds = join(output, 'node_modules/@lox-audioserver/node-librespot/pre
 for (const name of await readdir(prebuilds))
   if (name !== 'win32-x64-msvc') {
     const target = resolve(prebuilds, name);
-    if (!target.startsWith(output + '\\') || !/^D:\\/u.test(target))
+    if (
+      !target.startsWith(output + '\\') ||
+      (process.env['ZHENJING_RESTRICT_WRITES_TO_D'] === '1' && !/^D:\\/u.test(target)) ||
+      (await lstat(target)).isSymbolicLink()
+    )
       throw Error('原生预编译模块清理范围无效');
     await rm(target, { recursive: true, force: true });
   }

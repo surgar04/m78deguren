@@ -74,6 +74,9 @@ pub enum Request {
     },
     UpdateStatus {},
     UpdateCheck {},
+    UpdateDeveloper {
+        consent: bool,
+    },
     UpdateDownload {},
     UpdateOpenRelease {},
     UpdateOpenLogs {},
@@ -314,6 +317,18 @@ pub async fn settings_execute(
         }
         Request::UpdateStatus {} => json(state.update.status(&tools.downloads).await?),
         Request::UpdateCheck {} => json(state.update.check(&state.releases_http).await?),
+        Request::UpdateDeveloper { consent } => {
+            if !consent {
+                return Err(error("请明确选择开发者发行，并确认安装后需要认证"));
+            }
+            let _critical = settings::runtime::Critical::acquire(&state)?;
+            json(
+                state
+                    .update
+                    .begin_developer(&tools, &state.releases_http)
+                    .await?,
+            )
+        }
         Request::UpdateDownload {} => {
             json(state.update.download(&tools, &state.releases_http).await?)
         }
