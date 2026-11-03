@@ -21,6 +21,11 @@ jobs:
           robocopy $env:GITHUB_WORKSPACE $destination /E /XD .git /NFL /NDL /NJH /NJS /NP
           if ($LASTEXITCODE -ge 8) { throw 'Workspace copy failed' }
           exit 0
+      # bootstrap 最后会运行 env:check，.NET 必须先准备好；该脚本不依赖 Node/Rust。
+      - name: Prepare portable .NET SDK
+        shell: pwsh
+        working-directory: D:\zhenjing-ci
+        run: ./scripts/prepare-dotnet.ps1
       - name: Prepare isolated tools
         shell: pwsh
         working-directory: D:\zhenjing-ci
@@ -42,10 +47,6 @@ jobs:
             } | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
           if (-not $vc -or -not $sdk) { throw 'Runner 未提供完整的 MSVC/Windows SDK' }
           ./scripts/bootstrap.ps1 -MsvcSource $vc.FullName -SdkSource $sdkRoot -SdkVersion $sdk.Name
-      - name: Prepare portable .NET SDK
-        shell: pwsh
-        working-directory: D:\zhenjing-ci
-        run: ./scripts/prepare-dotnet.ps1
       - name: Quality checks
         shell: pwsh
         working-directory: D:\zhenjing-ci
