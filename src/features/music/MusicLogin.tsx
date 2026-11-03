@@ -21,6 +21,7 @@ import {
 } from '@/lib/music-contracts';
 import { musicEngine } from './engine';
 import { providerLabel } from './model';
+import { musicAuthCode, musicAuthFailure } from '@/lib/music-auth';
 
 const symbols = { qq: faQq, netease: faMusic, spotify: faSpotify, ytm: faYoutube };
 /** 授权是一条独立流程：选方式→生成→手机/浏览器确认，不在多个零散段落中寻找操作。 */
@@ -107,6 +108,13 @@ export function MusicLogin({
   const browser = provider === 'ytm' || provider === 'spotify';
   const confirmed = !start.isPending && poll.data?.state === 'confirmed';
   const failure = start.error ?? poll.error ?? methods.error;
+  const diagnosticCode = poll.data?.code || (failure ? musicAuthCode(failure) : '');
+  const diagnosis =
+    poll.data?.diagnostics ||
+    (failure
+      ? `provider ${provider}\nphase ${start.error ? 'opening' : 'checking'}\ncode ${diagnosticCode}`
+      : '');
+  const explained = musicAuthFailure(diagnosticCode);
   const status = confirmed
     ? '连接成功'
     : imageFailed
@@ -228,17 +236,21 @@ export function MusicLogin({
           </div>
           {(failure || poll.data?.state === 'error') && (
             <p className="music-login-error" role="alert">
-              {failure ? errorMessage(failure) : poll.data?.message}
-              {poll.data?.code && <small>诊断代码：{poll.data.code}</small>}
+              {failure
+                ? provider === 'ytm'
+                  ? `${explained.title}。${explained.hint}`
+                  : errorMessage(failure)
+                : poll.data?.message}
+              {diagnosticCode && <small>诊断代码：{diagnosticCode}</small>}
             </p>
           )}
-          {poll.data?.diagnostics && (
+          {diagnosis && (
             <div className="music-login-diagnostics">
               <button
                 type="button"
                 className="glass-button"
                 onClick={() => {
-                  const content = `臻境 YouTube Music 授权诊断\n${poll.data?.diagnostics ?? ''}`;
+                  const content = `臻境 ${providerLabel(provider)} 授权诊断\n${diagnosis}`;
                   if (typeof navigator.clipboard?.writeText !== 'function') {
                     setCopyStatus('剪贴板不可用，请展开诊断后手动复制');
                     return;
@@ -254,7 +266,7 @@ export function MusicLogin({
               <span role="status">{copyStatus}</span>
               <details>
                 <summary>查看授权阶段</summary>
-                <pre>{poll.data.diagnostics}</pre>
+                <pre>{diagnosis}</pre>
               </details>
             </div>
           )}

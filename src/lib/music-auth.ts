@@ -102,3 +102,13 @@ export function musicHostFailure(cause: unknown): string {
   if (/超时|timeout/i.test(value)) return 'host-timeout';
   return 'host-unavailable';
 }
+/** 仅认可固定代码。未知异常和 cause 的原文不会进入可复制诊断。 */
+export function musicAuthCode(cause: unknown): string {
+  if (cause && typeof cause === 'object') {
+    for (const field of ['cause', 'reason', 'code']) {
+      const value: unknown = Reflect.get(cause, field);
+      if (typeof value === 'string' && Object.hasOwn(failures, value)) return value;
+    }
+  }
+  return musicHostFailure(cause);
+}
