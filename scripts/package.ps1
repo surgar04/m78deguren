@@ -7,6 +7,17 @@ if($Publish){
     & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot 'scripts\publish-release.ts') --preflight
     if($LASTEXITCODE -ne 0){throw 'GitHub 发布预检未通过；未清理或覆盖现有安装包。'}
 }
+# 应用版本升级后先重建受版本约束的原生 DLL，避免把旧版本组件带入检查或安装包。
+# 只使用 D 盘便携 SDK；不放宽 Rust 构建期的版本、来源和逐文件摘要校验。
+$packageVersion=(Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw|ConvertFrom-Json).version
+$bridgeManifest=Join-Path $projectRoot 'src-tauri/resources/windows-bridge/manifest.json'
+if(-not (Test-Path -LiteralPath $bridgeManifest) -or (Get-Content -LiteralPath $bridgeManifest -Raw|ConvertFrom-Json).version -ne $packageVersion){
+    & "$PSScriptRoot\build-windows-bridge.ps1"
+}
+$monitorLibrary=Join-Path $projectRoot 'src-tauri/resources/hardware-monitor/runtime/ZhenjingMonitor.dll'
+if(-not (Test-Path -LiteralPath $monitorLibrary) -or [Diagnostics.FileVersionInfo]::GetVersionInfo($monitorLibrary).FileVersion -ne ($packageVersion+'.0')){
+    & "$PSScriptRoot\build-hardware-monitor.ps1"
+}
 & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot '.tools\pnpm\bin\pnpm.cjs') check
 if($LASTEXITCODE -ne 0){throw '质量检查未通过，停止打包与发布。'}
 & "$PSScriptRoot\clean-packages.ps1"

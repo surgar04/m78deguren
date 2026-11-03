@@ -24,7 +24,7 @@
     "System.Web.HttpUtility.dll": "57904e0d4ea5f38e110cff78d8324dd2b83e894f3f34f1990c93ed831e7fab11",
     "System.IO.Pipes.AccessControl.dll": "3444d887b589fbdc709c64ee68cd30187a8021ae5fd90a2fa9cefe7e8f2010d0",
     "System.Security.dll": "82a02dd492366f6f36d1620783749b5e0f471e85fe1c34a5c554741dac48fcbb",
-    "ZhenjingMonitor.exe": "ae6108db80752bb666ee1322153ebdf9cf0d3b3935a02675c51d1f8cd4fefe68",
+    "ZhenjingMonitor.exe": "50813724356c48ff6cb701fa318a3264f12f9f07139a7b02953e633971178b12",
     "System.Diagnostics.TraceSource.dll": "ad5e60214e43e47930e282d52dbc21c137d780d6a9de57ca881d1566682c247e",
     "System.Security.Cryptography.X509Certificates.dll": "4e830c798c51766a5ac2c5befdfefe8bec48d7417bff8fcf359d3bad0b5eda18",
     "System.IO.IsolatedStorage.dll": "c8bff13359a2d0a14c644a8b60aef0e940127cc3f810acd813b521e2512f9a3a",
@@ -39,7 +39,7 @@
     "System.Security.Principal.dll": "46fe40f5f195b614a4e9f58f04ffc976837a4e4649eb1b514b1209f6e0fb8e6e",
     "System.Xml.dll": "d720384c0eea1185f6b8ed595cdd3abe9b9e1ed485855df58cc896f830617a4c",
     "System.IO.MemoryMappedFiles.dll": "e29f98eb15b7ce8aa4af5b2560ea30f57fc897233bed892062823d643ab2f57e",
-    "ZhenjingMonitor.dll": "d93ea3d57c0f87d96ce8d44de8be099c1ba70709bfe99a8891dad63fb4ecdb78",
+    "ZhenjingMonitor.dll": "08ab9da0495f0b090689656712c1e65a1dcd896a852b75a01021b0b993001abf",
     "System.Runtime.Loader.dll": "5b5061346d1f7e1adb208207dd5d1a812db3984e1c9a0109dc875b1712811e9a",
     "System.Threading.Tasks.Dataflow.dll": "2fa7af13081b940051bf9ec8a5eb9141cec42740a694136937a519bbeeab04d9",
     "System.ObjectModel.dll": "6543df5b88d72adb9184908c5f3a2b084755956b247a4f559d3cd171a9bda4bd",
@@ -171,7 +171,7 @@
     "System.ComponentModel.Primitives.dll": "c7368f5d4e32ff30600ab0efcd1272830c8d82852b82e21e872caa27ed20596b",
     "System.Security.Cryptography.Algorithms.dll": "2606a842244b54e9f0570e690a64c56eb2b9beea1165efb0a905e87893f89371",
     "System.Runtime.InteropServices.RuntimeInformation.dll": "0a5b800566f00cf9e5f063b6240150e2441d4f52746dba260068901326bf8302",
-    "ZhenjingMonitor.deps.json": "7ed004fe27c09465b8b116f5553630aed7a27e31081d1c0293c1367dcfbe5d6b",
+    "ZhenjingMonitor.deps.json": "ee7755ff8f7c94becbb0ab62e90596a09c41838d0d760c990378b47db31f67cf",
     "System.Buffers.dll": "d1222b8642c75039e3408beddd7f2ca7753683af1a894d11322a896ca94bf428",
     "System.IO.FileSystem.AccessControl.dll": "e571fb2430b4bf60854b52a68a646a5f19605e05b7b97aab0b53787a281325c9",
     "System.Text.Encoding.dll": "c45c1b5945b0003440d918ab031401991850d0f7c3c479213259eb756e1906a5",
@@ -260,5 +260,5 @@
     "ZhenjingMonitor.csproj": "a469fe90a6274ad2470f03b8d3b5e17faaf2f9d235dee5042c1691a346c40de9",
     "Hud/Locales/fr-FR.json": "938d5cb63edc33aecf6972eaa6e9b956f3c12526c6e3ba09a08cd6dd71a0ab9f"
   },
-  "sha256": "ae6108db80752bb666ee1322153ebdf9cf0d3b3935a02675c51d1f8cd4fefe68"
+  "sha256": "50813724356c48ff6cb701fa318a3264f12f9f07139a7b02953e633971178b12"
 }
