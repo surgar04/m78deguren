@@ -12,6 +12,7 @@ export default defineConfig({
     maxWorkers: 1,
     fileParallelism: false,
     environment: 'jsdom',
+    globalSetup: ['./scripts/vitest-global-setup.ts'],
     setupFiles: ['./src/test/setup.ts'],
     include: [
       'src/**/*.test.{ts,tsx}',

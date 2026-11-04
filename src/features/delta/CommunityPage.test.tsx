@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import CommunityPage from './CommunityPage';
 
 const native = vi.hoisted(() =>
@@ -12,6 +12,13 @@ vi.mock('@/lib/desktop', () => ({
   executeGameRoom: native,
   errorMessage: (error: unknown) => (error instanceof Error ? error.message : 'fixture-error'),
 }));
+const clients = new Set<QueryClient>();
+afterEach(() => {
+  // React 组件卸载后还须清除请求/变更缓存，避免 GC 计时器拖住独立测试进程。
+  for (const client of clients) client.clear();
+  clients.clear();
+  vi.restoreAllMocks();
+});
 beforeEach(() => {
   native.mockReset();
   native.mockImplementation((request: Record<string, unknown>) =>
@@ -56,8 +63,12 @@ beforeEach(() => {
 });
 function view() {
   const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: 0 },
+      mutations: { retry: false, gcTime: 0 },
+    },
   });
+  clients.add(client);
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter>
