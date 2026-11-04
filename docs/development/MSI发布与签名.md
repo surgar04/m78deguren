@@ -1,6 +1,6 @@
 # MSI 发布与签名
 
-0.6.0 起只构建 MSI。入口为 dev.ps1 desktop:build / desktop:bundle，执行清理、前端与实际 Release 链接、WiX MSI、代码签名及独立 Ed25519 发布清单生成，不生成便携包或 EXE 安装引导。
+0.6.0 起只构建 MSI。0.10.3 起 `dev.ps1 desktop:build` / `desktop:bundle` 默认顺序构建稳定版和开发者版；单版重试使用 `desktop:build:stable` / `desktop:build:developer`。每版均执行清理、前端与实际 Release 链接、WiX MSI、代码签名及独立 Ed25519 发布清单生成，不生成便携包或 EXE 安装引导。
 
 WiX 3.14.1 使用固定 SHA256 的官方便携工具，全部位于 D 盘。自定义 C++ 即时动作只验证本地目录及 WebView2，不执行系统写入；文件、快捷方式和登记交由 Windows Installer 标准组件与事务处理。固定组件 GUID、UpgradeCode 与当前用户安装范围保持版本兼容，不允许降级，支持 MSI 维护重装。ICE91 关于目录不随 ALLUSERS 改变的提示对应本项目有意固定的 per-user 安装；运行时条件拒绝 ALLUSERS，未关闭 ICE 验证。
 

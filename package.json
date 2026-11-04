@@ -2,7 +2,7 @@
   "name": "zhenjing",
   "private": true,
   "license": "AGPL-3.0-only",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -18,7 +18,8 @@
     "preview": "vite preview",
     "tauri": "node scripts/check-environment.ts && tauri",
     "desktop:dev": "pnpm tauri dev",
-    "desktop:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1",
+    "desktop:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-pair.ps1",
+    "desktop:build:stable": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Edition stable",
     "desktop:bundle": "pnpm desktop:build",
     "desktop:build:developer": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Edition developer",
     "desktop:build:pair": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-pair.ps1",

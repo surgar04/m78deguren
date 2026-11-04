@@ -36,7 +36,10 @@ $manifest=@{schema=1;version=$version;targetFramework='net48';files=@{'Zhenjing.
 $stagedManifest=Join-Path $stage 'manifest.json'
 $targetManifest=Join-Path $target 'manifest.json'
 [IO.File]::WriteAllText($stagedManifest,($manifest|ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false))
-& (Join-Path $projectRoot '.tools/node/node.exe') (Join-Path $projectRoot 'node_modules/prettier/bin/prettier.cjs') --write $stagedManifest
+# 暂存文件位于被 CLI 忽略的 .cache 中；使用格式化 API，避免静默跳过后将未格式化清单带入质量检查。
+$formatScript=Join-Path $stage 'format-manifest.mjs'
+[IO.File]::WriteAllText($formatScript,'import {readFile,writeFile} from "node:fs/promises"; import * as prettier from "prettier"; const file=process.argv[2]; const config=await prettier.resolveConfig(process.cwd()); await writeFile(file,await prettier.format(await readFile(file,"utf8"),{...config,filepath:"manifest.json",parser:"json"}));',[Text.UTF8Encoding]::new($false))
+& (Join-Path $projectRoot '.tools/node/node.exe') $formatScript $stagedManifest
 if($LASTEXITCODE -ne 0){throw 'Windows DLL 清单格式处理失败'}
 if([IO.File]::Exists($targetManifest)){[IO.File]::Replace($stagedManifest,$targetManifest,(Join-Path $stage 'previous-manifest.json'))}else{[IO.File]::Move($stagedManifest,$targetManifest)}
 Write-Output 'Windows C# 组件已构建为显式 DLL。'

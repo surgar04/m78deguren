@@ -1,11 +1,13 @@
 # GitHub 手动发布
 
-按当前选择，`dev.ps1 desktop:build` 生成本地 MSI 及完整 Release 资产，不索取 GitHub 令牌，不自动上传，也不将本地打包成功称为线上更新已生效。
+按当前选择，`dev.ps1 desktop:build` 默认成对生成稳定版和开发者版 MSI 及各自完整 Release 资产，不索取 GitHub 令牌，不自动上传，也不将本地打包成功称为线上更新已生效。
 
 1. 在 `surgar04/m78deguren` 创建稳定 Release，标签为 `v` 加当前版本号，例如 `v0.9.0`。不要设为预发布。
 2. 上传 `dist/desktop` 的全部六个文件：当前版本 MSI、`zhenjing-update.json`、`SHA256SUMS.txt`、`publisher.json`、`build-info.json`、`INSTALL.md`。文件名保持原样，不能只上传 MSI。
 3. 发布并将其标为 Latest。更新源为该仓库的 `releases/latest/download/zhenjing-update.json`。
 4. 运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 release:verify`，核对公开版本、全部资产的 GitHub SHA256、文件长度和更新清单的 Ed25519 签名。
+
+开发者版单独创建 `v基础版本-dev.序号` Release（本次为 `v0.10.3-dev.1`），标为 **Pre-release**，不可设为 Latest。上传 `dist/desktop-developer` 全部六项资产，其更新清单为 `zhenjing-developer-update.json`。两套资产不可混用。稳定版仍须从审核合入后的 `main` 发布，开发者版从 `codex/develop` 发布；本地成对构建不绕过分支审核。
 
 标签中的 `v` 不能省略：`0.9.0` 和 `v0.9.0` 是两个不同的下载地址。安装说明统一采用 ASCII 文件名 `INSTALL.md`，避免 GitHub 将特殊字符文件名改成 `default.md`。发布前检查资产名称与本地完全一致；不要编辑已签名的更新清单来迁就错误标签。
 
