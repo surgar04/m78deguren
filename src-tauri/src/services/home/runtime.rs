@@ -114,8 +114,14 @@ impl HomeState {
                     tokio::time::sleep(Duration::from_secs(30)).await;
                     let state = app.state::<HomeState>();
                     let policy = state.store.lock().await.policy.clone();
+                    let game_room_enabled = {
+                        let room = app.state::<crate::services::game_room::GameRoomState>();
+                        let preferences = room.preferences.lock().await;
+                        preferences.auto_open || preferences.block_sticky_keys
+                    };
                     if policy.auto_game_mode
                         || policy.disable_win_in_game
+                        || game_room_enabled
                         || state.status.read().await.manual
                         || app
                             .state::<crate::services::quick_launch::QuickLaunchState>()
@@ -191,7 +197,30 @@ impl HomeState {
                     let Ok(value) = serde_json::from_str::<serde_json::Value>(&line) else {
                         continue;
                     };
-                    if value["kind"] == "status" {
+                    if value["kind"] == "game-session" {
+                        let detected = if value["runtime"].is_null() {
+                            Some(None)
+                        } else {
+                            serde_json::from_value::<crate::services::game_room::Detected>(
+                                value["runtime"].clone(),
+                            )
+                            .ok()
+                            .map(Some)
+                        };
+                        if let Some(detected) = detected {
+                            let app = app.clone();
+                            tauri::async_runtime::spawn(async move {
+                                if app
+                                    .state::<crate::services::game_room::GameRoomState>()
+                                    .observe(&app, detected)
+                                    .await
+                                    .is_err()
+                                {
+                                    log::warn!("游戏中间页会话更新失败");
+                                }
+                            });
+                        }
+                    } else if value["kind"] == "status" {
                         if let Ok(next) =
                             serde_json::from_value::<Runtime>(value["runtime"].clone())
                         {
@@ -299,6 +328,23 @@ impl HomeState {
             .rules
             .iter()
             .map(|rule| rule.process.clone())
+            .chain(
+                [
+                    "DeltaForceClient-Win64-Shipping.exe",
+                    "YuanShen.exe",
+                    "GenshinImpact.exe",
+                    "BH3.exe",
+                    "StarRail.exe",
+                    "Arknights.exe",
+                    "Endfield.exe",
+                    "HTGame.exe",
+                    "NTEGame.exe",
+                    "NTEGlobalGame.exe",
+                    "Wuthering Waves.exe",
+                ]
+                .into_iter()
+                .map(str::to_owned),
+            )
             .take(512)
             .collect::<Vec<_>>();
         let steam = app.state::<crate::services::steam::SteamState>();
@@ -313,7 +359,31 @@ impl HomeState {
             .state::<crate::services::quick_launch::QuickLaunchState>()
             .native_config(app)
             .await;
-        self.worker.send(serde_json::json!({"manual":manual,"restore":restore,"autoGameMode":store.policy.auto_game_mode,"disableWinInGame":store.policy.disable_win_in_game,"paths":store.shortcuts.iter().filter(|row|row.is_game).map(|row|row.path.clone()).collect::<Vec<_>>(),"directories":directories,"names":rules,"launched":pid.into_iter().collect::<Vec<_>>(),"wheel":wheel})).await
+        let detected_paths = app
+            .state::<crate::services::other_games::OtherGamesState>()
+            .current()
+            .await
+            .games
+            .into_iter()
+            .filter(|game| game.available)
+            .map(|game| game.path);
+        let game_paths = store
+            .shortcuts
+            .iter()
+            .filter(|row| row.is_game)
+            .map(|row| row.path.clone())
+            .chain(detected_paths)
+            .collect::<std::collections::HashSet<_>>()
+            .into_iter()
+            .take(1024)
+            .collect::<Vec<_>>();
+        let block_sticky = app
+            .state::<crate::services::game_room::GameRoomState>()
+            .preferences
+            .lock()
+            .await
+            .block_sticky_keys;
+        self.worker.send(serde_json::json!({"manual":manual,"restore":restore,"autoGameMode":store.policy.auto_game_mode,"disableWinInGame":store.policy.disable_win_in_game,"blockStickyKeys":block_sticky,"paths":game_paths,"directories":directories,"names":rules,"launched":pid.into_iter().collect::<Vec<_>>(),"wheel":wheel})).await
     }
     pub(super) async fn refresh_worker_if_running(&self, app: &tauri::AppHandle) {
         if self.worker.input.lock().await.is_some()
@@ -331,6 +401,20 @@ impl HomeState {
         self.worker
             .send(serde_json::json!({"wheelPreview":true}))
             .await
+    }
+    /// 恢复入口独立于游戏模式开关；先关闭自动保护，避免下一次采样立即重新应用。
+    pub async fn restore_sticky(&self, app: &tauri::AppHandle) -> Result<()> {
+        let room = app.state::<crate::services::game_room::GameRoomState>();
+        let mut preferences = room.preferences.lock().await;
+        preferences.block_sticky_keys = false;
+        crate::services::tools::save_json(&room.root.join("preferences.json"), &*preferences)
+            .await?;
+        drop(preferences);
+        self.ensure_worker(app).await?;
+        self.worker
+            .send(serde_json::json!({"restoreSticky":true}))
+            .await?;
+        self.configure_worker(app, None, false).await
     }
     pub async fn restore(&self, consent: bool, app: &tauri::AppHandle) -> Result<Snapshot> {
         if !consent {

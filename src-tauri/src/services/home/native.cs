@@ -18,6 +18,7 @@ namespace Zhenjing.Home {
   public string id;
   public bool? manual;
   public bool autoGameMode, disableWinInGame, restore, stop;
+  public bool blockStickyKeys, restoreSticky;
   public string[] paths = new string[0], directories = new string[0], names = new string[0];
   public int[] launched = new int[0];
   public WheelSettings wheel=new WheelSettings();
@@ -85,6 +86,7 @@ namespace Zhenjing.Home {
   static Hook callback=Keyboard;
   static Mutex lease;
   static bool leased;
+  static bool accessibilityReady;
   static DateTime sampled=DateTime.UtcNow;
   static List<Original> recovery=new List<Original>();
   // 永不调整系统、平台、反作弊、输入、音频、网络、安全及硬件控制程序。
@@ -218,21 +220,27 @@ namespace Zhenjing.Home {
    if(owned.Keys.Any(x=>!keep.Contains(x)))RestoreOwned(keep);
    last=rows.GroupBy(x=>x.pid).ToDictionary(x=>x.Key,x=>x.First());sampled=DateTime.UtcNow;
    Volatile.Write(ref keyboardGames,new HashSet<int>(gameFamily));HookState();Status();
+   // 优先识别三角洲真实进程；沿用同一次进程快照，不能为中间页再轮询系统进程。
+   var game=rows.Where(x=>gameFamily.Contains(x.pid)&&Game(x)&&!protectedNames.Any(prefix=>x.name.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))&&!x.name.Contains("launcher")&&!x.name.StartsWith("crash",StringComparison.OrdinalIgnoreCase)&&!x.name.StartsWith("unitycrash",StringComparison.OrdinalIgnoreCase)).OrderByDescending(x=>x.name=="deltaforceclient-win64-shipping").ThenBy(x=>x.created).FirstOrDefault();
+   Output(new {kind="game-session",runtime=game==null?null:new {pid=game.pid,created=game.created.ToString(System.Globalization.CultureInfo.InvariantCulture),name=Path.GetFileNameWithoutExtension(game.path),path=game.path}});
+   GameAccessibility.Update(game!=null,config.blockStickyKeys);
   }
   static void Status(){uint foreground;GetWindowThreadProcessId(GetForegroundWindow(),out foreground);Output(new {kind="status",runtime=new {ready=true,manual=manual,effective=effective,gameRunning=gameFamily.Count>0,winKeyBlocked=hookWanted&&keyboard!=IntPtr.Zero&&gameFamily.Contains((int)foreground),suppressedCount=owned.Count,recoverableCount=recovery.Count,message=message}});}
   static void Configure(string text){
    string id="";try {
     var next=json.Deserialize<Configuration>(text);id=next.id;
+    if(next.restoreSticky){if(!leased){try{if(!lease.WaitOne(0))throw new IOException("另一实例正在控制游戏辅助设置");}catch(AbandonedMutexException){}leased=true;}if(!accessibilityReady){GameAccessibility.Initialize(root);accessibilityReady=true;}GameAccessibility.Restore(true);Output(new {kind="ack",id=id,ok=true,message=""});return;}
     if(next.wheelPreview){WheelController.Preview();Output(new {kind="ack",id=id,ok=true,message=""});return;}
-    if(next.paths.Length>128||next.directories.Length>30000||next.names.Length>512)throw new IOException("识别名单超过限制");
+    if(next.paths.Length>1024||next.directories.Length>30000||next.names.Length>512)throw new IOException("识别名单超过限制");
     if(!next.restore&&recovery.Count>0&&(next.manual==true||next.autoGameMode||next.disableWinInGame))throw new IOException("存在未恢复的进程记录，请先使用恢复入口");
-    if((next.manual==true||next.autoGameMode||next.disableWinInGame||next.restore)&&!leased){try {if(!lease.WaitOne(0))throw new IOException("另一臻境实例正在控制游戏模式，请先在该实例关闭");}catch(AbandonedMutexException){}leased=true;}
+    if((next.manual==true||next.autoGameMode||next.disableWinInGame||next.blockStickyKeys||next.restore)&&!leased){try {if(!lease.WaitOne(0))throw new IOException("另一臻境实例正在控制游戏模式，请先在该实例关闭");}catch(AbandonedMutexException){}leased=true;}
+    if(leased&&!accessibilityReady){GameAccessibility.Initialize(root);accessibilityReady=true;}
     if(next.restore){foreach(var row in recovery.ToArray()){try {Restore(row);recovery.Remove(row);}catch(Exception e){message=e.Message;}}Save();if(recovery.Count>0)throw new IOException("部分进程未能恢复，原值已保留，可稍后重试："+message);}
     if(next.manual.HasValue){manual=next.manual.Value;manualOverride=true;}
     else if(next.autoGameMode!=config.autoGameMode){manualOverride=false;manual=false;}
     config=next;WheelController.Configure(next.wheel);message="";if(next.stop){manual=false;config.autoGameMode=false;config.disableWinInGame=false;ending=true;}
     Tick();if(config.disableWinInGame&&keyboard==IntPtr.Zero)throw new IOException("Win 键钩子未就绪，策略未成功应用");if(!effective&&owned.Count>0)throw new IOException("仍有部分进程未能恢复，原值保留在应用数据目录，可再次使用恢复入口");
-    if(!manual&&!config.autoGameMode&&!config.disableWinInGame&&leased){lease.ReleaseMutex();leased=false;}
+    if(!manual&&!config.autoGameMode&&!config.disableWinInGame&&!config.blockStickyKeys&&leased){lease.ReleaseMutex();leased=false;}
     Output(new {kind="ack",id=id,ok=true,message=""});
    }catch(Exception e){message=e.Message;Status();Output(new {kind="ack",id=id,ok=false,message=e.Message});}
   }
@@ -273,7 +281,7 @@ namespace Zhenjing.Home {
    var timer=new System.Windows.Forms.Timer {Interval=1000};
    int ticks=0;timer.Tick+=delegate {try {if(owner.HasExited)ending=true;if(ending){Application.ExitThread();return;}string line;while(queue.TryDequeue(out line)){Configure(line);if(ending)break;}if(ending){Application.ExitThread();return;}if(++ticks%3==0)Tick();}catch(Exception e){message=e.Message;Status();}};
    try {timer.Start();Status();Application.Run();}
-   finally {timer.Stop();ending=true;manual=false;hookWanted=false;config.disableWinInGame=false;config.autoGameMode=false;HookState();try {RestoreOwned(new HashSet<int>());}catch(Exception e){message=e.Message;}hookThread.Join(2000);if(leased)lease.ReleaseMutex();lease.Dispose();owner.Dispose();}
+   finally {timer.Stop();ending=true;manual=false;hookWanted=false;config.disableWinInGame=false;config.autoGameMode=false;HookState();try {RestoreOwned(new HashSet<int>());}catch(Exception e){message=e.Message;}try {GameAccessibility.Shutdown();}catch(Exception e){message=e.Message;}hookThread.Join(2000);if(leased)lease.ReleaseMutex();lease.Dispose();owner.Dispose();}
   }
  }
 }

@@ -202,6 +202,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         .manage(services::hud::HudState::new(&root)?)
         .manage(services::steam::SteamState::new(&root)?)
         .manage(services::home::HomeState::new(&root)?)
+        .manage(services::game_room::GameRoomState::new(&root)?)
         .manage(services::other_games::OtherGamesState::new(&root)?)
         .manage(services::acceleration::AccelerationState::new(&root)?)
         .manage(services::quick_launch::QuickLaunchState::new(&root)?)
@@ -473,6 +474,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                 commands::onboarding::onboarding_execute,
                 commands::steam::steam_execute,
                 commands::home::home_execute,
+                commands::game_room::game_room_execute,
                 commands::launchers::other_games_execute,
                 commands::launchers::quick_launch_execute,
                 commands::acceleration::acceleration_execute

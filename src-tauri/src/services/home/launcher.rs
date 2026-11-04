@@ -228,6 +228,17 @@ impl HomeState {
             (PathBuf::from(&row.path), None)
         };
         let path = validate_exe(&target).await?;
+        if row.is_game {
+            // 先完成独立页面展示，再交给官方启动器；检测结果才将“准备中”推进为真实运行会话。
+            if app
+                .state::<crate::services::game_room::GameRoomState>()
+                .preparing(app, &row.name, &row.path)
+                .await
+                .is_err()
+            {
+                log::warn!("快捷启动的游戏中间页未能显示");
+            }
+        }
         let pid = if let Some(app_id) = steam_app_id {
             app.state::<crate::services::steam::SteamState>()
                 .launch("run", Some(app_id))

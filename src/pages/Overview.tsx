@@ -34,7 +34,7 @@ import { useText } from '@/features/settings/i18n';
 import { useHardwareSnapshot } from '@/features/hardware/repository';
 import { field } from '@/features/hardware/live-model';
 import { homeSnapshotSchema, homeContentSchema, type HomeShortcut } from '@/lib/home-contracts';
-import { executeHome, errorMessage, isDesktop } from '@/lib/desktop';
+import { executeHome, executeGameRoom, errorMessage, isDesktop } from '@/lib/desktop';
 import { scrollToSection } from '@/features/home/navigation';
 import { HOME_GUIDE } from '@/features/home/help';
 import '@/features/home/live-home.css';
@@ -363,6 +363,18 @@ export default function Overview() {
                   </h2>
                   <p>游戏与程序，随时出发。</p>
                 </div>
+                <button
+                  type="button"
+                  className="glass-button"
+                  disabled={!isDesktop()}
+                  onClick={() => {
+                    void executeGameRoom({ operation: 'open' }, z.null()).catch((cause) =>
+                      workspace.notify(errorMessage(cause)),
+                    );
+                  }}
+                >
+                  <Icon icon={faGamepad} /> 游戏空间
+                </button>
                 <button
                   type="button"
                   className="mint-button"

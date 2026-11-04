@@ -1,0 +1,80 @@
+/* 基于 NexBox df_stats 的 WeGame 同源采集流程重写。只在官方 HTTPS 页运行；不读出 Cookie、票据或账号密钥。 */
+(() => {
+  const command = __COMMAND__;
+  const slot = __SLOT__;
+  const result = { ready: false };
+  window[slot] = result;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 95000);
+  const api = 'https://www.wegame.com.cn/api/v1/wegame.pallas.dfm.DfmBattle/';
+  const accountType = /(?:^|;\s*)tgp_user_type=1(?:;|$)/.test(document.cookie) ? 2 : 1;
+  async function call(method, body) {
+    const response = await fetch(api + method, {
+      method: 'POST', credentials: 'include', signal: controller.signal,
+      headers: { 'Content-Type': 'application/json', 'trpc-caller': 'wegame.pallas.web.DfmBattle' },
+      body: JSON.stringify({ from_src: 'df_web', area: 36, account_type: accountType, ...body }),
+    });
+    if (!response.ok) throw new Error('http-' + response.status);
+    const text = await response.text();
+    if (text.length > 8000000) throw new Error('response-limit');
+    const value = JSON.parse(text);
+    if (value?.result?.error_code !== 0) throw new Error('session-or-game-unavailable');
+    return value;
+  }
+  // 只向宿主返回业务数据，递归剥离账号标识及凭据；认证保留在 WebView2 自己的加密档案中。
+  function sanitize(value, depth = 0) {
+    if (depth > 25) return null;
+    if (Array.isArray(value)) return value.slice(0, 6000).map(item => sanitize(item, depth + 1));
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value)
+      .filter(([key]) => !/cookie|token|ticket|openid|unionid|uin$|tgp_id|skey|credential/i.test(key))
+      .slice(0, 500).map(([key, item]) => [key, sanitize(item, depth + 1)]));
+    return typeof value === 'string' ? value.slice(0, 16000) : value;
+  }
+  (async () => {
+    const role = (await call('GetRoleInfo', {})).role_info;
+    if (!role?.openid) throw new Error('session-or-game-unavailable');
+    const identity = { openid: role.openid, area: role.area || 36 };
+    const data = {};
+    const errors = {};
+    async function capture(key, work) { try { data[key] = sanitize(await work()); } catch (error) { errors[key] = error.message === 'session-or-game-unavailable' ? '授权失效、角色未绑定或数据暂不可用' : error.name === 'AbortError' ? '请求超时，请重试' : '网络或官方数据格式异常，请重试'; } }
+    async function battles(queue) {
+      const field = queue === 'sol' ? 'sols' : 'tdms';
+      const first = await call('GetBattleList', { ...identity, queue, size: 50, after: null, filters: [] });
+      const all = []; const seen = new Set();
+      const absorb = rows => { let added = 0; for (const row of rows) { const key = String(row.roomId || row.startTime || ''); if (key && !seen.has(key)) { seen.add(key); all.push(row); added++; } } return added; };
+      const initial = Array.isArray(first[field]) ? first[field] : [];
+      absorb(initial);
+      if (initial.length >= 8) for (const cursor of ['startTime', 'roomId']) {
+        let after = initial.at(-1)?.[cursor]; let advanced = false;
+        for (let page = 0; after != null && page < 14; page++) {
+          const next = await call('GetBattleList', { ...identity, queue, size: 50, after, filters: [] });
+          const rows = Array.isArray(next[field]) ? next[field] : [];
+          if (!absorb(rows)) break;
+          advanced = true; if (rows.length < 8) break;
+          const newAfter = rows.at(-1)?.[cursor]; if (newAfter === after) break; after = newAfter;
+        }
+        if (advanced) break;
+      }
+      return { ...first, [field]: all };
+    }
+    const queue = command.queue || 'sol';
+    if (command.kind === 'refresh') {
+      data.role = sanitize(role);
+      data.report_sol_sid = '0'; data.report_tdm_sid = '0';
+      await Promise.all([
+        capture('report_sol', () => call('GetBattleReport', { ...identity, queue: 'sol', sid: '' })),
+        capture('report_tdm', () => call('GetBattleReport', { ...identity, queue: 'tdm', sid: '' })),
+        capture('battles_sol', () => battles('sol')), capture('battles_tdm', () => battles('tdm')),
+        capture('collectibles', () => call('GetCollectibles', identity)), capture('daily', () => call('GetDailyStats', identity)),
+        ...['sol','tdm'].map(async queue => { await capture('maps_' + queue, () => call('GetMapStats', { ...identity, queue, sid: '', mapids: [2201,2202,2211,2212,2231,2232,2233,2242,2251,8102,8103,8151,8901,8902,8921,8922,8923,3901,3902,3951,1901,1902,1911,1912,8802,8803] })); if (data['maps_' + queue]) data['maps_' + queue + '_sid'] = '0'; }),
+        capture('seasons', async () => { const response = await fetch('/api/rail/web/data_filter/game_config/query', { method: 'POST', credentials: 'include', signal: controller.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data_names: 'df_helper_score_season_list', command: 'list_all', params: { start_page: 0, items_per_pager: 50, filters: [] }, stamp: { agent_client_language: 'zh_CN' }, response_format: 0 }) }); if (!response.ok) throw Error('http'); return response.json(); }),
+      ]);
+    } else if (command.kind === 'season') {
+      await capture('report_' + queue, () => call('GetBattleReport', { ...identity, queue, sid: command.sid === '0' ? '' : command.sid }));
+      if (data['report_' + queue]) data['report_' + queue + '_sid'] = command.sid;
+      await capture('maps_' + queue, () => call('GetMapStats', { ...identity, queue, sid: command.sid === '0' ? '' : command.sid, mapids: [2201,2202,2211,2212,2231,2232,2233,2242,2251,8102,8103,8151,8901,8902,8921,8922,8923,3901,3902,3951,1901,1902,1911,1912,8802,8803] }));
+      if (data['maps_' + queue]) data['maps_' + queue + '_sid'] = command.sid;
+    } else if (command.kind === 'detail') await capture('detail', () => call('GetBattleDetail', { ...identity, queue, roomId: command.roomId, start_time: command.startTime }));
+    window[slot] = { ready: true, ok: true, data, errors };
+  })().catch(error => { window[slot] = { ready: true, ok: false, code: error.name === 'AbortError' ? 'timeout' : error.message === 'session-or-game-unavailable' ? 'authorization' : 'network' }; }).finally(() => clearTimeout(timeout));
+})()

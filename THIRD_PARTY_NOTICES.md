@@ -48,6 +48,8 @@ HUD 的显示器／指定窗口 FPS 方案按需使用 ECPFrames，它基于 Int
 
 工具功能范围参考 [NexBox](https://github.com/MuLiuSaMa/NexBox) 的 `5e77875933d751e7661cb2ad54202f98a989dc63` 源码快照。NexBox 采用 GPL-3.0，其中下载引擎另有 AGPL 许可。本次按功能重写本项目领域服务、界面和互操作适配；系统优化配置事实的映射见下文，未嵌入或执行上游应用及下载引擎代码。参考仓库仅存于不发布的 D 盘缓存目录。
 
+游戏空间的三角洲专区参考其官方数据源采集与客户端分析逻辑重写；随机装备基础目录保留于 `src/features/delta/data`，随附 NexBox 的 GPL-3.0 原文。组合程序按根目录 AGPL-3.0 分发。主播资料来自 [冠军导航](https://gjts.cn/)，改枪码来自 NexBox 社区服务；游戏资料和图片版权属于各自权利人。
+
 系统优化配置映射同样参照该快照的 `src/config/system-optimizer.ts`、中文名称及 `aq_registry` / `aq_registry_restore`，抽取 201 个配置标识、简短名称和注册表目标事实，记录在编译期 `optimizer-catalog.json`。导入脚本仅静态解析固定文件，未执行或打包参考项目的脚本、注册表文件或下载引擎。风险说明、扫描、事务、备份恢复和界面为本项目实现；修正的共享值冲突及显卡定位差异见《系统优化全量实现与验收》。
 
 其他 npm 与 Cargo 依赖的版本、来源及许可证以 `pnpm-lock.yaml`、`src-tauri/Cargo.lock` 和各依赖包许可为准。

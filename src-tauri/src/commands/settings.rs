@@ -89,8 +89,8 @@ pub enum Request {
     },
     BootReady {},
 }
-fn allowed(label: &str, _request: &Request) -> bool {
-    label == "main"
+fn allowed(label: &str, request: &Request) -> bool {
+    label == "main" || label == "game-room" && matches!(request, Request::Snapshot {})
 }
 fn json<T: Serialize>(value: T) -> Result<serde_json::Value> {
     serde_json::to_value(value).map_err(|_| error("设置返回结构无效"))

@@ -59,7 +59,7 @@ impl Buffer {
             || entry
                 .intervals
                 .front()
-                .is_some_and(|(at, _)| at.elapsed() > Duration::from_secs(10))
+                .is_some_and(|(at, _)| at.elapsed() > Duration::from_secs(60))
         {
             entry.intervals.pop_front();
         }
@@ -130,7 +130,7 @@ impl Buffer {
             let mut all: Vec<_> = chain
                 .intervals
                 .iter()
-                .filter(|(at, _)| at.elapsed() <= Duration::from_secs(10))
+                .filter(|(at, _)| at.elapsed() <= Duration::from_secs(60))
                 .map(|(_, ms)| *ms)
                 .collect();
             snapshot.frame_count = all.len();
@@ -148,7 +148,7 @@ impl Buffer {
         } else if snapshot.low01.is_none() {
             "0.1% Low 需要窗口内至少 1000 帧；缺失读数不补零"
         } else {
-            "ETW Present · 最近 1 秒 FPS / 最近 10 秒 Low"
+            "ETW Present · 最近 1 秒 FPS / 最近 60 秒 Low"
         }
         .into();
         snapshot
@@ -162,6 +162,7 @@ fn low(descending: &[f64], denominator: usize) -> Option<f64> {
     Some(1000.0 * count as f64 / descending[..count].iter().sum::<f64>())
 }
 pub struct Frames {
+    control: Mutex<()>,
     generation: AtomicU64,
     target: Arc<AtomicU32>,
     configured: AtomicU32,
@@ -172,6 +173,7 @@ pub struct Frames {
 impl Default for Frames {
     fn default() -> Self {
         Self {
+            control: Mutex::new(()),
             generation: AtomicU64::new(0),
             target: Arc::new(AtomicU32::new(0)),
             configured: AtomicU32::new(0),
@@ -208,6 +210,18 @@ impl Frames {
         }
     }
     pub fn stop(&self) -> Result<()> {
+        let _control = self.control.lock().map_err(|_| error("ETW 控制锁不可用"))?;
+        self.stop_inner()
+    }
+    /// 判断租约与释放在同一个控制锁内完成，避免旧窗口关闭时停止刚被其他页面接管的会话。
+    pub fn stop_if_generation(&self, expected: u64) -> Result<()> {
+        let _control = self.control.lock().map_err(|_| error("ETW 控制锁不可用"))?;
+        if self.generation() == expected {
+            self.stop_inner()?;
+        }
+        Ok(())
+    }
+    fn stop_inner(&self) -> Result<()> {
         self.generation.fetch_add(1, Ordering::SeqCst);
         #[cfg(windows)]
         if let Some(trace) = self
@@ -227,7 +241,19 @@ impl Frames {
         Ok(())
     }
     pub fn start(&self, pid: Option<u32>) -> Result<()> {
-        self.stop()?;
+        let _control = self.control.lock().map_err(|_| error("ETW 控制锁不可用"))?;
+        self.start_inner(pid)
+    }
+    pub fn start_if_idle(&self, pid: u32) -> Result<Option<u64>> {
+        let _control = self.control.lock().map_err(|_| error("ETW 控制锁不可用"))?;
+        if self.snapshot().enabled {
+            return Ok(None);
+        }
+        self.start_inner(Some(pid))?;
+        Ok(Some(self.generation()))
+    }
+    fn start_inner(&self, pid: Option<u32>) -> Result<()> {
+        self.stop_inner()?;
         self.configured
             .store(pid.unwrap_or_default(), Ordering::Relaxed);
         self.foreground(pid.unwrap_or_default());
@@ -373,6 +399,39 @@ impl Frames {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn low_percentiles_can_accumulate_on_a_sixty_fps_game() {
+        let now = Instant::now();
+        let mut buffer = Buffer::default();
+        buffer.reset(42);
+        let mut chain = Chain::default();
+        for index in 0..1000 {
+            chain.intervals.push_back((
+                if index == 999 {
+                    now
+                } else {
+                    now - Duration::from_secs(20)
+                },
+                16.0,
+            ));
+        }
+        buffer.chains.insert((0, 1), chain);
+        let sample = buffer.read(true);
+        assert_eq!(sample.low1, Some(62.5));
+        assert_eq!(sample.low01, Some(62.5));
+    }
+    #[test]
+    fn stale_consumer_cannot_stop_or_advance_another_frame_lease() -> Result<()> {
+        let frames = Frames::default();
+        frames.stop_if_generation(99)?;
+        assert_eq!(frames.generation(), 0);
+        frames.stop()?;
+        frames.stop_if_generation(0)?;
+        assert_eq!(frames.generation(), 1);
+        frames.stop_if_generation(1)?;
+        assert_eq!(frames.generation(), 2);
+        Ok(())
+    }
     #[test]
     fn separates_swapchains_and_does_not_invent_low_values() {
         let mut buffer = Buffer::default();

@@ -18,6 +18,12 @@ const DesktopLyricsWindow = lazy(
 );
 const Music = lazy(() => import('@/features/music/MusicPage'));
 const Optimization = lazy(() => import('@/pages/Optimization'));
+const GameRoom = lazy(() => import('@/features/delta/GameRoom'));
+const DeltaCommunity = lazy(() => import('@/features/delta/CommunityPage'));
+const DeltaStats = lazy(() => import('@/features/delta/StatsPage'));
+const DeltaRandom = lazy(() => import('@/features/delta/RandomEquipment'));
+const DeltaStreamers = lazy(() => import('@/features/delta/StreamersPage'));
+const DeltaPlatforms = lazy(() => import('@/features/delta/OtherPlatforms'));
 const HudWindow = lazy(() => import('@/features/hud/HudWindow'));
 const CrosshairOverlay = lazy(() =>
   import('@/features/tools/native/ScreenTools').then((module) => ({
@@ -67,6 +73,14 @@ export function App() {
               <Route path="/library" element={<Library />} />
               <Route path="/library/other" element={<OtherGames />} />
               <Route path="/music" element={<Music />} />
+              <Route path="/delta-force" element={<GameRoom />}>
+                <Route index element={<DeltaCommunity />} />
+                <Route path="stats" element={<DeltaStats />} />
+                <Route path="random-equipment" element={<DeltaRandom />} />
+                <Route path="other-platforms" element={<DeltaPlatforms />} />
+                <Route path="streamers" element={<DeltaStreamers />} />
+                <Route path="streamers/:id" element={<DeltaStreamers />} />
+              </Route>
               <Route path="/hardware" element={<Hardware />} />
               <Route path="/sensor-monitor" element={<SensorMonitor />} />
               <Route path="/tools/:toolId?" element={<Tools />} />

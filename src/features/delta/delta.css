@@ -1,0 +1,907 @@
+/* 游戏空间独立页面：沿用臻境薄荷玻璃，分为角色、性能与工具三层；窄窗只纵向滚动。 */
+.delta-room {
+  min-height: 100dvh;
+  color: #182f3f;
+  background: #e7f3f2;
+  isolation: isolate;
+  font-size: 13px;
+}
+.delta-room > .home-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+.delta-room > .home-wallpaper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #f4fcff25;
+}
+.delta-room > .wallpaper,
+.delta-room > .app-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+.delta-shell {
+  position: relative;
+  width: min(1360px, 100%);
+  padding: 20px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+.delta-panel {
+  background: linear-gradient(135deg, #ffffffdf, #ecf7fae0);
+  border: 1px solid #fffffff0;
+  border-radius: 20px;
+  box-shadow: 0 7px 30px #1f526613;
+  backdrop-filter: blur(20px);
+  min-width: 0;
+}
+.delta-room button,
+.delta-room input,
+.delta-room select,
+.delta-room textarea {
+  font: inherit;
+}
+.delta-room button,
+.delta-room a {
+  -webkit-tap-highlight-color: transparent;
+}
+.delta-room button {
+  cursor: pointer;
+  border: 1px solid #7facae35;
+  background: #ffffffa8;
+  color: inherit;
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.delta-room button:hover:not(:disabled) {
+  background: #c3f3e8;
+  border-color: #66cbb8;
+}
+.delta-room button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.delta-room .primary,
+.delta-room button.active {
+  background: #a1eddb;
+  border-color: #85dfc8;
+  font-weight: 650;
+}
+.delta-room button:focus-visible,
+.delta-room a:focus-visible,
+.delta-room input:focus-visible,
+.delta-room select:focus-visible {
+  outline: 3px solid #169b83;
+  outline-offset: 3px;
+}
+.delta-header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.delta-game-brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 240px;
+  flex: 1;
+}
+.delta-game-logo {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  background: linear-gradient(140deg, #c7f6e9, #80d5c6);
+  border: 1px solid #ffffff;
+  border-radius: 18px;
+  color: #087c68;
+  font-size: 34px;
+}
+.delta-game-logo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.delta-header h1 {
+  font-size: 26px;
+  margin: 4px 0 5px;
+}
+.delta-header p {
+  margin: 0;
+  color: #607d8b;
+  font-size: 12px;
+}
+.delta-eyebrow {
+  letter-spacing: 1.6px;
+  color: #458877;
+  font-size: 10px;
+  font-weight: 700;
+}
+.delta-dot {
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background: #98aeb8;
+  margin-right: 6px;
+}
+.delta-dot.running {
+  background: #13b594;
+  box-shadow: 0 0 0 4px #17b29316;
+}
+.delta-role {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0;
+}
+.delta-role > img,
+.delta-role > .delta-image-placeholder {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.delta-role p {
+  color: #688391;
+  font-size: 12px;
+  margin: 5px 0;
+}
+.delta-role button {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+.delta-window-actions {
+  display: flex;
+  gap: 4px;
+  align-self: flex-start;
+}
+.delta-window-actions button {
+  padding: 7px 9px;
+  border-color: transparent;
+  background: transparent;
+}
+.delta-image-placeholder {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(120deg, #d0eee7, #e2eaf7);
+  color: #68a697;
+  font-size: 24px;
+}
+.delta-telemetry {
+  padding: 18px 20px 14px;
+}
+.delta-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.delta-section-heading h2,
+.delta-section-heading h3 {
+  margin: 0;
+  margin-right: auto;
+}
+.delta-room h2 {
+  font-size: 17px;
+}
+.delta-room h3 {
+  font-size: 14px;
+}
+.delta-section-heading > span {
+  color: #708a99;
+  font-size: 11px;
+}
+.delta-metrics {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 7px;
+}
+.delta-metrics > div {
+  border: 1px solid #c6dde854;
+  background: #ffffff60;
+  border-radius: 12px;
+  padding: 10px 8px;
+  min-width: 0;
+}
+.delta-metrics span,
+.delta-stat > span {
+  color: #6b8393;
+  font-size: 10px;
+  display: block;
+  margin-bottom: 5px;
+}
+.delta-metrics strong {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.delta-metrics > div:nth-child(n + 4) strong {
+  font-size: 13px;
+  line-height: 1.65;
+}
+.delta-chart {
+  margin-top: 14px;
+}
+.delta-chart svg {
+  display: block;
+  width: 100%;
+  height: 70px;
+  overflow: visible;
+}
+.delta-chart-legend,
+.delta-chart-labels {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: #849baa;
+  margin: 5px 0;
+}
+.delta-chart-legend span:nth-child(1) {
+  color: #10a48b;
+}
+.delta-chart-legend span:nth-child(2) {
+  color: #4989e8;
+}
+.delta-chart-legend span:nth-child(3) {
+  color: #9684df;
+}
+.delta-chart-legend span:nth-child(4) {
+  color: #c68e38;
+}
+.delta-chart-labels {
+  justify-content: space-between;
+}
+.delta-caption {
+  font-size: 11px;
+  color: #698393;
+  line-height: 1.7;
+  margin: 8px 0;
+}
+.delta-tools > nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 9px 14px;
+  gap: 6px;
+  border-bottom: 1px solid #cadae34d;
+}
+.delta-tools > nav > a {
+  color: #536f81;
+  text-decoration: none;
+  padding: 11px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-radius: 11px;
+}
+.delta-tools > nav > a.active {
+  background: #b2f0de;
+  color: #173a37;
+  font-weight: 650;
+}
+.delta-tool-content {
+  padding: 20px;
+  min-height: 240px;
+}
+.delta-passwords {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+.delta-passwords > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #c3e5df80;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f7fffc90;
+}
+.delta-passwords strong {
+  margin-left: auto;
+  font-size: 21px;
+  letter-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.delta-passwords button {
+  padding: 6px;
+  font-size: 11px;
+}
+.delta-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+.delta-quick-links a {
+  color: #188c79;
+  padding: 8px 12px;
+  text-decoration: none;
+  background: #e6faf2b5;
+  border-radius: 10px;
+}
+.delta-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0;
+}
+.delta-filters form {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-width: 220px;
+}
+.delta-room input:not([type='checkbox']),
+.delta-room select,
+.delta-room textarea {
+  color: inherit;
+  background: #ffffffb0;
+  border: 1px solid #b5cddf80;
+  padding: 9px 12px;
+  border-radius: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+.delta-filters input:not([type='checkbox']) {
+  flex: 1;
+}
+.delta-room input[type='checkbox'] {
+  accent-color: #19a48a;
+}
+.delta-loadouts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.delta-loadouts article {
+  border: 1px solid #c6dfe583;
+  background: #ffffff7a;
+  border-radius: 14px;
+  padding: 14px;
+}
+.delta-loadouts code {
+  display: block;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  border-radius: 8px;
+  background: #e3f2f0a6;
+  font-size: 11px;
+  user-select: all;
+}
+.delta-loadouts p {
+  color: #607e8b;
+  line-height: 1.6;
+  min-height: 20px;
+}
+.delta-loadouts footer {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.delta-loadouts footer > span {
+  margin-right: auto;
+  color: #7b929b;
+}
+.delta-loadouts footer button {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.delta-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0 0;
+  color: #698393;
+  font-size: 12px;
+}
+.delta-error,
+.delta-warning {
+  background: #fff3e0e0;
+  border: 1px solid #f2c98f75;
+  color: #946425;
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.delta-notice {
+  background: #d9f7eae0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #1d7768;
+  line-height: 1.6;
+}
+.delta-empty {
+  text-align: center;
+  padding: 38px 20px;
+  color: #7895a4;
+  line-height: 1.8;
+}
+.delta-submit {
+  padding: 18px;
+  border: 1px solid #96d9c3;
+  background: #f0fff8d0;
+  border-radius: 14px;
+  margin: 14px 0;
+}
+.delta-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.delta-form-grid label {
+  display: grid;
+  gap: 6px;
+}
+.delta-form-grid .full {
+  grid-column: 1/-1;
+}
+.delta-submit > div:last-child {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.delta-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+.delta-platform-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22px;
+  gap: 9px;
+  white-space: normal;
+}
+.delta-platform-grid span {
+  color: #72919b;
+  font-size: 11px;
+}
+.delta-equipment {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  min-height: 180px;
+}
+.delta-equipment article {
+  padding: 12px;
+  border: 1px solid #bfd6e05c;
+  background: #ffffff70;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+.delta-equipment article > img,
+.delta-equipment article > .delta-image-placeholder {
+  height: 108px;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.delta-equipment span {
+  font-size: 11px;
+  color: #6a8b96;
+}
+.delta-equipment > .delta-empty,
+.delta-task {
+  grid-column: 1/-1;
+}
+.delta-task {
+  background: #e8e1ff91;
+  padding: 14px;
+  border-radius: 10px;
+}
+.delta-equipment.rolling {
+  opacity: 0.4;
+  transition: opacity 0.3s;
+}
+.delta-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 18px 0;
+}
+.delta-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 15px 0;
+}
+.delta-stat {
+  padding: 18px;
+  background: #ffffff80;
+  border: 1px solid #d4e5eb;
+  border-radius: 14px;
+}
+.delta-stat strong {
+  font-size: 25px;
+}
+.delta-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 14px 0;
+}
+.delta-room table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+.delta-room th,
+.delta-room td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #c2d9e46b;
+  white-space: nowrap;
+}
+.delta-room th {
+  color: #6a899a;
+  background: #f7fdfa6b;
+  font-weight: 550;
+}
+.delta-detail {
+  padding: 16px;
+  border: 1px solid #b8dccf;
+  background: #f5fff9a0;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+.delta-fields {
+  margin: 0;
+}
+.delta-fields > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #c5dce24d;
+}
+.delta-fields dt {
+  color: #648291;
+  flex: 0 0 34%;
+  overflow-wrap: anywhere;
+}
+.delta-fields dd {
+  margin: 0;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+.delta-fields dd > details {
+  width: 100%;
+}
+.delta-fields small {
+  display: block;
+  color: #7b98a3;
+  margin-top: 4px;
+}
+.delta-room details {
+  margin: 12px 0;
+}
+.delta-room summary {
+  cursor: pointer;
+  color: #568171;
+  padding: 5px 0;
+}
+.delta-pressure {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 10px 0;
+}
+.delta-pressure > span {
+  width: 50px;
+}
+.delta-pressure progress {
+  flex: 1;
+  accent-color: #36baa3;
+}
+.delta-pressure b {
+  width: 40px;
+}
+.delta-collections,
+.delta-gear-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.delta-collections article,
+.delta-gear-grid article {
+  border: 1px solid #cfdee667;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff7a;
+}
+.delta-collections img,
+.delta-collections .delta-image-placeholder,
+.delta-gear-grid img,
+.delta-gear-grid .delta-image-placeholder {
+  width: 100%;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 9px;
+  margin-bottom: 8px;
+}
+.delta-wide-search {
+  width: 100%;
+  margin: 10px 0 18px;
+}
+.delta-streamer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.delta-streamer-grid > a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  padding: 15px;
+  border-radius: 14px;
+  border: 1px solid #d1e4ea90;
+  background: #ffffff85;
+}
+.delta-streamer-grid > a > img,
+.delta-streamer-grid > a > .delta-image-placeholder {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.delta-streamer-grid p {
+  margin: 6px 0;
+  color: #7b929d;
+  font-size: 11px;
+}
+.delta-streamer-grid small {
+  font-size: 10px;
+  color: #92a6af;
+}
+.delta-streamer-grid > a > span:last-child {
+  margin-left: auto;
+}
+.delta-streamer-section {
+  margin: 20px 0;
+}
+.delta-preferences {
+  padding: 20px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.delta-preferences h2,
+.delta-preferences p {
+  width: 100%;
+  margin: 0;
+}
+.delta-preferences label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.delta-footer {
+  text-align: center;
+  font-size: 10px;
+  color: #6f909d;
+  padding: 5px 0;
+}
+/* 与主界面的主题选择保持一致，暗色下提高次要文字与表单的可读性。 */
+.delta-room[data-theme='dark'] {
+  background: #162d32;
+  color: #e0eeeb;
+}
+.delta-room[data-theme='dark'] .delta-panel {
+  background: linear-gradient(135deg, #203b40ef, #223b48ed);
+  border-color: #8bb5bc33;
+}
+.delta-room[data-theme='dark'] :is(button, input:not([type='checkbox']), select, textarea) {
+  background: #2b484fe8;
+  border-color: #8cb9bc44;
+  color: #e0eeeb;
+}
+.delta-room[data-theme='dark']
+  :is(
+    .delta-metrics > div,
+    .delta-loadouts article,
+    .delta-stat,
+    .delta-collections article,
+    .delta-gear-grid article,
+    .delta-streamer-grid > a
+  ) {
+  background: #28474a9c;
+  border-color: #8bb5bc33;
+}
+.delta-room[data-theme='dark']
+  :is(
+    .delta-caption,
+    .delta-role p,
+    .delta-metrics span,
+    .delta-stat > span,
+    .delta-fields dt,
+    .delta-section-heading > span
+  ) {
+  color: #a3bdc6;
+}
+.delta-room[data-theme='dark'] :is(button.active, button.primary, .delta-tools > nav > a.active) {
+  background: #8bd8c1;
+  color: #173a37;
+}
+.delta-room[data-theme='dark'] .delta-loadouts code {
+  background: #183f3c;
+  color: #c7eedf;
+}
+.delta-room[data-theme='dark'] .delta-passwords > div {
+  background: #254c44;
+}
+.delta-room[data-theme='dark'] .delta-tools > nav > a {
+  color: #b4c9ce;
+}
+.delta-room[data-theme='dark'] .delta-submit {
+  background: #23433d;
+}
+.delta-room[data-theme='dark'] .delta-notice {
+  background: #254c45;
+  color: #b8e3d4;
+}
+@media (prefers-color-scheme: dark) {
+  .delta-room[data-theme='system'] {
+    background: #162d32;
+    color: #e0eeeb;
+  }
+  .delta-room[data-theme='system'] .delta-panel {
+    background: linear-gradient(135deg, #203b40ef, #223b48ed);
+    border-color: #8bb5bc33;
+  }
+  .delta-room[data-theme='system']
+    :is(
+      button,
+      input:not([type='checkbox']),
+      select,
+      textarea,
+      .delta-metrics > div,
+      .delta-loadouts article,
+      .delta-stat,
+      .delta-collections article,
+      .delta-gear-grid article,
+      .delta-streamer-grid > a,
+      .delta-passwords > div,
+      .delta-submit
+    ) {
+    background: #28474aeb;
+    color: #e0eeeb;
+  }
+  .delta-room[data-theme='system']
+    :is(.delta-caption, .delta-role p, .delta-metrics span, .delta-stat > span, .delta-fields dt) {
+    color: #a3bdc6;
+  }
+}
+@media (max-width: 1000px) {
+  .delta-shell {
+    padding: 14px;
+    gap: 10px;
+  }
+  .delta-header {
+    gap: 12px;
+    padding: 16px;
+  }
+  .delta-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .delta-platform-grid,
+  .delta-collections,
+  .delta-gear-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .delta-streamer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .delta-game-brand {
+    min-width: 210px;
+  }
+  .delta-header h1 {
+    font-size: 22px;
+  }
+  .delta-game-logo {
+    width: 60px;
+    height: 60px;
+  }
+  .delta-equipment {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .delta-shell {
+    padding: 10px;
+  }
+  .delta-role {
+    order: 3;
+    width: 100%;
+  }
+  .delta-window-actions {
+    margin-left: auto;
+  }
+  .delta-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .delta-metrics > div {
+    padding: 9px;
+  }
+  .delta-metrics strong {
+    font-size: 17px;
+  }
+  .delta-tools > nav > a {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+  .delta-tools > nav {
+    gap: 3px;
+    padding: 8px;
+  }
+  .delta-tool-content {
+    padding: 14px;
+  }
+  .delta-loadouts,
+  .delta-streamer-grid {
+    grid-template-columns: 1fr;
+  }
+  .delta-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .delta-stat strong {
+    font-size: 21px;
+  }
+  .delta-filters select {
+    flex: 1;
+  }
+  .delta-fields > div {
+    gap: 8px;
+  }
+  .delta-equipment {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .delta-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .delta-filters form {
+    min-width: 0;
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .delta-equipment.rolling {
+    transition: none;
+  }
+}

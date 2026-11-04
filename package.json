@@ -56,6 +56,8 @@
     "test:desktop": "node scripts/smoke-home.ts",
     "test:home:desktop": "node scripts/smoke-home.ts",
     "test:home:native": "node scripts/verify-home-native.ts",
+    "test:game-room:native": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-game-accessibility.ps1",
+    "test:game-room:desktop": "node scripts/smoke-game-room.ts",
     "test:tools:desktop": "node scripts/smoke-tools.ts",
     "test:optimization:desktop": "node scripts/smoke-optimization.ts",
     "test:hardware:desktop": "node scripts/smoke-hardware.ts",

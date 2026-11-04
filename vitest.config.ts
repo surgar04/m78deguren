@@ -16,6 +16,7 @@ export default defineConfig({
     include: [
       'src/**/*.test.{ts,tsx}',
       'native/music-host/tests/**/*.test.ts',
+      'native/game-room/tests/**/*.test.ts',
       'integrations/folia-engine/tests/**/*.test.ts',
     ],
     clearMocks: true,

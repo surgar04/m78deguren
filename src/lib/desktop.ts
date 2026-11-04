@@ -6,6 +6,18 @@ import {
 } from './diagnostic-contracts';
 import { traceCall } from './diagnostics';
 import { z } from 'zod';
+import { gameRoomRequestSchema, type GameRoomRequest } from './game-room-contracts';
+
+/** 游戏空间所有调用经过统一诊断与双端校验；远端扫码页面无法获得此能力。 */
+export async function executeGameRoom<T>(
+  request: GameRoomRequest,
+  schema: z.ZodType<T>,
+): Promise<T> {
+  requireDesktop();
+  return schema.parse(
+    await invoke<unknown>('game_room_execute', { request: gameRoomRequestSchema.parse(request) }),
+  );
+}
 /** 全部业务 IPC 的关联与耗时集中处理，永不记录参数、返回正文或认证票据。 */
 async function invoke<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   const request = z

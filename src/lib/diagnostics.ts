@@ -114,7 +114,7 @@ export function traceCall(
     key = `${command}/${operation ?? 'call'}`;
   const read =
     operation !== null &&
-    /^(?:snapshot|status|read|list|poll|sample|clock|desktop-clock|desktop-content|desktop-read|frame|timeline|progress|runtime|provider)$/u.test(
+    /^(?:snapshot|status|read|list|poll|sample|telemetry|clock|desktop-clock|desktop-content|desktop-read|frame|timeline|progress|runtime|provider)$/u.test(
       operation,
     );
   const sampled = !read || Date.now() - (reads.get(key) ?? 0) > 60000;

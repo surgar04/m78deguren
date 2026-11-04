@@ -3,6 +3,7 @@ pub mod acceleration;
 pub mod components;
 pub mod developer;
 pub mod diagnostics;
+pub mod game_room;
 pub mod hardware;
 pub mod home;
 pub mod hud;

@@ -7,16 +7,17 @@ import { useSetupStatus } from './repository';
 export function FirstRunGate({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const auxiliary =
-    desktopWindowLabel() !== 'main' &&
-    [
-      '/hud',
-      '/desktop-lyrics',
-      '/desktop-island',
-      '/performance-overlay',
-      '/tool-overlay',
-      '/sensor-monitor',
-      '/screen-test',
-    ].includes(pathname);
+    (desktopWindowLabel() !== 'main' &&
+      [
+        '/hud',
+        '/desktop-lyrics',
+        '/desktop-island',
+        '/performance-overlay',
+        '/tool-overlay',
+        '/sensor-monitor',
+        '/screen-test',
+      ].includes(pathname)) ||
+    (desktopWindowLabel() === 'game-room' && pathname.startsWith('/delta-force'));
   const query = useSetupStatus(!auxiliary);
   if (auxiliary || !isDesktop()) return children;
   if (query.isPending)

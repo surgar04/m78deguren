@@ -105,15 +105,9 @@ impl Default for Context {
 async fn release_frames(hardware: &Hardware, context: &mut Context) -> Result<()> {
     if let Some(generation) = context.frames.take() {
         let frames = hardware.frames.clone();
-        tauri::async_runtime::spawn_blocking(move || {
-            if frames.generation() == generation {
-                frames.stop()
-            } else {
-                Ok(())
-            }
-        })
-        .await
-        .map_err(|_| error("HUD 帧采样停止任务失败"))??;
+        tauri::async_runtime::spawn_blocking(move || frames.stop_if_generation(generation))
+            .await
+            .map_err(|_| error("HUD 帧采样停止任务失败"))??;
     }
     context.frames_attempted = false;
     context.frame_error = None;

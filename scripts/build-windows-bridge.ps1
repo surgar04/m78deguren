@@ -7,7 +7,8 @@ $relative=@(
  'src-tauri/src/services/tools/windows/native.cs','src-tauri/src/services/tools/windows/nvidia.cs',
  'src-tauri/src/services/tools/windows/driver.cs','src-tauri/src/services/tools/windows/color.cs',
  'src-tauri/src/services/tools/windows/optimizer.cs',
- 'native/windows-bridge/Clicker.cs','native/windows-bridge/KeyState.cs','native/windows-bridge/MediaInput.cs'
+ 'native/windows-bridge/Clicker.cs','native/windows-bridge/KeyState.cs','native/windows-bridge/MediaInput.cs',
+ 'native/windows-bridge/GameAccessibility.cs'
 )
 $stage=Join-Path $projectRoot ('.cache/dotnet/windows-bridge/'+[Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($stage)|Out-Null
@@ -31,7 +32,11 @@ $sources=@{}
 foreach($relativePath in $relative){$sources[$relativePath]=(Get-FileHash -LiteralPath (Join-Path $projectRoot $relativePath)).Hash.ToLowerInvariant()}
 $sources['scripts/build-windows-bridge.ps1']=(Get-FileHash -LiteralPath $PSCommandPath).Hash.ToLowerInvariant()
 $manifest=@{schema=1;version=$version;targetFramework='net48';files=@{'Zhenjing.Windows.dll'=(Get-FileHash -LiteralPath $output).Hash.ToLowerInvariant()};sources=$sources}
-[IO.File]::WriteAllText((Join-Path $target 'manifest.json'),($manifest|ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false))
-& (Join-Path $projectRoot '.tools/node/node.exe') (Join-Path $projectRoot 'node_modules/prettier/bin/prettier.cjs') --write (Join-Path $target 'manifest.json')
+# 在独立构建目录完整生成、格式化后原子替换，不能截断仍被编译器只读映射的旧清单。
+$stagedManifest=Join-Path $stage 'manifest.json'
+$targetManifest=Join-Path $target 'manifest.json'
+[IO.File]::WriteAllText($stagedManifest,($manifest|ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false))
+& (Join-Path $projectRoot '.tools/node/node.exe') (Join-Path $projectRoot 'node_modules/prettier/bin/prettier.cjs') --write $stagedManifest
 if($LASTEXITCODE -ne 0){throw 'Windows DLL 清单格式处理失败'}
+if([IO.File]::Exists($targetManifest)){[IO.File]::Replace($stagedManifest,$targetManifest,(Join-Path $stage 'previous-manifest.json'))}else{[IO.File]::Move($stagedManifest,$targetManifest)}
 Write-Output 'Windows C# 组件已构建为显式 DLL。'
