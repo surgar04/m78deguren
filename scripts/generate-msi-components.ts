@@ -44,6 +44,13 @@ for (const [sourceRoot, destinationRoot, manifestPath] of [
     'components/music-host',
     'src-tauri/resources/music-host/manifest.json',
   ],
+  // 自定义 WiX 模板使用显式文件表；仅配置 Tauri resources 不会自动加入安装包。
+  // 宿主、依赖许可与摘要清单必须作为同一受校验组件进入 MSI。
+  [
+    'src-tauri/resources/plugin-host',
+    'components/plugin-host',
+    'src-tauri/resources/plugin-host/manifest.json',
+  ],
 ] as const) {
   const manifest = manifestSchema.parse(
     JSON.parse(await readFile(manifestPath, 'utf8')) as unknown,
@@ -71,7 +78,8 @@ for (const [sourceRoot, destinationRoot, manifestPath] of [
     );
     entries.push({ source, destination: posix.join(destinationRoot, name) });
   }
-  if (destinationRoot.endsWith('windows-bridge') || destinationRoot.endsWith('music-host'))
+  // 监控组件的清单位于 runtime 之外；其他组件运行时需要同目录的完整性清单。
+  if (destinationRoot !== 'components/monitor')
     entries.push({
       source: resolve(manifestPath),
       destination: posix.join(destinationRoot, 'manifest.json'),
