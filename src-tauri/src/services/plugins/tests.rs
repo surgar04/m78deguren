@@ -592,3 +592,86 @@ fn manifest_cannot_enable_native_execution_or_implicit_network() -> Result<()> {
     assert!(model::origin("https://example.com").is_ok());
     Ok(())
 }
+/// 真实开发者身份与会费服务的完整联调。凭据只从维护者 D 盘私有目录读取，不生成测试后门。
+/// 使用独立临时账本，只读固定群 API；测试缴费不上传、不影响日常应用数据。
+#[cfg(feature = "developer-edition")]
+#[tokio::test]
+#[ignore = "需要本机已有开发者凭据，且显式允许访问固定群 API"]
+async fn native_developer_dues_auth_sync_edit_pay_void_and_fallback() -> Result<()> {
+    #[derive(serde::Deserialize)]
+    struct Credential {
+        email: String,
+        stoken: String,
+    }
+    async fn execute(state: &PluginState, input: serde_json::Value) -> Result<dues::Ledger> {
+        let request = serde_json::from_value(input).map_err(|_| error("DUES_TEST_REQUEST"))?;
+        serde_json::from_value(state.builtin_dues(request).await?)
+            .map_err(|_| error("DUES_TEST_RESPONSE"))
+    }
+    let project = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .ok_or_else(|| error("DUES_TEST_ROOT"))?;
+    let temporary = tempfile::tempdir().map_err(io_error)?;
+    let identity = crate::services::developer::DeveloperState::new(temporary.path())?;
+    let state = PluginState::new(temporary.path())?;
+    assert!(!dues::visible());
+    assert!(state.snapshot().await.builtins.is_empty());
+    assert!(execute(&state, json!({"action":"snapshot"})).await.is_err());
+    let mut credential: Credential = serde_json::from_slice(&storage::read_bounded(
+        &project.join(".local/developer-identity/initial-credential.json"),
+        8192,
+    )?)
+    .map_err(|_| error("DUES_TEST_IDENTITY"))?;
+    let authenticated = identity
+        .authenticate(&credential.email, &credential.stoken)
+        .await;
+    credential.stoken.clear();
+    assert_eq!(authenticated?.mode, "developer");
+    assert!(
+        state
+            .snapshot()
+            .await
+            .builtins
+            .iter()
+            .any(|item| item.id == dues::ID)
+    );
+    let mut ledger = execute(&state, json!({"action":"snapshot"})).await?;
+    ledger = execute(&state, json!({"action":"sync","revision":ledger.revision})).await?;
+    let count = ledger.members.len();
+    let member = ledger
+        .members
+        .first()
+        .ok_or_else(|| error("DUES_TEST_MEMBERS"))?
+        .wxid
+        .clone();
+    ledger = execute(&state, json!({"action":"settings","revision":ledger.revision,"monthlyCents":101,"annualCents":10001})).await?;
+    ledger = execute(&state, json!({"action":"edit-member","revision":ledger.revision,"wxid":member,"nickname":"隔离测试成员","groupNickname":"隔离测试群昵称","remark":"仅本次临时账本"})).await?;
+    ledger = execute(&state, json!({"action":"pay","revision":ledger.revision,"wxids":[member],"month":"2026-11","kind":"annual","amountCents":10001,"remark":"隔离测试，不是实际缴费"})).await?;
+    assert_eq!(ledger.payments.len(), 1);
+    assert_eq!(ledger.payments[0].months, 12);
+    assert_eq!(ledger.payments[0].amount_cents, 10001);
+    assert!(ledger.payments[0].remark.contains("2026年11月"));
+    assert!(execute(&state, json!({"action":"pay","revision":ledger.revision,"wxids":[member],"month":"2027-01","kind":"monthly","amountCents":101,"remark":""})).await.is_err());
+    let payment = ledger.payments[0].id.clone();
+    ledger = execute(
+        &state,
+        json!({"action":"void","revision":ledger.revision,"id":payment,"reason":"隔离验收结束"}),
+    )
+    .await?;
+    assert!(ledger.payments[0].voided_at.is_some());
+    let reopened = PluginState::new(temporary.path())?;
+    assert_eq!(
+        execute(&reopened, json!({"action":"snapshot"}))
+            .await?
+            .revision,
+        ledger.revision
+    );
+    state.safe_mode(true, true).await?;
+    assert!(execute(&state, json!({"action":"snapshot"})).await.is_err());
+    state.safe_mode(false, true).await?;
+    identity.fallback("隔离测试结束").await?;
+    assert!(state.snapshot().await.builtins.is_empty());
+    assert!(execute(&state, json!({"action":"snapshot"})).await.is_err());
+    std::fs::write(project.join(".cache/verification/dues-native-workflow.json"), serde_json::to_vec_pretty(&json!({"version":crate::services::developer::build_version(),"passed":true,"memberCount":count,"realSignatureAuthentication":true,"unauthenticatedDenied":true,"liveApiSync":true,"editing":true,"annualPayment":true,"overlapDenied":true,"voidAudit":true,"reopenPersistence":true,"safeMode":true,"fallbackHidden":true,"isolatedTemporaryLedger":true,"installerExecuted":false,"systemChangesExecuted":false})).map_err(|_| error("DUES_TEST_REPORT"))?).map_err(io_error)?;
+    Ok(())
+}

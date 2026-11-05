@@ -152,6 +152,8 @@ C# 官方工具链仍为预览发行，兼容性边界应随升级重新验证�
 
 `scripts/package.ps1` 会先生成 Release 插件宿主，随后按既有稳定版/开发者版流程打包 MSI；插件宿主位于安装组件目录，主程序内嵌其 SHA-256 并在启动插件时校验、保持只读句柄。`verify-installer.ts` 同时核对插件宿主文件和清单。
 
+独立宿主显式使用 Windows x64 target 与静态 CRT，同时覆盖 Rust 和 C/C++ 依赖；构建后检查实际 PE 导入表，拒绝依赖额外 VC++ DLL 的资源。构建标志仅在本次子进程范围生效并恢复，不修改全局 Cargo 配置。全新 CI 工作区先生成宿主与许可，再检查主程序。
+
 桌面开发也使用独立 `plugin-runtime` 优化配置编译宿主，避免未优化的编译器在处理 C#/JavaScript 语言运行库时耗尽启动预算；桌面主程序仍按原调试配置运行。宿主通过固定的“编译/初始化”阶段帧定位耗时，阶段消息不会刷新 60 秒总期限。开发配置关闭 LTO 并限制构建并发为 2，以降低开发机内存峰值。
 
 修改 WIT、SDK、运行时或构建工具后，应重新构建三种示例并运行 `test:plugins:host`、`test:plugins:native`、`test:plugins:workflow` 和 `plugins:check`，以及相关前端检查。`native/plugin-host` 是独立 Rust 工程，锁文件随源码提交；`check` 包含该宿主的格式、Clippy 和资源边界测试。完整管理流程测试使用 Tauri MockRuntime 提供界面句柄，但签名包、索引、数据事务和 Wasm 子进程走实际实现；默认标记 ignored，必须通过专用命令显式运行，避免普通单元测试依赖本机未生成的示例产物。运行时缺失、签名不符、未知权限、版本不兼容时明确失败，不回退到不受控原生执行。
@@ -194,8 +196,15 @@ Windows 原生库测试通过开发进程专用的 Cargo runner，为 D 盘生�
 # 仅此命令显式联网只读 API，断言原生网关与解析器兼容，不输出个人资料
 powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 test:plugins:dues-api
 
+# 需本机已有 D 盘私有开发者凭据；真实验签与服务联调，使用独立临时账本
+powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 test:plugins:dues-native -DeveloperBuild 2
+
 # 隔离浏览器合成数据验收；与真实认证/原生服务验收分开报告
 powershell -NoProfile -ExecutionPolicy Bypass -File .\dev.ps1 test:plugins:dues-ui
 ```
 
 三语言宿主、管理工作流、资源边界、账本原子事务和界面测试分别验证各自边界；不能用网页夹具代替开发者认证或实际原生运行证明。
+
+会费原生联调显式编译开发者特性，先验证未认证不可见，再读取已有私有凭据并由正式验证器验签；覆盖同步、本地编辑、金额、年费冲突、撤销、重新打开持久化、安全模式及降权隐藏。测试只对临时账本登记缴费，不修改日常资料，也不向服务端写入会费。该测试默认忽略，不要求公共 CI 获得维护者凭据。
+
+管理员高完整性级别的 WebView2 可能忽略环境提供的 CDP 调试参数。此环境下分别记录实际 Release EXE 启动结果、原生业务联调和隔离浏览器界面验收，不修改注册表或降低应用权限来制造调试成功。

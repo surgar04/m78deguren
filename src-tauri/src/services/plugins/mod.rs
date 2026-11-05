@@ -299,6 +299,8 @@ impl PluginState {
         self.available(dues::ID)?;
         self.limit("builtin-dues".to_owned(), 600).await?;
         let result = self.dues.execute(request).await?;
+        // 包括头像缓存命中在内，异步等待结束后再次复核认证，避免过期会话取得延迟响应。
+        dues::require_developer()?;
         self.available(dues::ID)?;
         Ok(result)
     }

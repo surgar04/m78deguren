@@ -117,14 +117,18 @@ impl PluginState {
                 .to_owned();
             let path = parent.join(&name);
             // 凭据、应用配置、安装组件和开发源码不能通过文件票据绕过插件能力代理。
-            let mut protected = vec![private, installation];
+            let protected = vec![private, installation];
             #[cfg(debug_assertions)]
-            protected.push(
-                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-                    .parent()
-                    .ok_or_else(|| error("PLUGIN_FILE_PATH"))?
-                    .to_path_buf(),
-            );
+            let protected = {
+                let mut directories = protected;
+                directories.push(
+                    std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                        .parent()
+                        .ok_or_else(|| error("PLUGIN_FILE_PATH"))?
+                        .to_path_buf(),
+                );
+                directories
+            };
             let candidate = path.to_string_lossy().replace(r"\\?\", "").to_lowercase();
             for directory in protected {
                 let directory = std::fs::canonicalize(directory)

@@ -16,6 +16,7 @@
     "test:plugins:native": "cargo test --manifest-path src-tauri/Cargo.toml --locked --lib plugins:: -- --test-threads=1",
     "test:plugins:workflow": "cargo test --manifest-path src-tauri/Cargo.toml --locked --lib native_workflow -- --ignored --test-threads=1",
     "test:plugins:dues-api": "cargo test --manifest-path src-tauri/Cargo.toml --locked --lib live_dues_api -- --ignored --test-threads=1",
+    "test:plugins:dues-native": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-dues-native.ps1",
     "test:plugins:dues-ui": "node scripts/verify-dues-ui.ts",
     "test:plugins:limits": "cargo test --manifest-path native/plugin-host/Cargo.toml --locked",
     "plugins:host": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-plugin-host.ps1",
