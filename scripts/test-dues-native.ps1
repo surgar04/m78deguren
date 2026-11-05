@@ -3,6 +3,6 @@ $ErrorActionPreference='Stop'
 $env:ZHENJING_BUILD_EDITION='developer'
 $env:ZHENJING_DEVELOPER_BUILD=[string]$DeveloperBuild
 . "$PSScriptRoot/env.ps1"
-# 仅通过实际身份验证器读取既有私有凭据，联网只读固定 API；所有缴费均属于临时测试账本。
+# 通过正式验证器读取既有私有凭据；仅使用合成成员及临时账本，联网 API 由专用命令单独验收。
 & cargo test --manifest-path src-tauri/Cargo.toml --locked --features developer-edition --lib native_developer_dues -- --ignored --test-threads=1
 exit $LASTEXITCODE

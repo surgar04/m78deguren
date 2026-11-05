@@ -593,11 +593,11 @@ fn manifest_cannot_enable_native_execution_or_implicit_network() -> Result<()> {
     Ok(())
 }
 /// 真实开发者身份与会费服务的完整联调。凭据只从维护者 D 盘私有目录读取，不生成测试后门。
-/// 使用独立临时账本，只读固定群 API；测试缴费不上传、不影响日常应用数据。
+/// 使用合成成员与独立临时账本；联网解析由单独的 live_dues_api 测试核验，避免外部离线掩盖业务结果。
 #[cfg(feature = "developer-edition")]
 #[tokio::test]
-#[ignore = "需要本机已有开发者凭据，且显式允许访问固定群 API"]
-async fn native_developer_dues_auth_sync_edit_pay_void_and_fallback() -> Result<()> {
+#[ignore = "需要本机已有开发者凭据；使用独立合成成员账本"]
+async fn native_developer_dues_auth_edit_pay_void_and_fallback() -> Result<()> {
     #[derive(serde::Deserialize)]
     struct Credential {
         email: String,
@@ -646,8 +646,8 @@ async fn native_developer_dues_auth_sync_edit_pay_void_and_fallback() -> Result<
             .iter()
             .any(|item| item.id == dues::ID)
     );
+    state.dues.seed_synthetic_members_for_test().await?;
     let mut ledger = execute(&state, json!({"action":"snapshot"})).await?;
-    ledger = execute(&state, json!({"action":"sync","revision":ledger.revision})).await?;
     let count = ledger.members.len();
     let member = ledger
         .members
@@ -683,6 +683,6 @@ async fn native_developer_dues_auth_sync_edit_pay_void_and_fallback() -> Result<
     identity.fallback("隔离测试结束").await?;
     assert!(state.snapshot().await.builtins.is_empty());
     assert!(execute(&state, json!({"action":"snapshot"})).await.is_err());
-    std::fs::write(project.join(".cache/verification/dues-native-workflow.json"), serde_json::to_vec_pretty(&json!({"version":crate::services::developer::build_version(),"passed":true,"memberCount":count,"realSignatureAuthentication":true,"unauthenticatedDenied":true,"liveApiSync":true,"editing":true,"annualPayment":true,"overlapDenied":true,"voidAudit":true,"reopenPersistence":true,"safeMode":true,"fallbackHidden":true,"isolatedTemporaryLedger":true,"installerExecuted":false,"systemChangesExecuted":false})).map_err(|_| error("DUES_TEST_REPORT"))?).map_err(io_error)?;
+    std::fs::write(project.join(".cache/verification/dues-native-workflow.json"), serde_json::to_vec_pretty(&json!({"version":crate::services::developer::build_version(),"passed":true,"memberCount":count,"memberSource":"synthetic-fixture","realSignatureAuthentication":true,"unauthenticatedDenied":true,"liveApiSync":false,"editing":true,"annualPayment":true,"overlapDenied":true,"voidAudit":true,"reopenPersistence":true,"safeMode":true,"fallbackHidden":true,"isolatedTemporaryLedger":true,"installerExecuted":false,"systemChangesExecuted":false})).map_err(|_| error("DUES_TEST_REPORT"))?).map_err(io_error)?;
     Ok(())
 }

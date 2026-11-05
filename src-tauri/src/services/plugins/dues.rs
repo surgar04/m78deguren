@@ -473,6 +473,19 @@ pub struct State {
     avatar_slots: tokio::sync::Semaphore,
 }
 impl State {
+    /// 仅原生集成测试使用：以正式解析器、合并逻辑与事务写入合成名单，不依赖外部接口在线。
+    /// 发布应用不编译该入口，既不放宽认证，也不把测试成员作为产品默认数据。
+    #[cfg(all(test, feature = "developer-edition"))]
+    pub(super) async fn seed_synthetic_members_for_test(&self) -> Result<()> {
+        let response: ApiResponse = serde_json::from_value(serde_json::json!({
+            "ok":true,"data":{"group":{"wxid":GROUP,"name":"合成验收群"},
+            "members":[{"wxid":"synthetic-member","nickname":"合成成员","groupNickname":"合成群昵称","avatarUrl":""}],
+            "total":1,"complete":true,"failedProfiles":0},"meta":{"updatedAt":null}
+        })).map_err(|_| error("DUES_TEST_FIXTURE"))?;
+        self.change(0, move |ledger| merge(ledger, response))
+            .await?;
+        Ok(())
+    }
     pub fn new(root: &Path) -> Self {
         Self {
             path: root.join("builtins").join(ID).join("ledger.json"),
@@ -523,7 +536,7 @@ impl State {
                 let data = self
                     .network
                     .fetch(API, &[ORIGIN.to_owned()], 2 * 1024 * 1024)
-                    .await?;
+                    .await.map_err(|_| error("DUES_SYNC_NETWORK：暂时无法连接群成员接口，请检查网络或稍后重试。已保存的成员和缴费记录保持不变。"))?;
                 let response: ApiResponse = serde_json::from_slice(&data)
                     .map_err(|_| error("DUES_API：响应格式不受支持，原数据未修改"))?;
                 self.change(revision, move |ledger| merge(ledger, response))
