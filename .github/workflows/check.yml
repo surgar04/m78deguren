@@ -47,6 +47,12 @@ jobs:
             } | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
           if (-not $vc -or -not $sdk) { throw 'Runner 未提供完整的 MSVC/Windows SDK' }
           ./scripts/bootstrap.ps1 -MsvcSource $vc.FullName -SdkSource $sdkRoot -SdkVersion $sdk.Name
+      # 插件宿主是运行时资源；全新工作区必须先生成可执行文件、摘要与依赖许可。
+      # 主程序 build.rs 随后校验并内嵌该摘要，避免 CI 依赖维护者机器的忽略目录。
+      - name: Prepare isolated plugin host
+        shell: pwsh
+        working-directory: D:\zhenjing-ci
+        run: ./dev.ps1 plugins:host
       - name: Quality checks
         shell: pwsh
         working-directory: D:\zhenjing-ci
