@@ -604,15 +604,26 @@ async fn native_developer_dues_auth_sync_edit_pay_void_and_fallback() -> Result<
         stoken: String,
     }
     async fn execute(state: &PluginState, input: serde_json::Value) -> Result<dues::Ledger> {
+        let action = input
+            .get("action")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("unknown")
+            .to_owned();
         let request = serde_json::from_value(input).map_err(|_| error("DUES_TEST_REQUEST"))?;
-        serde_json::from_value(state.builtin_dues(request).await?)
-            .map_err(|_| error("DUES_TEST_RESPONSE"))
+        // 只报告固定动作名与受控原生错误，不拼接成员资料或凭据。
+        let result = state
+            .builtin_dues(request)
+            .await
+            .map_err(|cause| error(format!("DUES_TEST_{action}：{cause}")))?;
+        serde_json::from_value(result).map_err(|_| error("DUES_TEST_RESPONSE"))
     }
     let project = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
         .ok_or_else(|| error("DUES_TEST_ROOT"))?;
     let temporary = tempfile::tempdir().map_err(io_error)?;
     let identity = crate::services::developer::DeveloperState::new(temporary.path())?;
+    // 与实际 run_app 相同：设置服务先准备 settings 目录，认证回退才可持久化通道选择。
+    let _settings = crate::services::settings::SettingsState::new(temporary.path())?;
     let state = PluginState::new(temporary.path())?;
     assert!(!dues::visible());
     assert!(state.snapshot().await.builtins.is_empty());
