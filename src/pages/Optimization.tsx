@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/PageHeader';
 import { useMemo, useState } from 'react';
 import {
   faMagnifyingGlass,
@@ -68,23 +69,11 @@ export default function Optimization() {
   return (
     <WorkspaceLayout workspace={workspace} active="optimization">
       <main id="main-content" className="optimization-main" tabIndex={-1}>
-        <header className="optimization-heading" data-home-enter>
-          <div className="optimization-title">
-            <h1>系统优化</h1>
-            <span className="optimization-source">
-              {catalog.data ? '本机配置 · 201 项' : '未连接'}
-            </span>
-          </div>
-          <p>按需调整，让系统更合心意。</p>
-          <p className="optimization-date">
-            {new Intl.DateTimeFormat('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long',
-            }).format(new Date())}
-          </p>
-        </header>
+        <PageHeader
+          title="系统优化"
+          description="按需调整，让系统更合心意。"
+          badge={catalog.data ? `本机配置 · ${catalog.data.settings.length} 项` : '未连接'}
+        />
         <div className="optimization-toolbar" data-home-enter>
           <label className="optimization-search glass">
             <Icon icon={faMagnifyingGlass} />

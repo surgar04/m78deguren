@@ -208,6 +208,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
         .manage(services::quick_launch::QuickLaunchState::new(&root)?)
         .manage(services::tools::ToolsState::new(&root)?)
         .manage(services::music::MusicState::new(&root)?)
+        .manage(services::plugins::PluginState::new(&root)?)
         .register_asynchronous_uri_scheme_protocol(
             "zhenjing-music",
             |context, request, responder| {
@@ -471,6 +472,7 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                 commands::hardware::hardware_execute,
                 commands::hud::hud_execute,
                 commands::music::music_execute,
+                commands::plugins::plugins_execute,
                 commands::onboarding::onboarding_execute,
                 commands::steam::steam_execute,
                 commands::home::home_execute,
@@ -501,6 +503,9 @@ fn run_app() -> Result<(), Box<dyn std::error::Error>> {
                             .await;
                     });
                     app.state::<services::hud::HudState>().cancellation.cancel();
+                    app.state::<services::plugins::PluginState>()
+                        .shutdown
+                        .cancel();
                     let hardware = app.state::<services::hardware::Hardware>().inner().clone();
                     tauri::async_runtime::spawn(async move {
                         let _ = tokio::time::timeout(
@@ -556,6 +561,7 @@ pub(crate) fn boot_runtime(app: &tauri::AppHandle) -> services::tools::Result<()
         return Err(cause);
     }
     services::hud::runtime::boot(app);
+    services::plugins::PluginState::start_scheduler(app.clone());
     let home_app = app.clone();
     tauri::async_runtime::spawn(async move {
         if let Err(cause) = home_app

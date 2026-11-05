@@ -1,0 +1,162 @@
+/* 插件中心继承桌面布局令牌；第三方界面只能选择受控组件，不能注入全局样式。 */
+.plugins-main {
+  min-width: 0;
+}
+.plugin-grid,
+.plugin-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--layout-gap);
+}
+.plugin-card,
+.plugin-empty,
+.plugin-view {
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-card);
+  padding: var(--layout-card-padding);
+  background: var(--layout-surface);
+  margin-block: var(--space-4);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* 栅格间距统一由 gap 提供，卡片自身外边距不能再次扩大行间距。 */
+.plugin-grid > .plugin-card,
+.plugin-grid .plugin-view {
+  margin-block: 0;
+}
+.plugin-card-heading,
+.plugin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+}
+.plugin-card h2 {
+  font-size: var(--layout-section-title);
+  line-height: var(--layout-section-line);
+}
+.plugin-card a {
+  color: inherit;
+  text-decoration: none;
+}
+.plugin-card p {
+  margin-block: var(--space-3);
+}
+.plugin-secondary {
+  font-size: var(--layout-caption);
+  line-height: var(--layout-caption-line);
+  color: var(--home-muted);
+  margin-block: var(--space-4);
+}
+.plugin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.plugin-actions button,
+.plugin-toolbar input {
+  min-height: var(--layout-control);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--layout-line);
+  padding: var(--space-2) var(--space-3);
+  background: var(--layout-surface);
+  color: var(--home-ink);
+  font: inherit;
+}
+.plugin-toolbar label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.plugin-toolbar input {
+  min-width: 0;
+  max-width: 100%;
+}
+.plugin-status {
+  font-size: var(--layout-caption);
+  border-radius: var(--radius-control);
+  padding: var(--space-1) var(--space-2);
+  background: color-mix(in srgb, var(--home-mint) 35%, transparent);
+}
+.plugin-message {
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-4);
+  margin-block: var(--space-4);
+  overflow-wrap: anywhere;
+}
+.plugin-fingerprint {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  margin-block: var(--space-3);
+}
+.plugin-permissions {
+  border: 1px solid var(--layout-line);
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+}
+.plugin-permissions label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+}
+.plugin-permissions input {
+  margin-top: 5px;
+}
+.plugin-permissions :is(small, code) {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.plugin-consent {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.plugin-details {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.plugin-view-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+.plugin-view :is(p, h3, dl) {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.plugin-metric {
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+}
+.plugin-metric dd {
+  margin: var(--space-2) 0 0;
+  font-size: 24px;
+}
+.plugin-contributions {
+  margin-top: var(--layout-section);
+}
+.plugin-contributions a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: var(--layout-card-padding);
+  background: var(--layout-surface);
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-card);
+}
+@media (max-width: 700px) {
+  .plugin-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "scope": "direct-and-embedded-runtime",
+  "notice": "发布者应依据最终构建补充传递依赖和嵌入 JS 引擎的版权声明；本清单不代表平台已审核。",
+  "dependencies": [
+    {
+      "name": "zhenjing-plugin-sdk",
+      "version": "1.0.0",
+      "license": "AGPL-3.0-only",
+      "source": "plugins/sdk/typescript"
+    },
+    {
+      "name": "@bytecodealliance/componentize-js",
+      "version": "0.23.0",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/bytecodealliance/ComponentizeJS"
+    },
+    {
+      "name": "@bytecodealliance/jco",
+      "version": "1.41.0",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/bytecodealliance/jco",
+      "buildOnly": true
+    }
+  ]
+}

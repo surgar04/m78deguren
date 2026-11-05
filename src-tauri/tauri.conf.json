@@ -47,7 +47,8 @@
       "resources/hardware-monitor/licenses/": "licenses/hardware/",
       "resources/hardware-monitor/runtime/": "components/monitor/",
       "resources/windows-bridge/": "components/windows-bridge/",
-      "resources/music-host/": "components/music-host/"
+      "resources/music-host/": "components/music-host/",
+      "resources/plugin-host/": "components/plugin-host/"
     },
     "windows": {
       "webviewInstallMode": {

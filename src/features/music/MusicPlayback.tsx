@@ -24,7 +24,7 @@ export function MusicNowPlaying({
 }) {
   const playback = useMusicPlayer();
   return (
-    <aside className="music-now glass">
+    <aside className="music-now glass" id="music-support-panel" aria-label="当前播放详情">
       <div className="music-now-top">
         <span>正在聆听</span>
         <span>{playback.track ? providerLabel(playback.track.provider) : '等待播放'}</span>

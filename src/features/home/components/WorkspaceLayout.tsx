@@ -15,6 +15,7 @@ import { UpdateNotice } from '@/features/settings/UpdateNotice';
 import '../home.css';
 import '../desktop-density.css';
 import '../live-home.css';
+import { isDesktop, listenPluginNotifications } from '@/lib/desktop';
 
 gsap.registerPlugin(useGSAP);
 function subscribeTheme(callback: () => void) {
@@ -47,6 +48,21 @@ export function WorkspaceLayout({
   );
   const palette = ACCENTS.find((entry) => entry.id === accent) ?? ACCENTS[0];
   const { query, dialog, setDialog, notify, toast } = workspace;
+  useEffect(() => {
+    if (!isDesktop()) return;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    void listenPluginNotifications(notify)
+      .then((cleanup) => {
+        if (disposed) cleanup();
+        else unlisten = cleanup;
+      })
+      .catch(() => undefined);
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [notify]);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     // 同属工具页的详情路由也必须回到顶部，否则从列表底部打开工具会落到长表单中间。
@@ -106,6 +122,8 @@ export function WorkspaceLayout({
   return (
     <div
       ref={container}
+      data-layout="adaptive"
+      data-page={active}
       data-accent={accent}
       data-motion={motion}
       data-theme={ui.theme === 'system' ? (systemDark ? 'dark' : 'light') : ui.theme}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "scope": "direct",
+  "notice": "传递依赖的精确版本与来源同时保存在包内 Cargo.lock；发布者应补齐对应许可声明。",
+  "dependencies": [
+    {
+      "name": "zhenjing-plugin-sdk",
+      "version": "1.0.0",
+      "license": "AGPL-3.0-only",
+      "source": "plugins/sdk/rust"
+    },
+    {
+      "name": "wit-bindgen",
+      "version": "0.57.1",
+      "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+      "source": "https://github.com/bytecodealliance/wit-bindgen"
+    },
+    {
+      "name": "serde_json",
+      "version": "1.0.154",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://github.com/serde-rs/json"
+    }
+  ]
+}

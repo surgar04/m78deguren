@@ -21,6 +21,7 @@
     "vitest.config.ts",
     "eslint.config.ts",
     "scripts/**/*.ts",
+    "plugins/**/*.ts",
     "native/hardware-web/**/*.ts",
     "native/game-room/**/*.ts"
   ]

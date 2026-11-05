@@ -18,6 +18,7 @@ import {
   faMinus,
   faXmark,
   faUser,
+  faPuzzlePiece,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -179,6 +180,14 @@ export function TopBar({ open, notify }: ChromeProps) {
           ) : (
             <Icon icon={faUser} />
           )}
+        </button>
+        <button
+          className="appearance-button glass"
+          type="button"
+          aria-label="插件中心"
+          onClick={() => navigate('/plugins')}
+        >
+          <Icon icon={faPuzzlePiece} />
         </button>
         <button
           className="appearance-button glass"

@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/PageHeader';
 import { MusicCover as Cover } from './MusicCover';
 import { MusicNowPlaying, MusicControls, MusicEffects } from './MusicPlayback';
 import { MusicLogin as Login } from './MusicLogin';
@@ -217,6 +218,8 @@ export default function MusicPage() {
     [immersive, setImmersive] = useState(false),
     [themeOpen, setThemeOpen] = useState(false),
     [effectsOpen, setEffectsOpen] = useState(false);
+  // 窄工作区默认将空间让给曲库；辅助面板可展开，歌词匹配等功能不会因换列而丢失。
+  const [supportOpen, setSupportOpen] = useState(false);
   const account = useMusicAccount(preferences.provider),
     local = useLocalMusic();
   const onlineProvider = preferences.provider === 'local' ? null : preferences.provider;
@@ -324,43 +327,51 @@ export default function MusicPage() {
   return (
     <WorkspaceLayout workspace={workspace} active="music">
       <main className="music-main" id="main-content" tabIndex={-1}>
-        <header className="music-heading" data-home-enter>
-          <div>
-            <span className="music-eyebrow">YOUR SOUND, YOUR MOMENT</span>
-            <h1>音乐</h1>
-            <p>把喜欢的声音，留在此刻。</p>
-          </div>
-          <div className="music-heading-actions">
-            <DesktopLyricsControls />
-            <button type="button" className="glass" onClick={() => setEffectsOpen(true)}>
-              <Icon icon={faWandMagicSparkles} />
-              演绎设置
-            </button>
-            <button
-              type="button"
-              className="glass"
-              onClick={() => {
-                void cache.invalidateQueries({ queryKey: ['music'] });
-              }}
-              aria-label="刷新音乐数据"
-            >
-              <Icon icon={faRotateRight} />
-            </button>
-            <button
-              type="button"
-              className="mint-button"
-              disabled={!playback.track}
-              onClick={() => setImmersive(true)}
-            >
-              <Icon icon={faExpand} />
-              沉浸演绎
-            </button>
-          </div>
-        </header>
+        <PageHeader
+          title="音乐"
+          description="把喜欢的声音，留在此刻。"
+          actions={
+            <>
+              <button
+                type="button"
+                className="glass music-support-toggle"
+                aria-expanded={supportOpen}
+                aria-controls="music-support-panel"
+                onClick={() => setSupportOpen((open) => !open)}
+              >
+                {supportOpen ? '收起当前播放' : '当前播放'}
+              </button>
+              <DesktopLyricsControls />
+              <button type="button" className="glass" onClick={() => setEffectsOpen(true)}>
+                <Icon icon={faWandMagicSparkles} />
+                演绎设置
+              </button>
+              <button
+                type="button"
+                className="glass"
+                onClick={() => {
+                  void cache.invalidateQueries({ queryKey: ['music'] });
+                }}
+                aria-label="刷新音乐数据"
+              >
+                <Icon icon={faRotateRight} />
+              </button>
+              <button
+                type="button"
+                className="mint-button"
+                disabled={!playback.track}
+                onClick={() => setImmersive(true)}
+              >
+                <Icon icon={faExpand} />
+                沉浸演绎
+              </button>
+            </>
+          }
+        />
         {!isDesktop() && (
           <p className="music-notice">请在臻境桌面应用中使用真实曲库、平台登录及本地播放。</p>
         )}
-        <section className="music-workbench" data-home-enter>
+        <section className="music-workbench" data-support={supportOpen} data-home-enter>
           <aside className="music-browser glass">
             <div className="music-library-top">
               <div className="music-platforms" aria-label="音乐平台">

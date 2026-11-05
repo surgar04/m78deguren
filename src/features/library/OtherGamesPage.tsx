@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/PageHeader';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -164,15 +165,11 @@ export default function OtherGamesPage() {
   return (
     <WorkspaceLayout workspace={workspace} active="library">
       <main id="main-content" className="catalog-main steam-main other-games-main" tabIndex={-1}>
-        <header className="catalog-heading" data-home-enter>
-          <h1>
-            游戏库 <span className="steam-live-badge">本地游戏发现</span>
-          </h1>
-          <p>发现你的游戏，一键回到热爱。</p>
-          <p className="catalog-date">
-            {new Date().toLocaleDateString('zh-CN', { dateStyle: 'full' })}
-          </p>
-        </header>
+        <PageHeader
+          title="游戏库"
+          description="发现你的游戏，一键回到热爱。"
+          badge="本地游戏发现"
+        />
         <LibraryNavigation />
         <div className="other-games-toolbar glass">
           <label className="other-search">

@@ -38,6 +38,7 @@ import { executeHome, executeGameRoom, errorMessage, isDesktop } from '@/lib/des
 import { scrollToSection } from '@/features/home/navigation';
 import { HOME_GUIDE } from '@/features/home/help';
 import '@/features/home/live-home.css';
+import { PluginContributions } from '@/features/plugins/PluginContributions';
 
 function ProgramIcon({ id }: { id: string }) {
   const query = useQuery({
@@ -532,6 +533,7 @@ export default function Overview() {
             {home.data.runtime.message}
           </p>
         )}
+        <PluginContributions kind="widget" />
       </main>
     </WorkspaceLayout>
   );

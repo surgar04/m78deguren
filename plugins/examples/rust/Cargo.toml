@@ -1,0 +1,12 @@
+[package]
+name = "zhenjing-rust-example"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.96"
+license = "AGPL-3.0-only"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+zhenjing-plugin-sdk = { path = "../../sdk/rust" }

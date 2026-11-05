@@ -6,6 +6,30 @@ import {
 } from './diagnostic-contracts';
 import { traceCall } from './diagnostics';
 import { z } from 'zod';
+import { pluginRequestSchema, type PluginRequest } from './plugin-contracts';
+import { listen } from '@tauri-apps/api/event';
+
+/** 通知只传显示所需字段，监听器由工作台生命周期清理，不接受插件事件中的命令或 URL。 */
+export async function listenPluginNotifications(
+  notify: (message: string) => void,
+): Promise<() => void> {
+  requireDesktop();
+  const schema = z
+    .object({ pluginId: z.string().max(96), name: z.string().max(160), text: z.string().max(512) })
+    .strict();
+  return listen<unknown>('plugin-notification', (event) => {
+    const parsed = schema.safeParse(event.payload);
+    if (parsed.success) notify(`${parsed.data.name}：${parsed.data.text}`);
+  });
+}
+
+/** 插件中心唯一原生入口；权限由 Rust 根据真实实例再次判定，前端不能自行授予会话。 */
+export async function executePlugins<T>(request: PluginRequest, schema: z.ZodType<T>): Promise<T> {
+  requireDesktop();
+  return schema.parse(
+    await invoke<unknown>('plugins_execute', { request: pluginRequestSchema.parse(request) }),
+  );
+}
 import { gameRoomRequestSchema, type GameRoomRequest } from './game-room-contracts';
 
 /** 游戏空间所有调用经过统一诊断与双端校验；远端扫码页面无法获得此能力。 */

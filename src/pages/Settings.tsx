@@ -1,4 +1,5 @@
-import { useEffect, type KeyboardEvent } from 'react';
+import { PageHeader } from '@/components/PageHeader';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   faDisplay,
@@ -37,7 +38,7 @@ export type SettingsTab = (typeof TABS)[number]['id'];
 /** 六类设置共享原生查询；页面没有模拟版本、占用、日期或网络状态。 */
 export default function Settings() {
   const workspace = useGameWorkspace();
-  const { t, locale } = useText();
+  const { t } = useText();
   const snapshot = useSettingsSnapshot();
   const [params, setParams] = useSearchParams();
   // 标签由 URL 唯一控制；全局更新提醒跳转时，即使当前已在设置页也会切换到“关于”。
@@ -45,14 +46,32 @@ export default function Settings() {
   const setTab = (next: SettingsTab) => setParams({ tab: next }, { replace: true });
   const current = TABS.find((row) => row.id === tab) ?? TABS[0];
   const Panel = current.Component;
+  const [navigationElement, setNavigationElement] = useState<HTMLDivElement | null>(null);
+  const [navigationOrientation, setNavigationOrientation] = useState<'vertical' | 'horizontal'>(
+    'vertical',
+  );
+  useEffect(() => {
+    if (!navigationElement) return;
+    // ARIA 方向跟随容器查询的实际排版；顶部导航、缩放或窗口调整后读屏提示仍准确。
+    const observer = new ResizeObserver(() => {
+      setNavigationOrientation(
+        getComputedStyle(navigationElement).flexDirection === 'row' ? 'horizontal' : 'vertical',
+      );
+    });
+    observer.observe(navigationElement);
+    return () => observer.disconnect();
+  }, [navigationElement]);
   useEffect(() => {
     document.querySelector('.preferences-panel-content')?.scrollTo({ top: 0, behavior: 'instant' });
+    // 设置改用页面主滚动后，切换分类仍回到当前设置组的起点。
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [tab]);
   const navigateTabs = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    // 分类在窄窗口横向排列；四方向键均可切换，避免导航布局变化后键盘失效。
     const next =
-      event.key === 'ArrowDown'
+      event.key === 'ArrowDown' || event.key === 'ArrowRight'
         ? (index + 1) % TABS.length
-        : event.key === 'ArrowUp'
+        : event.key === 'ArrowUp' || event.key === 'ArrowLeft'
           ? (index + TABS.length - 1) % TABS.length
           : event.key === 'Home'
             ? 0
@@ -70,15 +89,7 @@ export default function Settings() {
   return (
     <WorkspaceLayout workspace={workspace} active="settings">
       <main id="main-content" className="preferences-main live-settings" tabIndex={-1}>
-        <header className="preferences-heading" data-home-enter>
-          <div className="preferences-title">
-            <h1>{t('设置')}</h1>
-          </div>
-          <p>{t('让臻境，更合你的习惯。')}</p>
-          <p className="preferences-date">
-            {new Intl.DateTimeFormat(locale, { dateStyle: 'full' }).format(new Date())}
-          </p>
-        </header>
+        <PageHeader title={t('设置')} description={t('让臻境，更合你的习惯。')} />
         {!isDesktop() && (
           <p role="status" className="settings-review">
             网页预览仅支持界面偏好。启动项、驱动、缓存、媒体和更新功能需在桌面端连接 Rust 后端。
@@ -92,10 +103,11 @@ export default function Settings() {
         ))}
         <section className="preferences-workbench glass" aria-label={t('设置')} data-home-enter>
           <div
+            ref={setNavigationElement}
             className="preferences-navigation"
             role="tablist"
             aria-label={t('设置')}
-            aria-orientation="vertical"
+            aria-orientation={navigationOrientation}
           >
             {TABS.map((item, index) => (
               <button

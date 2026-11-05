@@ -1,5 +1,6 @@
 [package]
 name = "zhenjing"
+default-run = "zhenjing"
 version = "0.10.3"
 description = "臻境桌面应用"
 publish = false
@@ -57,8 +58,12 @@ qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 roxmltree = "0.21"
 rfd = { version = "=0.16.1", default-features = false }
 tempfile = "=3.27.0"
+zip = { version = "=4.6.1", default-features = false, features = ["deflate"] }
 # 仅启用进程信息；不采集 CPU/磁盘/网络计数，避免为加速准备重复启动硬件监测。
 sysinfo = { version = "=0.37.2", default-features = false, features = ["system"] }
+
+[dev-dependencies]
+tauri = { version = "2", features = ["test"] }
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -80,3 +85,4 @@ strip = true
 
 [target."cfg(windows)".dependencies]
 ferrisetw = "=1.2.0"
+win32job = "=2.0.3"

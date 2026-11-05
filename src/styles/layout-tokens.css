@@ -1,0 +1,32 @@
+/*
+ * 臻境桌面布局令牌。数值使用 CSS 逻辑像素，由 WebView 处理系统 DPI；禁止整页缩放。
+ * 以 8px 为主要节奏，4px 用于文字和图标的细分，12px 用于紧凑控件组。
+ * 窗口边距、容器间距与内部留白分开命名，避免“统一间距”退化成所有距离相同。
+ */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --layout-rail: 80px;
+  --layout-edge: 16px;
+  --layout-margin: 24px;
+  --layout-gap: 24px;
+  --layout-section: 32px;
+  --layout-card-padding: 24px;
+  --layout-control: 40px;
+  --layout-title: 28px;
+  --layout-title-line: 36px;
+  --layout-section-title: 20px;
+  --layout-section-line: 28px;
+  --layout-body: 14px;
+  --layout-body-line: 22px;
+  --layout-caption: 12px;
+  --layout-caption-line: 18px;
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-workbench: 24px;
+}

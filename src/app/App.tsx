@@ -13,6 +13,7 @@ const OtherGames = lazy(() => import('@/features/library/OtherGamesPage'));
 const Hardware = lazy(() => import('@/pages/Hardware'));
 const SensorMonitor = lazy(() => import('@/pages/SensorMonitor'));
 const Tools = lazy(() => import('@/pages/Tools'));
+const Plugins = lazy(() => import('@/features/plugins/PluginsPage'));
 const DesktopLyricsWindow = lazy(
   () => import('@/features/music/desktop-lyrics/DesktopLyricsWindow'),
 );
@@ -86,6 +87,8 @@ export function App() {
               <Route path="/tools/:toolId?" element={<Tools />} />
               <Route path="/optimization" element={<Optimization />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/plugins" element={<Plugins />} />
+              <Route path="/plugins/:pluginId" element={<Plugins />} />
               <Route
                 path="*"
                 element={

@@ -24,7 +24,7 @@
   font-size: 32px;
   line-height: 1.5;
   font-weight: var(--home-weight-display);
-  margin: 6px 0 !important;
+  margin: 6px 0;
   overflow-wrap: anywhere;
 }
 .home-welcome > p:not(.home-eyebrow) {

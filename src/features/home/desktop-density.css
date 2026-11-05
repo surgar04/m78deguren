@@ -47,429 +47,951 @@
   outline: none;
 }
 
-@media (min-width: 701px) {
-  .home-layout {
-    --desktop-title-size: 28px;
-    padding: 18px 20px 24px 0;
-  }
-  .home-layout .home-workspace {
-    margin-left: 112px;
-    margin-right: 0;
-    padding-left: 0;
-    /* 跟随窗口实际宽度，不能在最大化/全屏后留下固定宽度之外的空白。 */
-    max-width: none;
-    min-width: 0;
-  }
-  .home-layout .dock {
-    top: 18px;
-    left: 14px;
-    width: 76px;
-    height: min(552px, calc(100svh - 36px));
-    border-radius: 21px;
-    padding: 16px 10px;
-  }
-  .home-layout .brand {
-    width: 54px;
-    height: 80px;
-    margin-bottom: 14px;
-  }
-  .home-layout .brand img {
-    width: 64px;
-    height: 84px;
-    transform: translate(-50%, -2px);
-  }
-  .home-layout .dock nav {
-    gap: 10px;
-  }
-  .home-layout .dock-item {
-    height: 54px;
-    gap: 5px;
-    font-size: 12px;
-    border-radius: 12px;
-  }
-  .home-layout .dock-item .ui-icon {
-    font-size: 19px;
-  }
-  .home-layout .top-bar {
-    height: 42px;
-    gap: 16px;
-  }
-  .home-layout .global-search {
-    width: 360px;
-    max-width: 42%;
-    height: 42px;
-    border-radius: 14px;
-    font-size: 13px;
-  }
-  .home-layout .global-search .shortcut {
-    font-size: 11px;
-  }
-  .home-layout .top-actions {
-    gap: 10px;
-  }
-  .home-layout .avatar-button {
-    width: 42px;
-    height: 42px;
-  }
-  .home-layout .appearance-button {
-    width: 40px;
-    height: 40px;
-  }
-  .home-layout .window-controls {
-    width: 126px;
-    height: 40px;
-    margin-left: 6px;
-    border-radius: 14px;
-  }
-  .home-layout .window-controls button {
-    width: 42px;
-    height: 40px;
-  }
-  .home-layout :is(.greeting, .preferences-main) {
-    margin-top: 22px;
-  }
-  .home-layout :is(.tools-main, .optimization-main, .hw-main, .catalog-main) {
-    padding-top: 22px;
-  }
-  .home-layout
-    :is(
-      .greeting h1,
-      .tools-title h1,
-      .optimization-title h1,
-      .hw-heading h1,
-      .catalog-heading h1,
-      .preferences-title h1
-    ) {
-    font-size: var(--desktop-title-size);
-    line-height: 40px;
-    letter-spacing: 0.2px;
-  }
-  .home-layout :is(.tools-title, .optimization-title, .hw-heading-title, .preferences-title) {
-    height: 40px;
-    gap: 12px;
-  }
-  .home-layout
-    :is(.tools-heading, .optimization-heading, .hw-heading, .catalog-heading, .preferences-heading)
-    > p {
-    font-size: 15px;
-    line-height: 24px;
-  }
-  .home-layout
-    :is(.greeting p, .tools-date, .optimization-date, .hw-date, .catalog-date, .preferences-date) {
-    font-size: 13px;
-    line-height: 22px;
-  }
-  .home-layout
-    :is(.tools-source, .optimization-source, .hw-source-badge, .preferences-title > span) {
-    height: 27px;
-    padding: 3px 11px;
-    font-size: 12px;
-  }
-  .home-layout :is(.tools-toolbar, .optimization-toolbar, .catalog-toolbar) {
-    margin-top: 18px;
-    gap: 10px;
-  }
-  .home-layout
-    :is(
-      .tools-search,
-      .tools-filters,
-      .tools-manage,
-      .optimization-search,
-      .optimization-detect,
-      .optimization-history
-    ) {
-    height: 42px;
-    border-radius: 14px;
-    font-size: 14px;
-  }
-  .home-layout .tools-search {
-    width: 320px;
-  }
-  .home-layout .tools-filters button {
-    min-width: 92px;
-    gap: 8px;
-    padding: 0 16px;
-    border-radius: 13px;
-    font-size: 14px;
-  }
-  .home-layout .tools-filters button:last-child {
-    min-width: 120px;
-  }
-  .home-layout .tools-manage {
-    width: 126px;
-    gap: 8px;
-  }
-  .home-layout .optimization-toolbar {
-    grid-template-columns: minmax(0, 1fr) 184px 152px;
-    max-width: none;
-  }
-  .home-layout :is(.tools-search input, .optimization-search input) {
-    font-size: 14px;
-  }
-  .home-layout :is(.tool-section h2, .optimization-content h2) {
-    font-size: 19px;
-    line-height: 28px;
-  }
-  .home-layout .tool-section + .tool-section {
-    margin-top: 22px;
-  }
-  .home-layout :is(.tool-grid, .optimization-grid) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 10px;
-  }
-  .home-layout :is(.tool-card, .optimization-category) {
-    height: 116px;
-    border-radius: 15px;
-    background: #f7fbffdb;
-    backdrop-filter: blur(14px);
-  }
-  .home-layout :is(.tool-open, .optimization-category > button) {
-    align-items: center;
-    gap: 15px;
-    padding: 18px 17px;
-  }
-  .home-layout :is(.tool-copy, .optimization-category-copy) {
-    padding-top: 0;
-  }
-  .home-layout :is(.tool-name, .optimization-category-name) {
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .home-layout :is(.tool-description, .optimization-category-description) {
-    font-size: 13px;
-    line-height: 20px;
-    margin-top: 4px;
-    padding-right: 24px;
-    color: #5e7489;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-  }
-  .home-layout .tool-favorite {
-    top: 7px;
-    right: 7px;
-    width: 28px;
-    height: 28px;
-    border-radius: 9px;
-  }
-  .home-layout .tool-favorite .ui-icon {
-    font-size: 15px;
-  }
-  .home-layout :is(.tool-arrow, .optimization-arrow) {
-    right: 12px;
-    bottom: 12px;
-    width: 26px;
-    height: 26px;
-    background: #e7f6f1;
-    border-radius: 9px;
-  }
-  .home-layout :is(.tool-arrow, .optimization-arrow) .ui-icon {
-    font-size: 11px;
-  }
-  .home-layout .optimization-common {
-    margin-top: 22px;
-  }
-  .home-layout .optimization-common-item {
-    padding: 18px 20px;
-    gap: 16px;
-    min-height: 143px;
-  }
-  .home-layout .optimization-common-item .feature-icon[class] {
-    flex-basis: 44px;
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
-  }
-  .home-layout .optimization-common-info h3 {
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .home-layout .optimization-common-info p {
-    font-size: 13px;
-    line-height: 21px;
-  }
-  .home-layout .optimization-setting-footer {
-    margin-top: 12px;
-    padding-top: 10px;
-    font-size: 12px;
-  }
-  .home-layout .tools-detail {
-    margin-top: 20px;
-    padding: 22px;
-    border-radius: 18px;
-  }
-  .home-layout .tools-detail-header {
-    padding-bottom: 16px;
-    margin-bottom: 18px;
-  }
-  .home-layout .native-tool-panel {
-    gap: 16px;
-    font-size: 14px;
-  }
-  .home-layout
-    .native-tool-panel
-    :is(.native-status-banner, .native-device-card, .native-change-review) {
-    padding: 16px;
-  }
-  .home-layout .native-tool-panel h3 {
-    font-size: 18px;
-  }
-  .home-layout .native-tool-panel h4 {
-    font-size: 15px;
-  }
-  .home-layout .native-tool-panel .native-tool-form label {
-    font-size: 13px;
-  }
-  .home-layout .home-columns {
-    grid-template-columns: minmax(0, 1fr) 306px;
-    gap: 16px;
-    margin-top: 16px;
-  }
-  .home-layout .status-panel {
-    min-height: 0;
-    padding: 18px 16px;
-  }
-  .home-layout .status-panel h2 {
-    font-size: 16px;
-  }
-  .home-layout .status-panel .utility-row {
-    padding: 12px 8px;
-    min-height: 60px;
-    gap: 10px;
-  }
-  .home-layout .status-panel .row-copy strong {
-    font-size: 13px;
-  }
-  .home-layout .status-panel .row-copy p {
-    font-size: 11px;
-    line-height: 18px;
-  }
-  .home-layout .recent-grid {
-    height: 232px;
-    grid-template-rows: minmax(0, 1fr);
-  }
-  .home-layout :is(.recent-featured, .recent-secondary, .recent-small) {
-    min-height: 0;
-  }
-  .home-layout :is(.recent-featured, .recent-secondary) {
-    height: 100%;
-  }
-  .home-layout .empty-recent {
-    min-height: 232px;
-  }
-  .home-layout .featured-bottom h3 {
-    font-size: 25px;
-    line-height: 34px;
-  }
-  .home-layout .continue-button {
-    width: 130px;
-    height: 40px;
-    font-size: 13px;
-  }
-  .home-layout .library-section {
-    margin-top: 22px;
-  }
-  .home-layout .section-heading h2 {
-    font-size: 20px;
-  }
-  .home-layout .preferences-workbench {
-    grid-template-columns: 200px minmax(0, 1fr);
-    min-height: 560px;
-    gap: 22px;
-    padding: 22px;
-  }
-  .home-layout .preferences-navigation {
-    padding-right: 16px;
-    gap: 8px;
-  }
-  .home-layout .preferences-navigation button {
-    min-height: 46px;
-    gap: 14px;
-    padding: 10px 12px;
-    font-size: 15px;
-  }
-  .home-layout .preferences-navigation button .ui-icon {
-    width: 20px;
-    height: 20px;
-  }
-  .home-layout .preferences-section-heading h2 {
-    font-size: 24px;
-    line-height: 34px;
-  }
-  .home-layout .preferences-section-heading p {
-    font-size: 14px;
-    line-height: 23px;
-  }
-  .home-layout .preference-row {
-    min-height: 72px;
-    gap: 18px;
-  }
-  .home-layout .preference-row-icon {
-    width: 44px;
-    height: 44px;
-    font-size: 21px;
-  }
-  .home-layout .preference-row-copy h3 {
-    font-size: 17px;
-    line-height: 26px;
-  }
-  .home-layout .preference-row-copy p {
-    font-size: 13px;
-    line-height: 21px;
-  }
-  .home-layout .preferences-color {
-    width: 58px;
-    height: 60px;
-  }
-  .home-layout .preferences-visuals {
-    grid-template-columns: minmax(0, 1fr) 210px;
-    gap: 20px;
-  }
-  .home-layout .catalog-heading {
-    min-height: 120px;
-  }
-  .home-layout .catalog-actions {
-    top: 64px;
-    gap: 10px;
-  }
-  .home-layout .catalog-actions button {
-    width: 136px;
-    height: 42px;
-    font-size: 14px;
-    gap: 10px;
-  }
-  .home-layout .catalog-actions .ui-icon {
-    font-size: 17px;
-  }
-  .home-layout.compact :is(.tool-card, .optimization-category) {
-    height: 104px;
-  }
-  .home-layout.compact .native-tool-panel {
-    gap: 12px;
-  }
+/*
+ * 自适应桌面布局。公共外壳提供尺寸令牌，页面只声明内容关系。
+ * 使用 data-layout 提高公共规则的确定性，避免懒加载页面样式的注入顺序改变密度。
+ * 12 列用于区域对齐；目录使用容器宽度换列，表单与曲库保留各自的阅读结构。
+ */
+.home-layout[data-layout='adaptive'] {
+  --home-muted: #526b80;
+  --layout-surface: #f7fbfff0;
+  --layout-line: #cbdce5;
+  --layout-focus: #167565;
+  padding: var(--layout-edge) var(--layout-margin) var(--layout-margin) 0;
+  font-size: var(--layout-body);
+  line-height: var(--layout-body-line);
 }
-@media (min-width: 701px) and (max-width: 1100px) {
-  .home-layout .global-search {
-    max-width: none;
+.home-layout[data-layout='adaptive'][data-theme='dark'] {
+  --layout-surface: #192a3bf2;
+  --layout-line: #405469;
+  --layout-focus: #9ce5d0;
+  --home-muted: #b4c6d8;
+}
+.home-layout[data-layout='adaptive'].compact {
+  /* 紧凑偏好只改变留白，不缩小文字与独立按钮的可点击区域。 */
+  --layout-card-padding: 16px;
+  --layout-gap: 16px;
+  --layout-section: 24px;
+}
+.home-layout[data-layout='adaptive'] .home-workspace {
+  margin: 0 0 0 calc(var(--layout-edge) + var(--layout-rail) + var(--layout-gap));
+  padding: 0;
+  max-width: none;
+  min-width: 0;
+  container: workspace / inline-size;
+}
+/* 导航高度由可用窗口决定；短窗口滚动导航内部，品牌与最后一个入口均可到达。 */
+.home-layout[data-layout='adaptive'] .dock {
+  inset: var(--layout-edge) auto auto var(--layout-edge);
+  width: var(--layout-rail);
+  height: auto;
+  max-height: calc(100dvh - 2 * var(--layout-edge));
+  border-radius: var(--radius-workbench);
+  padding: var(--space-4) var(--space-2);
+  gap: var(--space-4);
+}
+.home-layout[data-layout='adaptive'] .brand {
+  flex: 0 0 72px;
+  width: 56px;
+  height: 72px;
+  min-height: 0;
+  margin: 0;
+}
+.home-layout[data-layout='adaptive'] .brand img {
+  width: 56px;
+  height: 72px;
+  transform: translate(-50%, 0);
+}
+.home-layout[data-layout='adaptive'] .dock nav {
+  min-height: 0;
+  gap: var(--space-2);
+  overflow: auto;
+  scrollbar-width: thin;
+  padding: var(--space-1);
+}
+.home-layout[data-layout='adaptive'] .dock-item {
+  flex-shrink: 0;
+  min-height: 56px;
+  height: auto;
+  padding: var(--space-2) var(--space-1);
+  gap: var(--space-1);
+  border-radius: var(--radius-control);
+  font-size: var(--layout-caption);
+  line-height: var(--layout-caption-line);
+}
+.home-layout[data-layout='adaptive'] .dock-item .ui-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  color: inherit;
+}
+.home-layout[data-layout='adaptive'] .window-controls button {
+  color: var(--home-ink);
+}
+.home-layout[data-layout='adaptive'][data-theme='dark'] :is(.avatar-button, .appearance-button) {
+  color: var(--home-ink);
+  background: var(--layout-surface);
+  border: 1px solid var(--layout-line);
+}
+.home-layout[data-layout='adaptive'] .top-bar {
+  min-height: 56px;
+  height: auto;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  /* 即使隐藏搜索，操作区左侧也留有真实的窗口拖拽空间。 */
+  padding-block: var(--space-2);
+}
+.home-layout[data-layout='adaptive'] .global-search {
+  flex: 1 1 240px;
+  width: auto;
+  min-width: 0;
+  max-width: 400px;
+  height: var(--layout-control);
+  gap: var(--space-2);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-control);
+  font-size: var(--layout-body);
+}
+.home-layout[data-layout='adaptive'] .global-search > span:not(.shortcut) {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.home-layout[data-layout='adaptive'] .top-actions {
+  flex: 0 1 auto;
+  margin-left: auto;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.home-layout[data-layout='adaptive'] :is(.avatar-button, .appearance-button, .icon-button) {
+  width: var(--layout-control);
+  height: var(--layout-control);
+  flex-shrink: 0;
+  border-radius: var(--radius-control);
+}
+.home-layout[data-layout='adaptive'] .window-controls {
+  width: 120px;
+  height: var(--layout-control);
+  margin: 0;
+  border-radius: var(--radius-control);
+}
+.home-layout[data-layout='adaptive'] .window-controls button {
+  width: var(--layout-control);
+  height: var(--layout-control);
+}
+.home-layout[data-layout='adaptive'] .home-mode-bar {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-control);
+}
+.home-layout[data-layout='adaptive'] .home-mode-bar > button:first-child {
+  min-height: var(--layout-control);
+  font-size: var(--layout-caption);
+  gap: var(--space-2);
+}
+/* 所有路由共享同一内容起点；只给主页面设置节奏，不影响独立 HUD 和歌词窗口。 */
+.home-layout[data-layout='adaptive'] #main-content {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-6) 0 0;
+}
+.home-layout[data-layout='adaptive'] .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4) var(--layout-gap);
+  margin: 0 0 var(--space-6);
+  flex: 0 0 auto;
+}
+.home-layout[data-layout='adaptive'] .page-header-copy {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.home-layout[data-layout='adaptive'] .page-header-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.home-layout[data-layout='adaptive'] :is(.page-header-title h1, .home-welcome h1) {
+  margin: 0;
+  font-size: var(--layout-title);
+  line-height: var(--layout-title-line);
+  font-weight: var(--home-weight-display);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+.home-layout[data-layout='adaptive'] .page-header-badge {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-control);
+  color: var(--home-muted);
+  font-size: var(--layout-caption);
+  line-height: var(--layout-caption-line);
+}
+.home-layout[data-layout='adaptive'] .page-header-description {
+  margin: var(--space-2) 0 0;
+  color: var(--home-muted);
+  font-size: var(--layout-body);
+  line-height: var(--layout-body-line);
+}
+.home-layout[data-layout='adaptive'] .page-header-meta {
+  margin-top: var(--space-1);
+  color: var(--home-muted);
+  font-size: var(--layout-caption);
+}
+.home-layout[data-layout='adaptive'] .page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+.home-layout[data-layout='adaptive'] .page-header-navigation {
+  flex-basis: 100%;
+  min-width: 0;
+}
+.home-layout[data-layout='adaptive']
+  :is(
+    .page-header-actions button,
+    .mint-button,
+    .tools-manage,
+    .optimization-detect,
+    .optimization-history
+  ) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--layout-control);
+  height: auto;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  font-size: var(--layout-body);
+  line-height: var(--layout-body-line);
+}
+.home-layout[data-layout='adaptive'] :is(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--layout-focus);
+  outline-offset: 3px;
+}
+.home-layout[data-layout='adaptive']
+  :is(.tools-search, .optimization-search, .home-launcher-search):focus-within {
+  outline: 3px solid var(--layout-focus);
+  outline-offset: 3px;
+}
+/* 正文表面稳定遮住复杂壁纸；导航仍服从透明/液态偏好，深色使用同一组语义令牌。 */
+.home-layout[data-layout='adaptive']
+  :is(
+    .home-live-card,
+    .home-launcher,
+    .tool-card:not(.tool-compact),
+    .optimization-category,
+    .optimization-common,
+    .hw-metric,
+    .hw-device,
+    .hw-trend,
+    .hw-sensor-panel,
+    .preferences-workbench,
+    .music-browser,
+    .music-now,
+    .other-game-card
+  ) {
+  background: var(--layout-surface);
+  border-color: var(--layout-line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 2px 8px #17344608;
+  color: var(--home-ink);
+}
+/* 首页仍以快捷启动为主。侧栏关闭后跨满整行，不留下空列。 */
+.home-layout[data-layout='adaptive'] .home-welcome-row {
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+.home-layout[data-layout='adaptive'] .home-welcome h1 {
+  margin-block: var(--space-2);
+}
+.home-layout[data-layout='adaptive'] .home-quick-links {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.home-layout[data-layout='adaptive'] .home-quick-links button {
+  padding: var(--space-3);
+  min-width: 72px;
+  font-size: var(--layout-caption);
+  border-radius: var(--radius-card);
+}
+.home-layout[data-layout='adaptive'] .home-message-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--layout-gap);
+  margin-bottom: var(--space-6);
+}
+.home-layout[data-layout='adaptive'] :is(.home-note, .home-quote) {
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+.home-layout[data-layout='adaptive'] .home-dashboard-grid {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+.home-layout[data-layout='adaptive'] .home-overview-stack {
+  grid-column: span 4;
+  gap: var(--layout-gap);
+}
+.home-layout[data-layout='adaptive'] .home-launcher {
+  grid-column: span 8;
+  min-height: 400px;
+  padding: var(--layout-card-padding);
+  border-radius: var(--radius-workbench);
+  container: launcher / inline-size;
+}
+.home-layout[data-layout='adaptive'] .home-no-side > .home-launcher {
+  grid-column: 1 / -1;
+}
+.home-layout[data-layout='adaptive'] .home-live-card {
+  padding: var(--layout-card-padding);
+}
+.home-layout[data-layout='adaptive'] :is(.home-card-heading, .home-launcher-heading) {
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.home-layout[data-layout='adaptive'] :is(.home-card-heading h2, .home-launcher-heading h2) {
+  font-size: var(--layout-section-title);
+  line-height: var(--layout-section-line);
+}
+.home-layout[data-layout='adaptive'] .home-launcher-heading {
+  margin-bottom: var(--space-4);
+}
+.home-layout[data-layout='adaptive'] .home-launcher-search {
+  min-height: var(--layout-control);
+  margin-bottom: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+}
+.home-layout[data-layout='adaptive'] .home-launcher-list {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-4);
+  max-height: none;
+  overflow: visible;
+  padding: var(--space-1);
+}
+.home-layout[data-layout='adaptive'] .home-program {
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) 64px;
+  border-radius: var(--radius-card);
+}
+.home-layout[data-layout='adaptive'] .home-program-name strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: var(--layout-body);
+}
+.home-layout[data-layout='adaptive'] :is(.home-program-play, .home-program-tools .icon-button) {
+  width: var(--layout-control);
+  height: var(--layout-control);
+}
+.home-layout[data-layout='adaptive'] .home-program-tools {
+  bottom: var(--space-2);
+  inset-inline: var(--space-4);
+  gap: var(--space-1);
+}
+.home-layout[data-layout='adaptive'] .home-hardware-row {
+  grid-template-columns: 20px 40px minmax(0, 1fr);
+  padding-block: var(--space-3);
+  font-size: var(--layout-caption);
+}
+.home-layout[data-layout='adaptive'] .home-hardware-row strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.home-layout[data-layout='adaptive']
+  :is(
+    .home-win-card p,
+    .home-source,
+    .home-program-name small,
+    .home-launcher-footer,
+    .home-note p,
+    .home-quote small,
+    .home-welcome small
+  ) {
+  font-size: var(--layout-caption);
+  line-height: var(--layout-caption-line);
+}
+/* 目录共用容器网格。280px 是内容最小宽度；宽窗口自然增加列数，不依赖设备类型。 */
+.home-layout[data-layout='adaptive']
+  :is(.tools-toolbar, .optimization-toolbar, .steam-toolbar, .other-games-toolbar) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+  max-width: none;
+}
+.home-layout[data-layout='adaptive'] :is(.tools-search, .optimization-search) {
+  flex: 1 1 280px;
+  min-width: 0;
+  width: auto;
+  min-height: var(--layout-control);
+  height: auto;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  gap: var(--space-2);
+}
+.home-layout[data-layout='adaptive'] :is(.tools-search input, .optimization-search input) {
+  font-size: var(--layout-body);
+  min-width: 0;
+}
+.home-layout[data-layout='adaptive'] .tools-filters {
+  display: flex;
+  flex-wrap: wrap;
+  height: auto;
+  max-width: 100%;
+  padding: var(--space-1);
+}
+.home-layout[data-layout='adaptive'] .tools-filters button {
+  min-width: 0;
+  min-height: var(--layout-control);
+  height: auto;
+  padding: var(--space-2) var(--space-4);
+  gap: var(--space-2);
+  font-size: var(--layout-body);
+}
+.home-layout[data-layout='adaptive'] .tools-manage {
+  width: auto;
+}
+.home-layout[data-layout='adaptive']
+  :is(
+    .tool-section + .tool-section,
+    .optimization-common,
+    .optimization-section,
+    .optimization-presets
+  ) {
+  margin-top: var(--layout-section);
+}
+.home-layout[data-layout='adaptive'] :is(.tool-section h2, .optimization-content h2) {
+  font-size: var(--layout-section-title);
+  line-height: var(--layout-section-line);
+}
+.home-layout[data-layout='adaptive'] :is(.tool-grid, .optimization-grid, .other-games-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--layout-gap);
+  margin-top: var(--space-4);
+  align-items: stretch;
+}
+.home-layout[data-layout='adaptive'] :is(.tool-card:not(.tool-compact), .optimization-category) {
+  height: auto;
+  min-height: 144px;
+  overflow: visible;
+}
+.home-layout[data-layout='adaptive'] :is(.tool-open, .optimization-category > button) {
+  height: 100%;
+  min-height: 144px;
+  gap: var(--space-4);
+  padding: var(--layout-card-padding);
+  align-items: flex-start;
+  border-radius: inherit;
+}
+.home-layout[data-layout='adaptive'] :is(.tool-copy, .optimization-category-copy) {
+  min-width: 0;
+  padding: 0 24px 0 0;
+}
+.home-layout[data-layout='adaptive'] :is(.tool-name, .optimization-category-name) {
+  padding: 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--home-ink);
+  overflow-wrap: anywhere;
+}
+.home-layout[data-layout='adaptive'] :is(.tool-description, .optimization-category-description) {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  padding: 0;
+  margin-top: var(--space-2);
+  font-size: var(--layout-body);
+  line-height: var(--layout-body-line);
+  color: var(--home-muted);
+  overflow-wrap: anywhere;
+}
+.home-layout[data-layout='adaptive'] .tool-favorite {
+  top: var(--space-2);
+  right: var(--space-2);
+  width: var(--layout-control);
+  height: var(--layout-control);
+}
+.home-layout[data-layout='adaptive'] :is(.tool-arrow, .optimization-arrow) {
+  display: none;
+}
+.home-layout[data-layout='adaptive'] .tool-maintenance {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--layout-gap);
+  padding: 0;
+  margin-top: var(--space-4);
+}
+.home-layout[data-layout='adaptive'] .tool-maintenance .tool-card {
+  height: auto;
+  min-height: 112px;
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-card);
+  background: var(--layout-surface);
+}
+.home-layout[data-layout='adaptive'] .tool-maintenance .tool-open {
+  min-height: 112px;
+  border: 0;
+}
+.home-layout[data-layout='adaptive'] .tools-detail {
+  margin-top: var(--space-6);
+  padding: var(--layout-card-padding);
+  border-radius: var(--radius-workbench);
+}
+.home-layout[data-layout='adaptive'] :is(.optimization-common-item, .other-game-card) {
+  padding: var(--layout-card-padding);
+  gap: var(--space-4);
+}
+/* 硬件的三张摘要与下方 8+4 分区共享列线，数据表格只在自身容器横向滚动。 */
+.home-layout[data-layout='adaptive'] .hw-tabs {
+  margin: 0;
+  height: auto;
+  min-height: var(--layout-control);
+}
+.home-layout[data-layout='adaptive'] .hw-metrics {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+.home-layout[data-layout='adaptive'] .hw-metric {
+  grid-column: span 4;
+  min-height: 208px;
+  padding: var(--layout-card-padding);
+}
+.home-layout[data-layout='adaptive'] .hw-lower {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--layout-gap);
+  margin-top: var(--layout-gap);
+}
+.home-layout[data-layout='adaptive'] .hw-lower > :first-child {
+  grid-column: span 8;
+}
+.home-layout[data-layout='adaptive'] .hw-lower > :last-child {
+  grid-column: span 4;
+}
+.home-layout[data-layout='adaptive'] :is(.hw-device, .hw-trend, .hw-sensor-panel) {
+  min-width: 0;
+  padding: var(--layout-card-padding);
+}
+.home-layout[data-layout='adaptive'] :is(.hw-device h2, .hw-trend h2, .hw-metric-heading h2) {
+  font-size: var(--layout-section-title);
+  line-height: var(--layout-section-line);
+}
+.home-layout[data-layout='adaptive'] .hw-live-toolbar {
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+}
+/* 指标卡内部也按内容分配宽度，长型号可以换行，不反向撑大外部 12 列网格。 */
+.home-layout[data-layout='adaptive'] .hw-metric-body {
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.home-layout[data-layout='adaptive'] .optimization-common-panel {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  border-radius: var(--radius-card);
+}
+.home-layout[data-layout='adaptive'] .optimization-common-item + .optimization-common-item::before {
+  display: none;
+}
+/* 设置主体随内容自然增长，整个页面只有一个主滚动区；分类导航在足够宽时固定阅读起点。 */
+.home-layout[data-layout='adaptive'][data-page='settings'] {
+  display: block;
+}
+.home-layout[data-layout='adaptive'][data-page='settings'] > .home-workspace,
+.home-layout[data-layout='adaptive'] .live-settings {
+  display: block;
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-workbench {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-rows: auto;
+  min-height: 0;
+  gap: var(--layout-gap);
+  padding: var(--layout-card-padding);
+  overflow: visible;
+  align-items: start;
+  border-radius: var(--radius-workbench);
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-navigation {
+  position: sticky;
+  top: var(--space-6);
+  flex-direction: column;
+  gap: var(--space-2);
+  width: auto;
+  padding: 0 var(--space-4) 0 0;
+  border-right: 1px solid var(--layout-line);
+  overflow: visible;
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-navigation button {
+  min-height: 48px;
+  padding: var(--space-3);
+  gap: var(--space-3);
+  white-space: normal;
+  font-size: var(--layout-body);
+  line-height: var(--layout-body-line);
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-panel-content {
+  max-width: 880px;
+  overflow: visible;
+  padding: 0;
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-body {
+  min-width: 0;
+  width: 100%;
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-panel-content > h2 {
+  margin: 0 0 var(--space-6);
+  font-size: var(--layout-section-title);
+  line-height: var(--layout-section-line);
+}
+.home-layout[data-layout='adaptive'] .live-settings h3 {
+  margin: var(--space-8) 0 var(--space-4);
+  font-size: 16px;
+  line-height: 24px;
+}
+.home-layout[data-layout='adaptive'] .setting-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  min-height: 72px;
+  padding: var(--space-4) 0;
+  border-color: var(--layout-line);
+}
+.home-layout[data-layout='adaptive'] .setting-row > div:first-child {
+  flex: 1 1 240px;
+  overflow-wrap: anywhere;
+}
+.home-layout[data-layout='adaptive'] .setting-row p {
+  font-size: var(--layout-body);
+  line-height: var(--layout-body-line);
+  color: var(--home-muted);
+}
+.home-layout[data-layout='adaptive'] .setting-control {
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.home-layout[data-layout='adaptive']
+  .setting-control
+  :is(input:not([type='checkbox']):not([type='range']), select, button:not(.toggle)) {
+  min-height: var(--layout-control);
+  max-width: 100%;
+  border-radius: var(--radius-control);
+  font-size: var(--layout-body);
+}
+.home-layout[data-layout='adaptive'] .live-settings .preferences-footer {
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+}
+/* 游戏封面保持原有比例，卡片宽度随容器换列；列表模式继续沿用单列语义。 */
+.home-layout[data-layout='adaptive'] .catalog-grid:not(.catalog-list) {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--layout-gap);
+}
+.home-layout[data-layout='adaptive'] :is(.steam-accounts, .steam-disks) {
+  gap: var(--layout-gap);
+}
+.home-layout[data-layout='adaptive'] .steam-toolbar > :is(input, select) {
+  max-width: 100%;
+  min-height: var(--layout-control);
+}
+.home-layout[data-layout='adaptive']
+  :is(
+    .steam-toolbar,
+    .other-games-toolbar,
+    .hw-live-toolbar,
+    .settings-actions,
+    .preferences-footer
+  )
+  :is(button, select) {
+  min-height: var(--layout-control);
+  border-radius: var(--radius-control);
+  font-size: var(--layout-body);
+}
+.home-layout[data-layout='adaptive'] .catalog-favorite {
+  width: var(--layout-control);
+  height: var(--layout-control);
+}
+.home-layout[data-layout='adaptive'] .home-program-icon {
+  width: 40px;
+  height: 40px;
+}
+.home-layout[data-layout='adaptive'] .library-secondary {
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-6);
+}
+/* 音乐采用纵向弹性布局：通知、页头、播放条按实际高度占位，曲库取得剩余空间。 */
+.home-layout[data-layout='adaptive'][data-page='music'] {
+  height: 100dvh;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+}
+.home-layout[data-layout='adaptive'][data-page='music'] > .home-workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.home-layout[data-layout='adaptive'][data-page='music'] .top-bar {
+  flex-shrink: 0;
+}
+.home-layout[data-layout='adaptive'] .music-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: var(--space-4);
+}
+.home-layout[data-layout='adaptive'] .music-main > :not(.music-workbench) {
+  flex-shrink: 0;
+}
+.home-layout[data-layout='adaptive'] .music-main .page-header {
+  margin-bottom: 0;
+}
+.home-layout[data-layout='adaptive'] .music-workbench {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 240px;
+  height: auto;
+  gap: var(--layout-gap);
+  align-items: stretch;
+}
+.home-layout[data-layout='adaptive'] .music-browser {
+  grid-column: span 8;
+  min-height: 0;
+  padding: var(--layout-card-padding);
+}
+.home-layout[data-layout='adaptive'] .music-now {
+  grid-column: span 4;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--layout-card-padding);
+}
+.home-layout[data-layout='adaptive'] .music-library-top {
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.home-layout[data-layout='adaptive'] .music-platforms {
+  flex: 1 1 280px;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.home-layout[data-layout='adaptive'] .music-platforms button {
+  min-height: var(--layout-control);
+  font-size: var(--layout-caption);
+}
+.home-layout[data-layout='adaptive'] .music-track {
+  min-height: 56px;
+  gap: var(--space-3);
+  padding: var(--space-2);
+}
+.home-layout[data-layout='adaptive'] .music-track-start b {
+  font-size: var(--layout-body);
+}
+.home-layout[data-layout='adaptive'] .music-track-start small {
+  font-size: var(--layout-caption);
+}
+.home-layout[data-layout='adaptive'] .music-attribution {
+  margin: 0;
+  font-size: var(--layout-caption);
+  line-height: var(--layout-caption-line);
+}
+.home-layout[data-layout='adaptive'] .page-header-actions .music-support-toggle {
+  display: none;
+}
+.home-layout[data-layout='adaptive'] .music-controls {
+  /* 播放条参与弹性排版，清除旧样式的 sticky，避免矮窗口中覆盖曲库。 */
+  position: static;
+  bottom: auto;
+  z-index: auto;
+  margin: 0;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+}
+/* 顶部导航与侧栏使用同一外边距；不覆盖用户已选择的导航方向。 */
+.home-layout[data-layout='adaptive'][data-nav='top'] {
+  padding-top: 104px;
+}
+.home-layout[data-layout='adaptive'][data-nav='top'] .home-workspace {
+  margin-left: var(--layout-margin);
+}
+.home-layout[data-layout='adaptive'][data-nav='top'] .dock {
+  inset: var(--layout-edge) var(--layout-margin) auto;
+  width: auto;
+  height: 72px;
+  flex-direction: row;
+  padding: var(--space-2) var(--space-4);
+  gap: var(--space-4);
+}
+.home-layout[data-layout='adaptive'][data-nav='top'] .brand {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 48px;
+}
+.home-layout[data-layout='adaptive'][data-nav='top'] .brand img {
+  width: 32px;
+  height: 48px;
+}
+.home-layout[data-layout='adaptive'][data-nav='top'] .dock nav {
+  display: flex;
+  min-width: 0;
+  gap: var(--space-2);
+}
+.home-layout[data-layout='adaptive'][data-nav='top'] .dock .dock-item {
+  min-width: 48px;
+  min-height: 40px;
+  height: auto;
+  flex-direction: row;
+  padding: var(--space-2) var(--space-3);
+  gap: var(--space-2);
+}
+/* 断点针对工作区而非显示器；侧栏改变位置或宽度时，内容仍能按实际空间重排。 */
+@container workspace (width < 888px) {
+  .home-layout[data-layout='adaptive']
+    :is(
+      .home-overview-stack,
+      .home-launcher,
+      .hw-metric,
+      .hw-lower > :first-child,
+      .hw-lower > :last-child
+    ) {
+    grid-column: 1 / -1;
   }
-  .home-layout .home-columns {
+  .home-layout[data-layout='adaptive'] .home-overview-stack {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  }
+  .home-layout[data-layout='adaptive'] .live-settings .preferences-workbench {
     grid-template-columns: minmax(0, 1fr);
   }
-  .home-layout .status-panel {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .home-layout .tools-toolbar {
+  .home-layout[data-layout='adaptive'] .live-settings .preferences-navigation {
+    position: static;
+    flex-direction: row;
     flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--layout-line);
+    padding: 0 0 var(--space-4);
   }
-  .home-layout .tools-search {
-    flex: 1;
-    width: auto;
+  .home-layout[data-layout='adaptive'] .live-settings .preferences-navigation button {
+    flex: 0 1 auto;
+  }
+  .home-layout[data-layout='adaptive'] .music-browser {
+    grid-column: 1 / -1;
+  }
+  .home-layout[data-layout='adaptive'] .music-now {
+    display: none;
+  }
+  .home-layout[data-layout='adaptive'] .page-header-actions .music-support-toggle {
+    display: inline-flex;
+  }
+  /* 展开面板时与曲库顺序排列，滚动限于工作台，底部播放控制始终保留。 */
+  .home-layout[data-layout='adaptive'] .music-workbench[data-support='true'] {
+    grid-template-rows: minmax(240px, 1fr) auto;
+    overflow-y: auto;
+  }
+  .home-layout[data-layout='adaptive'] .music-workbench[data-support='true'] .music-now {
+    display: block;
+    grid-column: 1 / -1;
+    height: auto;
+    max-height: 400px;
   }
 }
-@media (min-width: 701px) and (max-width: 960px) {
-  .home-layout :is(.tool-grid, .optimization-grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@container workspace (600px <= width < 888px) {
+  .home-layout[data-layout='adaptive'] .hw-metrics > .hw-metric {
+    grid-column: span 6;
+  }
+  .home-layout[data-layout='adaptive'] .hw-metrics > .hw-metric:last-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 1199px) {
+  .home-layout[data-layout='adaptive'] {
+    --layout-margin: 16px;
+    --layout-gap: 16px;
+    --layout-card-padding: 16px;
+  }
+}
+@media (max-width: 700px) {
+  .home-layout[data-layout='adaptive'] {
+    padding: var(--space-4);
+    padding-bottom: 104px;
+  }
+  .home-layout[data-layout='adaptive'] .home-workspace {
+    margin-left: 0;
+  }
+  .home-layout[data-layout='adaptive'][data-nav='side'] .dock {
+    inset: auto var(--space-4) var(--space-4);
+    width: auto;
+    height: 72px;
+    flex-direction: row;
+    padding: var(--space-2);
+  }
+  .home-layout[data-layout='adaptive'][data-nav='side'] .dock .brand {
+    display: none;
+  }
+  .home-layout[data-layout='adaptive'][data-nav='side'] .dock nav {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+  .home-layout[data-layout='adaptive'][data-nav='side'] .dock-item {
+    min-width: 56px;
+    flex: 1 0 56px;
+  }
+  .home-layout[data-layout='adaptive'] .global-search {
+    max-width: none;
+  }
+  .home-layout[data-layout='adaptive'] .shortcut {
+    display: none;
+  }
+}
+@media (max-height: 700px) {
+  .home-layout[data-layout='adaptive'] {
+    --layout-section: 24px;
+  }
+  .home-layout[data-layout='adaptive'] #main-content {
+    padding-top: var(--space-4);
+  }
+  .home-layout[data-layout='adaptive'] .page-header {
+    margin-bottom: var(--space-4);
+  }
+  .home-layout[data-layout='adaptive'] .dock {
+    gap: var(--space-2);
+  }
+  .home-layout[data-layout='adaptive'][data-page='music'] {
+    height: auto;
+    min-height: 100dvh;
+  }
+  .home-layout[data-layout='adaptive'] .music-workbench {
+    flex: 0 0 auto;
+    height: 360px;
+  }
+}
+/* 减少动态效果时完全关闭装饰过渡；键盘焦点仍即时显示。 */
+@media (prefers-reduced-motion: reduce) {
+  .home-layout[data-layout='adaptive'] :is(button, a) {
+    transition: none;
   }
 }

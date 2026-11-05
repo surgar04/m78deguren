@@ -13,6 +13,7 @@ pub mod launchers;
 pub mod music;
 pub mod onboarding;
 pub mod optimizer;
+pub mod plugins;
 pub mod settings;
 pub mod steam;
 pub mod tools;

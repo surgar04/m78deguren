@@ -60,6 +60,8 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
 $env:DOTNET_GENERATE_ASPNET_CERTIFICATE = 'false'
 $env:DOTNET_NOLOGO = 'true'
 $env:NUGET_PACKAGES = Join-Path $projectRoot '.cache\nuget\packages'
+## LLVM/WASI 上游会忽略 USERPROFILE 并使用 Windows 已知用户目录；必须显式覆盖工具链位置。
+$env:WASI_SDK_PATH = Join-Path $projectRoot '.tools\wasi-sdk\wasi-sdk-29.0'
 $env:NUGET_HTTP_CACHE_PATH = Join-Path $projectRoot '.cache\nuget\http'
 $env:DOTNET_BUNDLE_EXTRACT_BASE_DIR = Join-Path $projectRoot '.cache\dotnet\bundle'
 $env:PSModuleAnalysisCachePath = Join-Path $projectRoot '.cache\powershell\ModuleAnalysisCache'
@@ -70,6 +72,8 @@ if($PSVersionTable.PSVersion.Major -le 5){
     $env:PSModulePath=Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/Modules'
 }
 $env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER = Join-Path $projectRoot '.tools\msvc\bin\link.exe'
+# 只对本入口的 Cargo 运行生效；测试清单写入 D 盘目标 EXE，不修改全局配置或 Windows 组件。
+$env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER = 'zhenjing-rust-runner.cmd'
 $env:CC_x86_64_pc_windows_msvc = Join-Path $projectRoot '.tools\msvc\bin\cl.exe'
 $env:CXX_x86_64_pc_windows_msvc = $env:CC_x86_64_pc_windows_msvc
 $env:AR_x86_64_pc_windows_msvc = Join-Path $projectRoot '.tools\msvc\bin\lib.exe'

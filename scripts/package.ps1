@@ -4,6 +4,8 @@ $env:ZHENJING_DEVELOPER_BUILD=[string]$DeveloperBuild
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot\env.ps1"
 if($Debug){throw '分发包只支持 Release；调试请使用 desktop:dev。'}
+& "$PSScriptRoot\build-plugin-host.ps1" -Release
+if($LASTEXITCODE -ne 0){throw '插件宿主构建失败，停止打包。'}
 
 if($Publish){
     & (Join-Path $projectRoot '.tools\node\node.exe') (Join-Path $projectRoot 'scripts\publish-release.ts') --preflight

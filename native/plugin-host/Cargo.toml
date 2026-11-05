@@ -1,0 +1,40 @@
+[package]
+name = "zhenjing-plugin-host"
+version = "0.10.3"
+edition = "2024"
+rust-version = "1.96"
+license = "AGPL-3.0-only"
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wasmtime = { version = "=49.0.5", default-features = false, features = ["std", "runtime", "cranelift", "component-model", "wat"] }
+wasmtime-wasi = { version = "=49.0.5", default-features = false, features = ["p2"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+todo = "deny"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+# 宿主只通过受控协议诊断；入口不生成巨型 PDB，依赖库仍保留各自的调试配置。
+[profile.dev.package.zhenjing-plugin-host]
+debug = 0
+
+# 桌面调试也运行经过优化的编译器，否则大型 C#/JS 组件的冷编译会超过启动预算。
+# 与正式 Release 共用相同执行策略；关闭 LTO、分散代码生成以控制开发机编译内存。
+[profile.plugin-runtime]
+inherits = "release"
+opt-level = 2
+codegen-units = 16
+lto = false

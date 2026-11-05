@@ -12,6 +12,8 @@ src-tauri/resources/hardware-monitor/licenses
 # 由 .NET SDK 发布、逐字节校验的运行库布局，不改写运行时配置。
 src-tauri/resources/hardware-monitor/runtime
 src-tauri/resources/music-host
+# 原始依赖许可随组件逐字节分发，不能由代码格式化工具改写。
+src-tauri/resources/plugin-host
 # 固定摘要校验的第三方原始快照，保持字节与版权注释，不由本项目格式化。
 integrations/folia-engine/upstream
 native/music-host/upstream

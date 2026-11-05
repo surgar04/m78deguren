@@ -121,6 +121,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "cargo:rerun-if-changed={}",
         music.join("manifest.json").display()
     );
+    // 先构建独立插件宿主，再将其摘要编入主程序；发布版不信任安装目录可修改的摘要文件。
+    println!("cargo:rerun-if-changed=resources/plugin-host/manifest.json");
+    let plugin_manifest = base.join("resources/plugin-host/manifest.json");
+    let digest = if plugin_manifest.is_file() {
+        let value: serde_json::Value = serde_json::from_slice(&std::fs::read(plugin_manifest)?)?;
+        value["sha256"]
+            .as_str()
+            .filter(|v| v.len() == 64 && v.bytes().all(|b| b.is_ascii_hexdigit()))
+            .map(str::to_owned)
+    } else {
+        None
+    };
+    std::fs::write(
+        std::path::PathBuf::from(std::env::var("OUT_DIR")?).join("plugin_host_digest.rs"),
+        format!("const PLUGIN_HOST_DIGEST: Option<&str> = {digest:?};"),
+    )?;
     tauri_build::build();
     Ok(())
 }

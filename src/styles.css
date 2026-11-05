@@ -1,4 +1,5 @@
 @import 'tailwindcss' source(none);
+@import './styles/layout-tokens.css';
 @source './';
 
 /* 小米 MiSans 原始可变字体，未做改编；授权与出处见 docs/licenses/MiSans.md。 */

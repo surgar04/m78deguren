@@ -1,0 +1,15 @@
+package zhenjing:plugin@1.0.0;
+
+/// 能力调用必须经过宿主校验；请求和结果为有界、经 Schema 校验的 JSON 文本。
+interface capabilities {
+  call: func(request: string) -> result<string, string>;
+}
+
+/// 三语言共享同一生命周期与命令接口，不使用不稳定的 Rust 或 CLR 二进制 ABI。
+interface lifecycle {
+  invoke: func(command: string, input: string) -> result<string, string>;
+}
+world plugin {
+  import capabilities;
+  export lifecycle;
+}

@@ -10,6 +10,7 @@ pub mod hud;
 pub mod music;
 pub mod onboarding;
 pub mod other_games;
+pub mod plugins;
 pub mod quick_launch;
 pub mod settings;
 pub mod steam;

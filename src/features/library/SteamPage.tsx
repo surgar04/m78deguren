@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/PageHeader';
 import { useConfirmationPolicy } from '@/features/settings/use-confirmation-policy';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -206,42 +207,40 @@ export default function SteamPage() {
   return (
     <WorkspaceLayout workspace={workspace} active="library">
       <main id="main-content" className="catalog-main steam-main" tabIndex={-1}>
-        <header className="catalog-heading" data-home-enter>
-          <h1>
-            游戏库 <span className="steam-live-badge">真实 Steam 数据</span>
-          </h1>
-          <p>你的游戏，随时出发。</p>
-          <p className="catalog-date">
-            {new Date().toLocaleDateString('zh-CN', { dateStyle: 'full' })}
-          </p>
-          <div className="catalog-actions">
-            <button
-              type="button"
-              className="catalog-add"
-              disabled={!data?.installed || busy}
-              onClick={() =>
-                execute({ operation: 'launch', kind: 'client', appId: null, consent: true })
-              }
-            >
-              <Icon icon={faSteam} />
-              {data?.running ? '打开 Steam' : '启动 Steam'}
-            </button>
-            <button
-              type="button"
-              className="catalog-scan glass"
-              disabled={!isDesktop() || busy || query.isFetching}
-              onClick={() =>
-                refresh.mutate(
-                  { operation: 'snapshot', refresh: true },
-                  { onError: fail, onSuccess: () => setNotice('Steam 数据已刷新。') },
-                )
-              }
-            >
-              <Icon icon={faRotateRight} />
-              {query.isFetching || refresh.isPending ? '读取中…' : '刷新数据'}
-            </button>
-          </div>
-        </header>
+        <PageHeader
+          title="游戏库"
+          description="你的游戏，随时出发。"
+          badge="真实 Steam 数据"
+          actions={
+            <>
+              <button
+                type="button"
+                className="catalog-add"
+                disabled={!data?.installed || busy}
+                onClick={() =>
+                  execute({ operation: 'launch', kind: 'client', appId: null, consent: true })
+                }
+              >
+                <Icon icon={faSteam} />
+                {data?.running ? '打开 Steam' : '启动 Steam'}
+              </button>
+              <button
+                type="button"
+                className="catalog-scan glass"
+                disabled={!isDesktop() || busy || query.isFetching}
+                onClick={() =>
+                  refresh.mutate(
+                    { operation: 'snapshot', refresh: true },
+                    { onError: fail, onSuccess: () => setNotice('Steam 数据已刷新。') },
+                  )
+                }
+              >
+                <Icon icon={faRotateRight} />
+                {query.isFetching || refresh.isPending ? '读取中…' : '刷新数据'}
+              </button>
+            </>
+          }
+        />
         <LibraryNavigation />
         {!isDesktop() ? (
           <p className="steam-message">

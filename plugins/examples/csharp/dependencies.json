@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "scope": "direct-and-embedded-runtime",
+  "notice": "构建包的精确来源与内容哈希同时保存在 packages.lock.json；发布者需核对 NativeAOT 裁剪后实际嵌入的运行库声明。",
+  "dependencies": [
+    {
+      "name": "zhenjing-plugin-sdk",
+      "version": "1.0.0",
+      "license": "AGPL-3.0-only",
+      "source": "plugins/sdk/csharp"
+    },
+    {
+      "name": "BytecodeAlliance.Componentize.DotNet.Wasm.SDK",
+      "version": "0.8.0-preview00011",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "source": "https://github.com/bytecodealliance/componentize-dotnet",
+      "buildOnly": true
+    },
+    {
+      "name": "Microsoft.NETCore.App",
+      "version": "10.0.14",
+      "license": "MIT",
+      "source": "https://github.com/dotnet/runtime"
+    }
+  ]
+}

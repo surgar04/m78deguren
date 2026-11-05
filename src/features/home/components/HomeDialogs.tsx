@@ -25,6 +25,7 @@ import { DEFAULT_WALLPAPER, useWallpaper } from '@/features/settings/wallpaper';
 import { useSettingsUi } from '@/features/settings/ui-store';
 import { errorMessage } from '@/lib/desktop';
 import type { DialogState, HomeData } from '../types';
+import { PluginContributions } from '@/features/plugins/PluginContributions';
 
 function GlobalSearch({ open, close }: { open: (dialog: DialogState) => void; close: () => void }) {
   const [query, setQuery] = useState(''),
@@ -56,6 +57,7 @@ function GlobalSearch({ open, close }: { open: (dialog: DialogState) => void; cl
         />
       </label>
       <div className="search-results" aria-live="polite">
+        <PluginContributions kind="command" search={query} />
         <h3>本机快捷启动</h3>
         {shortcuts.map((row) => (
           <button key={row.id} type="button" onClick={() => open({ kind: 'shortcut', id: row.id })}>

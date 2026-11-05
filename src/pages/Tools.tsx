@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/PageHeader';
 import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -19,6 +20,7 @@ import { TOOL_GROUPS, selectTools } from '@/features/tools/catalog';
 import { ToolCard } from '@/features/tools/ToolCard';
 import type { ToolEntry, ToolFilter } from '@/features/tools/types';
 import '@/features/tools/tools.css';
+import { PluginContributions } from '@/features/plugins/PluginContributions';
 const NativeToolPanel = lazy(() => import('@/features/tools/native/NativeToolPanel'));
 
 const FILTERS = [
@@ -67,16 +69,11 @@ export default function Tools() {
   return (
     <WorkspaceLayout workspace={workspace} active="tools">
       <main id="main-content" className="tools-main" tabIndex={-1}>
-        <header className="tools-heading" data-home-enter>
-          <div className="tools-title">
-            <h1>{selected?.name ?? '工具箱'}</h1>
-            <span className="tools-source">
-              {catalog.data?.source === 'native' ? '本机工具' : '桌面工具'}
-            </span>
-          </div>
-          <p>{selected?.description ?? '让游戏与日常，都更顺手。'}</p>
-          <p className="tools-date">{workspace.query.data?.date}</p>
-        </header>
+        <PageHeader
+          title={selected?.name ?? '工具箱'}
+          description={selected?.description ?? '让游戏与日常，都更顺手。'}
+          badge={catalog.data?.source === 'native' ? '本机工具' : '桌面工具'}
+        />
         {!selectedId && (
           <>
             <div className="tools-toolbar" data-home-enter>
@@ -259,6 +256,7 @@ export default function Tools() {
             </button>
           </div>
         )}
+        {!selectedId && <PluginContributions kind="tool" search={query} />}
       </main>
     </WorkspaceLayout>
   );

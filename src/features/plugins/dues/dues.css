@@ -1,0 +1,353 @@
+/* 第一方表格复用桌面栅格与间距令牌。颜色与文字同时表达状态，深色模式继承主题。 */
+.dues-workspace {
+  min-width: 0;
+  margin-top: var(--space-6);
+  color: var(--home-ink);
+  background: var(--layout-surface);
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-card);
+  padding: var(--layout-card-padding);
+}
+.dues-heading,
+.dues-month-row,
+.dues-batch,
+.dues-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.dues-heading h2 {
+  font-size: var(--layout-section-title);
+  margin-top: var(--space-2);
+}
+.dues-eyebrow {
+  font-size: var(--layout-caption);
+  color: var(--home-muted);
+}
+.dues-workspace :is(button, input, select),
+.dues-dialog :is(input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+.dues-workspace button,
+.dues-month-row input,
+.dues-filters :is(input, select),
+.dues-dialog :is(input:not([type='checkbox']), select, textarea) {
+  min-height: var(--layout-control);
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
+  background: var(--layout-surface);
+}
+.dues-workspace button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.dues-workspace :is(button, input, select):focus-visible,
+.dues-dialog :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--home-mint);
+  outline-offset: 3px;
+}
+.dues-month-row {
+  justify-content: flex-start;
+  margin-block: var(--space-6);
+}
+.dues-month-row label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dues-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+.dues-metrics article {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--layout-card-padding);
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-card);
+  background: var(--layout-surface);
+  min-width: 0;
+}
+.dues-metrics article > span {
+  font-size: var(--layout-caption);
+  color: var(--home-muted);
+}
+.dues-metrics strong {
+  font-size: clamp(22px, 2vw, 32px);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.dues-metrics small {
+  font-size: 14px;
+  color: var(--home-muted);
+  font-weight: 400;
+}
+.dues-metrics button {
+  align-self: flex-start;
+  text-align: left;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: var(--layout-caption);
+}
+.dues-metrics progress {
+  width: 100%;
+  height: 8px;
+  accent-color: #21805c;
+}
+.dues-help {
+  display: block;
+  color: var(--home-muted);
+  font-size: var(--layout-caption);
+  line-height: 1.65;
+  margin-block: var(--space-2);
+}
+.dues-sync-state {
+  margin-block: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--layout-surface);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--layout-line);
+  font-size: var(--layout-caption);
+}
+.dues-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  border-bottom: 1px solid var(--layout-line);
+  padding-bottom: var(--space-3);
+}
+.dues-tabs [aria-selected='true'] {
+  background: color-mix(in srgb, var(--home-mint) 24%, var(--layout-surface));
+  font-weight: 650;
+}
+.dues-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(108px, 1fr));
+  gap: var(--space-4);
+  margin-block: var(--space-4);
+}
+.dues-filters label,
+.dues-dialog form > label:not(.dues-check) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--layout-caption);
+}
+.dues-filters :is(input, select) {
+  width: 100%;
+  min-width: 0;
+}
+.dues-batch {
+  justify-content: flex-start;
+  margin-block: var(--space-4);
+  font-size: var(--layout-caption);
+}
+.dues-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--layout-line);
+  border-radius: var(--radius-control);
+  background: var(--layout-surface);
+}
+.dues-table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--layout-caption);
+  text-align: left;
+}
+.dues-table :is(th, td) {
+  border-bottom: 1px solid var(--layout-line);
+  padding: var(--space-3) var(--space-4);
+  vertical-align: middle;
+  max-width: 280px;
+  overflow-wrap: anywhere;
+}
+.dues-table thead th {
+  background: var(--layout-surface);
+  white-space: nowrap;
+  font-weight: 650;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.dues-table tbody th {
+  font-weight: 550;
+  min-width: 120px;
+}
+.dues-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.dues-row-unpaid {
+  background: color-mix(in srgb, #d78936 9%, transparent);
+}
+.dues-row-unpaid > :first-child {
+  border-left: 3px solid #cc852e;
+}
+.dues-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 36px;
+}
+.dues-avatar-placeholder {
+  display: inline-grid;
+  place-items: center;
+  color: var(--home-ink);
+  background: color-mix(in srgb, var(--home-mint) 30%, var(--layout-surface));
+  font-weight: 650;
+}
+.dues-badge {
+  display: inline-flex;
+  align-items: center;
+  min-width: 54px;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+  font-weight: 650;
+}
+.dues-paid {
+  background: color-mix(in srgb, #27a46d 17%, var(--layout-surface));
+  color: #176640;
+}
+.dues-unpaid {
+  background: color-mix(in srgb, #e59435 20%, var(--layout-surface));
+  color: #8c4c0b;
+}
+.dues-paid-text {
+  color: #176640;
+}
+.dues-unpaid-text {
+  color: #995311;
+}
+[data-theme='dark'] .dues-paid,
+[data-theme='dark'] .dues-paid-text {
+  color: #8ce6b9;
+}
+[data-theme='dark'] .dues-unpaid,
+[data-theme='dark'] .dues-unpaid-text {
+  color: #ffd19a;
+}
+.dues-number {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dues-wxid {
+  font-family: ui-monospace, monospace;
+  min-width: 130px;
+}
+.dues-note {
+  min-width: 170px;
+}
+.dues-note :is(span, small) {
+  display: block;
+  line-height: 1.65;
+}
+.dues-row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+.dues-row-actions button {
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
+}
+.dues-pagination {
+  justify-content: flex-end;
+  margin-block: var(--space-4);
+  font-size: var(--layout-caption);
+}
+.dues-pagination > span:first-child {
+  margin-right: auto;
+}
+.dues-empty {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--home-muted);
+}
+.dues-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.dues-dialog input,
+.dues-dialog textarea {
+  width: 100%;
+}
+.dues-dialog textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+.dues-check {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.dues-check input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 3px;
+}
+.dues-summary,
+.dues-warning {
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--layout-line);
+  line-height: 1.7;
+  background: color-mix(in srgb, #e59435 10%, var(--layout-surface));
+}
+.dues-pay-names {
+  max-height: 100px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  color: var(--home-muted);
+}
+.dues-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 1400px) {
+  .dues-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) {
+  .dues-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dues-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .dues-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dues-month-row label {
+    width: 100%;
+  }
+  .dues-heading .plugin-actions {
+    width: 100%;
+  }
+}

@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/PageHeader';
 import { useConfirmationPolicy } from '@/features/settings/use-confirmation-policy';
 import { useState } from 'react';
 import { z } from 'zod';
@@ -90,41 +91,41 @@ export default function Hardware() {
   return (
     <WorkspaceLayout workspace={workspace} active="hardware">
       <main className="hw-main hw-live" id="main-content" tabIndex={-1}>
-        <header className="hw-heading" data-home-enter>
-          <div className="hw-heading-title">
-            <h1>系统与硬件</h1>
-            <span className="hw-source-badge">
+        <PageHeader
+          title="系统与硬件"
+          description="了解你的设备，掌握运行状态。"
+          badge={
+            <>
               {isDesktop()
                 ? query.error
                   ? '数据连接异常'
                   : STATUS[live?.status ?? 'starting']
                 : '需要桌面端'}
-            </span>
-          </div>
-          <p>了解你的设备，掌握运行状态。</p>
-          <p className="hw-date">
-            {new Intl.DateTimeFormat('zh-CN', { dateStyle: 'full' }).format(new Date())}
-          </p>
-          <div className="hw-actions">
-            <button
-              type="button"
-              className="hw-export"
-              disabled={!live}
-              onClick={() => open('export')}
-            >
-              <Icon icon={faArrowUpFromBracket} />
-              导出 HTML 报告
-            </button>
-            <button
-              type="button"
-              className="glass"
-              disabled={!isDesktop()}
-              onClick={() => opener.mutate({ operation: 'sensors-open' }, { onError: fail })}
-            >
-              <Icon icon={faChartColumn} />
-              传感器详情
-            </button>
-          </div>
+            </>
+          }
+          actions={
+            <>
+              <button
+                type="button"
+                className="hw-export"
+                disabled={!live}
+                onClick={() => open('export')}
+              >
+                <Icon icon={faArrowUpFromBracket} />
+                导出 HTML 报告
+              </button>
+              <button
+                type="button"
+                className="glass"
+                disabled={!isDesktop()}
+                onClick={() => opener.mutate({ operation: 'sensors-open' }, { onError: fail })}
+              >
+                <Icon icon={faChartColumn} />
+                传感器详情
+              </button>
+            </>
+          }
+        >
           <div className="hw-tabs glass" role="tablist" aria-label="硬件页面视图">
             {TABS.map((item, index) => (
               <button
@@ -162,7 +163,7 @@ export default function Hardware() {
               </button>
             ))}
           </div>
-        </header>
+        </PageHeader>
         {!isDesktop() && (
           <p className="hw-live-note" role="status">
             硬件型号、传感器、记录及 ETW 需要 Windows 桌面后端。网页不显示模拟读数。
