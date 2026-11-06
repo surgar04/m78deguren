@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** 内置插件仍走唯一 IPC 网关；人数、金额、文本与操作对象均在双端验证。金额单位为分。 */
+/** 内置插件走唯一 IPC 网关并双端验证；本地人民币使用分，公网会费使用原始整数游戏币。 */
 export const DUES_PLUGIN_ID = 'org.zhenjing.builtin.group-dues';
 const wxid = z.string().min(1).max(128).regex(/^\S+$/u);
 const cents = z.number().int().min(0).max(100_000_000);
