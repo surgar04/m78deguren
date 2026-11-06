@@ -70,6 +70,9 @@ describe('会费金额与跨月统计', () => {
   });
   it('拒绝伪造 IPC 路径、未知操作及非整数金额', () => {
     expect(
+      duesRequestSchema.safeParse({ action: 'refresh-fees', url: 'http://127.0.0.1' }).success,
+    ).toBe(false);
+    expect(
       duesRequestSchema.safeParse({ action: 'sync', revision: 1, url: 'http://127.0.0.1' }).success,
     ).toBe(false);
     expect(

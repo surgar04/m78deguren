@@ -195,6 +195,28 @@
 .dues-row-unpaid > :first-child {
   border-left: 3px solid #cc852e;
 }
+/* 已过期使用红色边线和文字，与今日到期、无记录的中性/警示状态区分。 */
+.dues-row-expired {
+  background: color-mix(in srgb, #cc4949 10%, transparent);
+}
+.dues-row-expired > :first-child {
+  border-left: 3px solid #cc4949;
+}
+.dues-expired {
+  background: color-mix(in srgb, #cc4949 18%, var(--layout-surface));
+  color: #a22828;
+}
+[data-theme='dark'] .dues-expired {
+  color: #ffaaaa;
+}
+.dues-history-dialog {
+  max-width: min(1200px, calc(100vw - 48px));
+}
+.dues-no-record {
+  color: var(--home-muted);
+  background: var(--layout-surface);
+  border: 1px solid var(--layout-line);
+}
 .dues-avatar {
   width: 36px;
   height: 36px;

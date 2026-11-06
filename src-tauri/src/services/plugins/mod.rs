@@ -276,8 +276,8 @@ impl PluginState {
                 vec![Builtin {
                     id: dues::ID,
                     name: "群会费智能表格",
-                    description: "同步群成员，管理月费与年费，按月筛选和统计缴纳情况。",
-                    version: "1.0.0",
+                    description: "自动同步游戏币会费、累计金额与到期状态，保留本地资料和独立人民币账本。",
+                    version: "1.1.0",
                 }]
             } else {
                 Vec::new()

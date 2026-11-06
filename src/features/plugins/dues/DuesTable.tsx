@@ -15,7 +15,8 @@ import {
   statistics,
   type TableFilter,
 } from './model';
-import { callDues, DUES_KEY, useDues, useDuesAction } from './repository';
+import { callDues, DUES_KEY, useDues, useDuesAction, useDuesAutoSync } from './repository';
+import RemoteDuesTable from './RemoteDuesTable';
 import './dues.css';
 
 type Editor =
@@ -378,7 +379,9 @@ export default function DuesTable() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editor, setEditor] = useState<Editor | null>(null),
     [notice, setNotice] = useState('');
+  const [source, setSource] = useState<'api' | 'local'>('api');
   const ledger = query.data;
+  const remoteSync = useDuesAutoSync(Boolean(ledger) && !editor);
   const rows = useMemo(() => (ledger ? rowsFor(ledger, month) : []), [ledger, month]);
   const filtered = useMemo(() => filterRows(rows, filter), [rows, filter]);
   const stats = ledger ? statistics(rows, ledger, month) : null;
@@ -462,15 +465,56 @@ export default function DuesTable() {
         )}
       </section>
     );
+  if (source === 'api')
+    return (
+      <>
+        <RemoteDuesTable
+          ledger={ledger}
+          busy={remoteSync.isFetching || action.isPending}
+          error={
+            remoteSync.error
+              ? errorMessage(remoteSync.error)
+              : action.isError
+                ? errorMessage(action.error)
+                : ''
+          }
+          message={!action.isError ? notice : ''}
+          checkedAt={remoteSync.dataUpdatedAt}
+          onRefresh={() => {
+            void remoteSync.refetch();
+          }}
+          onSyncMembers={() => submit({ action: 'sync', revision: ledger.revision })}
+          onLocal={() => setSource('local')}
+          onEdit={(member) => open({ type: 'member', revision: ledger.revision, member })}
+          avatar={(member) => <Avatar member={member} />}
+        />
+        {editor && (
+          <DuesEditor
+            editor={editor}
+            ledger={ledger}
+            busy={action.isPending}
+            failure={action.isError ? errorMessage(action.error) : ''}
+            onClose={() => {
+              setEditor(null);
+              action.reset();
+            }}
+            onSubmit={submit}
+          />
+        )}
+      </>
+    );
   return (
     <section className="dues-workspace" aria-label="会费智能表格">
       <header className="dues-heading">
         <div>
-          <span className="dues-eyebrow">开发者内置插件 · 本地账本</span>
+          <span className="dues-eyebrow">开发者内置插件 · 本地人民币账本（独立于公网游戏币）</span>
           <h2>{ledger.groupName}</h2>
           <p className="dues-help">按月掌握会费，保留每一笔记录。</p>
         </div>
         <div className="plugin-actions">
+          <button type="button" onClick={() => setSource('api')}>
+            返回 API 游戏币会费
+          </button>
           <button
             type="button"
             disabled={action.isPending}

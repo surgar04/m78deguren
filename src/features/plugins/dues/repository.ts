@@ -28,3 +28,22 @@ export function useDuesAction() {
     },
   });
 }
+
+/** 同步任务只保存运行状态；账本仍是 ledger 查询这一份服务状态。前台每分钟及重新聚焦时校验跨天数据。 */
+export function useDuesAutoSync(enabled: boolean) {
+  const client = useQueryClient();
+  return useQuery({
+    queryKey: [...DUES_KEY, 'remote-sync'],
+    enabled,
+    queryFn: async ({ signal }) => {
+      const ledger = await callDues({ action: 'refresh-fees' }, duesLedgerSchema);
+      // 页面关闭后 IPC 可能才返回；取消的查询不得重新填回已清除的个人资料缓存。
+      if (!signal.aborted) client.setQueryData([...DUES_KEY, 'ledger'], ledger);
+      return null;
+    },
+    retry: false,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: 'always',
+  });
+}

@@ -1,5 +1,6 @@
 //! 第一方内置会费插件：由发布的 Rust 代码提供可信表格能力，不扩大第三方 Wasm 权限。
-//! 金额始终使用整数分；成员同步与本地资料、缴费流水分离，避免远端刷新覆盖人工记录。
+//! 本地人民币账本使用整数分；公网游戏币快照独立保存，绝不换算或混入本地流水。
+mod remote;
 use super::{network::Network, storage};
 use crate::services::tools::{Result, error, io_error};
 use base64::{Engine, engine::general_purpose::STANDARD};
@@ -84,6 +85,9 @@ pub struct Ledger {
     pub settings: Settings,
     pub members: Vec<Member>,
     pub payments: Vec<Payment>,
+    /// 缺省兼容已有 schemaVersion=1 文件；公网重置只替换此快照，不删除本地人工记录。
+    #[serde(default)]
+    pub remote_fees: Option<remote::Snapshot>,
 }
 impl Default for Ledger {
     fn default() -> Self {
@@ -98,6 +102,7 @@ impl Default for Ledger {
             settings: Settings::default(),
             members: Vec::new(),
             payments: Vec::new(),
+            remote_fees: None,
         }
     }
 }
@@ -105,6 +110,7 @@ impl Default for Ledger {
 #[serde(tag = "action", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum Request {
     Snapshot,
+    RefreshFees,
     Sync {
         revision: u64,
     },
@@ -218,6 +224,9 @@ fn now() -> String {
     chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
 }
 fn validate(ledger: &Ledger) -> Result<()> {
+    if let Some(snapshot) = &ledger.remote_fees {
+        remote::validate(snapshot)?;
+    }
     if ledger.schema_version != 1
         || ledger.members.len() > 5000
         || ledger.payments.len() > 100_000
@@ -528,6 +537,7 @@ impl State {
         require_developer()?;
         let ledger = match request {
             Request::Snapshot => self.snapshot().await?,
+            Request::RefreshFees => self.refresh_fees().await?,
             Request::Sync { revision } => {
                 let _sync = self
                     .sync_gate
@@ -619,6 +629,48 @@ impl State {
         require_developer()?;
         serde_json::to_value(ledger).map_err(|_| error("DUES_ENCODING"))
     }
+    /// 自动同步以落盘时的本地版本合并，下载期间的人工资料编辑不会被旧副本覆盖。
+    async fn refresh_fees(&self) -> Result<Ledger> {
+        let _sync = self
+            .sync_gate
+            .try_lock()
+            .map_err(|_| error("DUES_SYNC_BUSY：同步正在进行"))?;
+        let snapshot = remote::download(&self.network).await?;
+        let empty = self.snapshot().await?.members.is_empty();
+        // 首次尽力补齐全群名单。群接口故障不妨碍会费接口的有效结果，也不推断未返回者欠费。
+        let group = if empty {
+            match self
+                .network
+                .fetch(API, &[ORIGIN.to_owned()], 2 * 1024 * 1024)
+                .await
+            {
+                Ok(bytes) => serde_json::from_slice::<ApiResponse>(&bytes).ok(),
+                Err(_) => None,
+            }
+        } else {
+            None
+        };
+        self.io(move |path| {
+            require_developer()?;
+            let ledger = load(path)?;
+            if group.is_none()
+                && ledger
+                    .remote_fees
+                    .as_ref()
+                    .is_some_and(|old| old.same_data(&snapshot))
+            {
+                return Ok(ledger);
+            }
+            transact(path, ledger.revision, move |ledger| {
+                if let Some(group) = group {
+                    merge(ledger, group)?;
+                }
+                ledger.remote_fees = Some(snapshot);
+                Ok(())
+            })
+        })
+        .await
+    }
     async fn avatar(&self, wxid: &str) -> Result<serde_json::Value> {
         let _slot = self
             .avatar_slots
@@ -633,6 +685,16 @@ impl State {
             .iter()
             .find(|m| m.wxid == wxid)
             .map(|m| m.avatar_url.clone())
+            .filter(|url| !url.is_empty())
+            .or_else(|| {
+                ledger.remote_fees.as_ref().and_then(|snapshot| {
+                    snapshot
+                        .members
+                        .iter()
+                        .find(|m| m.member.wxid == wxid)
+                        .map(|m| m.member.avatar_url.clone().unwrap_or_default())
+                })
+            })
             .ok_or_else(|| error("DUES_MEMBER"))?;
         if url.is_empty() {
             return Ok(serde_json::Value::Null);

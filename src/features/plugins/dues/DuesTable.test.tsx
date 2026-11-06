@@ -9,6 +9,7 @@ vi.mock('./repository', () => ({
   DUES_KEY: ['plugins', 'builtin-dues'],
   useDues: () => ({ data: exampleLedger(), error: null }),
   useDuesAction: () => ({ ...state, isPending: false, isError: false, error: null }),
+  useDuesAutoSync: () => ({ isFetching: false, error: null, refetch: () => Promise.resolve() }),
   callDues: () => Promise.resolve(null),
 }));
 beforeAll(() => {
@@ -26,6 +27,7 @@ it('筛选未缴、编辑资料、批量登记及撤销年费均需显式操作'
       <DuesTable />
     </QueryClientProvider>,
   );
+  fireEvent.click(screen.getByRole('button', { name: '本地人民币账本' }));
   fireEvent.change(screen.getByLabelText('查看月份'), { target: { value: '2026-11' } });
   expect(screen.getByLabelText('当月会费统计')).toHaveTextContent('50%');
   fireEvent.click(screen.getByRole('button', { name: '查看未缴人员 →' }));

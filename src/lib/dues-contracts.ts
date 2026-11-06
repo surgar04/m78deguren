@@ -33,6 +33,78 @@ export const duesPaymentSchema = z
     voidReason: z.string().max(1000).nullable(),
   })
   .strict();
+/** 公网金额为整数游戏币。接口展示文字仅显示，所有计算均取原始 amount。 */
+const gameAmount = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
+const feePerson = z
+  .object({ wxid, nickname: z.string().max(512), avatarUrl: z.string().max(4096).nullable() })
+  .strict();
+export const remoteFeeSchema = z
+  .object({
+    id: z.string().min(1).max(128),
+    member: feePerson,
+    plan: z.enum(['monthly', 'yearly']),
+    planLabel: z.string().max(128),
+    amount: gameAmount,
+    amountText: z.string().max(128),
+    currency: z.literal('POKEMMO_POKEYEN'),
+    paymentDate: z.iso.date(),
+    paidAt: z.iso.datetime({ offset: true }),
+    recordedAt: z.iso.datetime({ offset: true }).nullable(),
+    operatorWxid: wxid,
+    expiresOn: z.iso.date(),
+    expiresAt: z.iso.datetime({ offset: true }),
+    expiresAtText: z.string().max(128),
+    remainingDays: z.number().int(),
+    remainingDaysText: z.string().max(128),
+    status: z.enum(['active', 'due_today', 'expired']),
+    isExpired: z.boolean(),
+    isDueToday: z.boolean(),
+    isBackPayment: z.boolean(),
+    isLatest: z.boolean(),
+  })
+  .strict();
+export const remoteFeesSchema = z
+  .object({
+    syncedAt: z.iso.datetime({ offset: true }),
+    groupName: z.string().max(512),
+    meta: z
+      .object({
+        schemaVersion: z.literal(1),
+        revision: gameAmount,
+        updatedAt: z.iso.datetime({ offset: true }).nullable(),
+        evaluatedOn: z.iso.date(),
+        timeZone: z.string().min(1).max(128),
+        currency: z.literal('POKEMMO_POKEYEN'),
+      })
+      .strict(),
+    summary: z
+      .object({
+        recordCount: z.number().int().nonnegative(),
+        totalAmount: gameAmount,
+        memberCount: z.number().int().nonnegative().nullable(),
+        activeMembers: z.number().int().nonnegative().nullable(),
+        dueTodayMembers: z.number().int().nonnegative().nullable(),
+        expiredMembers: z.number().int().nonnegative().nullable(),
+      })
+      .strict(),
+    members: z
+      .array(
+        z
+          .object({
+            member: feePerson,
+            latestFee: remoteFeeSchema,
+            recordCount: z.number().int().positive(),
+            totalAmount: gameAmount,
+            totalAmountText: z.string().max(128),
+            monthlyTotalAmount: gameAmount,
+            yearlyTotalAmount: gameAmount,
+          })
+          .strict(),
+      )
+      .max(5000),
+    records: z.array(remoteFeeSchema).max(100000),
+  })
+  .strict();
 export const duesLedgerSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -45,10 +117,12 @@ export const duesLedgerSchema = z
     settings: duesSettingsSchema,
     members: z.array(duesMemberSchema).max(5000),
     payments: z.array(duesPaymentSchema).max(100000),
+    remoteFees: remoteFeesSchema.nullable().default(null),
   })
   .strict();
 export const duesRequestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('snapshot') }).strict(),
+  z.object({ action: z.literal('refresh-fees') }).strict(),
   z.object({ action: z.literal('sync'), revision }).strict(),
   z
     .object({ action: z.literal('settings'), revision, monthlyCents: cents, annualCents: cents })
@@ -88,3 +162,5 @@ export type DuesLedger = z.infer<typeof duesLedgerSchema>;
 export type DuesMember = z.infer<typeof duesMemberSchema>;
 export type DuesPayment = z.infer<typeof duesPaymentSchema>;
 export type DuesRequest = z.infer<typeof duesRequestSchema>;
+export type RemoteFees = z.infer<typeof remoteFeesSchema>;
+export type RemoteFee = z.infer<typeof remoteFeeSchema>;
