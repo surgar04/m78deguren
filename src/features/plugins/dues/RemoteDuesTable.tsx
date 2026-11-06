@@ -60,6 +60,7 @@ export default function RemoteDuesTable({
     [status, setStatus] = useState<ApiStatus | 'all'>('all');
   const [membership, setMembership] = useState('current'),
     [sort, setSort] = useState('expiry');
+  const [plan, setPlan] = useState<'all' | 'monthly' | 'yearly'>('all');
   const [minimum, setMinimum] = useState(''),
     [maximum, setMaximum] = useState('');
   const [month, setMonth] = useState(() =>
@@ -92,6 +93,7 @@ export default function RemoteDuesTable({
       return (
         (!search || haystack.includes(search.trim().toLocaleLowerCase())) &&
         (status === 'all' || state.status === status) &&
+        (plan === 'all' || row.fees?.latestFee.plan === plan) &&
         (membership === 'all' ||
           (membership === 'current' && (row.member.active || !row.knownMembership)) ||
           (membership === 'departed' && row.knownMembership && !row.member.active)) &&
@@ -269,7 +271,24 @@ export default function RemoteDuesTable({
             为准，补登按所属日期入账。年费不会在每个覆盖月重复计收入；本月未登记不等于欠费，当前资格请看最新方案与到期日。API
             不提供历史群成员快照。
           </p>
-          <div className="dues-filters">
+          <div className="dues-filters dues-api-filters">
+            <label>
+              缴费方案
+              <select
+                value={plan}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === 'all' || value === 'monthly' || value === 'yearly') {
+                    setPlan(value);
+                    reset();
+                  }
+                }}
+              >
+                <option value="all">全部方案</option>
+                <option value="monthly">最新为月费</option>
+                <option value="yearly">最新为年费</option>
+              </select>
+            </label>
             <label>
               搜索成员
               <input

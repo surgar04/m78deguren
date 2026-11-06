@@ -14,6 +14,13 @@ export function useDues() {
     queryFn: () => callDues({ action: 'snapshot' }, duesLedgerSchema),
     retry: false,
     staleTime: 10000,
+    // Snapshot、人工操作、自动同步共用此缓存。缓存提交时再比较版本，阻止乱序 IPC 响应回退显示。
+    // 在提交层检查而非只在 queryFn 中检查，避免 Promise 完成与缓存写入之间的微任务竞态。
+    structuralSharing: (previous: unknown, incoming: unknown) => {
+      const next = duesLedgerSchema.parse(incoming);
+      const old = duesLedgerSchema.safeParse(previous);
+      return old.success && old.data.revision > next.revision ? old.data : next;
+    },
   });
 }
 export function useDuesAction() {

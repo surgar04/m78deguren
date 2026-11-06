@@ -33,6 +33,10 @@ it('自动填入游戏币、过期日、空历史登记时间，筛选过期及�
   expect(table).toHaveTextContent('历史记录未提供');
   expect(table).toHaveTextContent('群状态待同步');
   expect(screen.queryByRole('button', { name: '登记已缴' })).not.toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('缴费方案'), { target: { value: 'yearly' } });
+  expect(table).toHaveTextContent('test-a');
+  expect(table).not.toHaveTextContent('test-b');
+  fireEvent.change(screen.getByLabelText('缴费方案'), { target: { value: 'all' } });
   fireEvent.change(screen.getByLabelText('会费状态'), { target: { value: 'expired' } });
   expect(table).toHaveTextContent('test-b');
   expect(table).not.toHaveTextContent('test-a');

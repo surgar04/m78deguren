@@ -104,6 +104,7 @@ try {
     await page.screenshot({ path: resolve(output, `api-table-${size.width}.png`), fullPage: true });
   }
   await page.getByLabel('会费状态').selectOption('expired');
+  await page.getByLabel('缴费方案').selectOption('monthly');
   assert.match(await apiTable.innerText(), /test-b/u);
   assert.doesNotMatch(await apiTable.innerText(), /test-a/u);
   assert.equal(await page.locator('.dues-row-expired').count(), 1);
